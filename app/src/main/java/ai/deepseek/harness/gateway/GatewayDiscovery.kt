@@ -49,15 +49,7 @@ import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-private fun createDnsResolver(context: Context): DnsResolver =
-  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-    createContextDnsResolver(context)
-  } else {
-    createLegacyDnsResolver()
-  }
-
-@RequiresApi(Build.VERSION_CODES.CINNAMON_BUN)
-private fun createContextDnsResolver(context: Context): DnsResolver = DnsResolver(context, null)
+private fun createDnsResolver(context: Context): DnsResolver = createLegacyDnsResolver()
 
 @Suppress("DEPRECATION")
 private fun createLegacyDnsResolver(): DnsResolver = DnsResolver.getInstance()
