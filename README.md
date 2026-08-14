@@ -1,71 +1,57 @@
-# DSH Android Client
+# DeepSeek Harness
 
-A native Kotlin (Jetpack Compose) companion app for [deepseek-harness](https://github.com/aqiyoung/deepseek-harness).
-It connects to a `dsh web` instance exposed behind a reverse proxy (e.g. Caddy) and lets you
-chat with the agent, watch streamed replies, and **approve or answer** the agent's tool calls / questions
-from your phone — the same role OpenClaw's Android app plays against its Gateway.
+English | [中文](README.zh.md)
 
-> ⚠️ deepseek-harness is a **developer preview**: the wire protocol can change. This client was
-> written against the `aqiyoung/deepseek-harness@master` source (`packages/client/connection`,
-> `packages/host/apiproxy`). If a call stops working, capture one WebSocket frame from your browser
-> DevTools and re-align the fields in `HarnessClient.kt` / `ChatViewModel.kt`.
+DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek AI](https://deepseek.com).
 
-## Protocol (verified against source)
+It uses an architecture where **everything is a plugin**, and is powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://github.com/cordiverse/paper).
 
-| Channel | Shape |
-|---|---|
-| Unary RPC | `POST /api/<method>` with body `{type:"client-request", rpcId, method, payload}` → `{type:"server-response", rpcId, result:{ok, value\|error}}` |
-| Downlink | two downlink-only WebSockets `wss://<host>/api/events.mux` and `/api/events.host`; frames are `{type:"server-request", rpcId, method, payload}` (client never sends on them) |
-| Respond | `POST /api/respond` with body `{type:"client-response", rpcId:<echo of request frame>, result:{ok:true, value:<answer>}}` |
+## Developer preview
 
-Key methods: `session.create` → `{sessionId}`, `session.prompt` → `{sessionId, mode:"queue", content:[{type:"text", text}]}`.
-Streamed assistant text arrives as `session/event` frames with `event.type == "assistant/chunk"`.
-Approvals arrive as `approval/requested` and are answered via `POST /api/respond` with
-`{sessionId, approvalId, outcome:"allowed-once"|"rejected"}`.
-Questions arrive as `question/requested` and are answered via `POST /api/respond` with
-`{sessionId, answer:{answers:[{id, selected:[labels], custom?}]}}`.
+DeepSeek Harness is currently in _developer preview_ and is iterating rapidly. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
 
-Auth is expected to be a Basic-auth layer in front of `dsh web` (see Caddy snippet below); the app
-sends the `Authorization: Basic …` header on every HTTP request **and** the WebSocket upgrade.
+## Run
 
-## Server side (one-time)
+### Run from `npm`
 
-`dsh web` ships with **no TLS/auth**, so put it behind a reverse proxy. Caddy example:
-
-```caddy
-yourdomain.example.com {
-    basicauth {
-        you $2a$14$xxxxxxxxxxxxxxxxxxxx   # `caddy hash-password`
-    }
-    reverse_proxy localhost:3080
-}
-```
+Install `Node.js`, then run:
 
 ```sh
-dsh web --trusted-host yourdomain.example.com
+npx @deepseek-ai/dsh web
 ```
 
-## Build
+The command starts the Web UI, served at `http://127.0.0.1:3080` by default. See [Web UI guide](docs/user/guide/index.md).
+
+### Run from source
+
+To run from a repository checkout:
 
 ```sh
-# On the `feature/android-dsh` branch the Android client lives at the repo root.
-# Needs Android SDK (compileSdk 34) + JDK 17; Android Studio handles the wrapper automatically.
-./gradlew assembleDebug      # or open in Android Studio and Run
+git clone https://github.com/deepseek-ai/deepseek-harness.git
+cd deepseek-harness
+pnpm install
+pnpm run build
+pnpm dsh web
 ```
 
-CI (`.github/workflows/android.yml`) builds a debug APK on every push to `feature/android-dsh`
-and uploads it as an artifact.
+## Community and support
 
-## Use
+- Feel free to submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).
+- Add the [`dsh-plugin`](https://github.com/topics/dsh-plugin) topic to your plugin repository for discoverability.
+- Join <a href="https://discord.gg/Ycq5dCaS4">DeepSeek Harness Discord community</a>.
 
-1. Open the app, tap **设置**, enter `https://yourdomain.example.com` + the Basic-auth user/pass.
-2. Tap **保存并连接**.
-3. Type a message; streamed replies render live. When the agent asks for approval or a question,
-   a card appears — answer it inline.
+## Contributing
 
-## Known verification points (harness developer preview)
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-- `assistant/chunk` text is read from `delta` then `text` (the data field is a wide passthrough in
-  the schema). If streaming text is blank, capture a chunk frame and confirm the field name.
-- Question `selected` sends the **option labels** (the schema only exposes `label`, not an option id).
-  If the host rejects answers, capture a `question/requested` frame and check the expected identifier.
+## Development
+
+Start with the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md).
+
+For agents, follow [AGENTS.md](AGENTS.md).
+
+## License
+
+[MIT](LICENSE)
+
+Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
