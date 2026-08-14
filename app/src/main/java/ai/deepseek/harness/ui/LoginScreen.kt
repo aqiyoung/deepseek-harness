@@ -125,6 +125,7 @@ fun LoginScreen(
                   when (val result = dshAuthenticate(username.trim(), password)) {
                     is LoginResult.Success -> {
                       result.cookie?.let { viewModel.setSessionCookie(it) }
+                      viewModel.setLoggedIn(true, username)
                       onLoginSuccess()
                     }
                     is LoginResult.Failure -> {
@@ -164,8 +165,7 @@ private suspend fun dshAuthenticate(
           .url(DSH_LOGIN_URL)
           .post(body)
           .build()
-      loginClient.newCall(request).use { call ->
-        val response = call.execute()
+      loginClient.newCall(request).execute().use { response ->
         val cookie = response.headers("Set-Cookie").firstOrNull()
         if (response.isSuccessful) {
           LoginResult.Success(cookie)

@@ -918,6 +918,11 @@ class MainViewModel private constructor(
     prefs.setLoggedIn(value, username)
   }
 
+  /** Persists the session cookie returned by the DSH web login endpoint. */
+  fun setSessionCookie(value: String) {
+    prefs.setSessionCookie(value)
+  }
+
   /** Re-enters gateway setup after disconnecting and clearing one-time setup credentials. */
   fun pairNewGateway() {
     NodeForegroundService.stop(nodeApp)
