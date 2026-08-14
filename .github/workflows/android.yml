@@ -2,9 +2,9 @@ name: Android CI (DSH Client)
 
 on:
   push:
-    branches: ["feature/android-dsh"]
+    branches: ["feature/android-dsh", "feature/android-dsh-openclaw"]
   pull_request:
-    branches: ["feature/android-dsh"]
+    branches: ["feature/android-dsh", "feature/android-dsh-openclaw"]
 
 permissions:
   contents: read
