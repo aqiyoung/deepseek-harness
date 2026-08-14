@@ -149,6 +149,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -2125,6 +2126,7 @@ private fun AboutSettingsScreen(
       buildTimestamp = BuildConfig.BUILD_TIMESTAMP,
       locale = appLocale,
     )
+    AppUpdateSettingsPanel(viewModel = viewModel)
     SettingsMetricPanel(
       rows =
         listOf(
@@ -2156,6 +2158,68 @@ private fun AboutSettingsScreen(
       modifier = Modifier.fillMaxWidth(),
       textAlign = TextAlign.Center,
     )
+  }
+}
+
+/**
+ * App 自身检查更新（GitHub Release 数据源，与 openlist-android 等一致）：
+ * - "检查更新"按钮：手动检查，结果以 Toast 展示（发现新版本则弹更新框，由 RootScreen 托管）。
+ * - "启动时自动检查更新"开关：开时启动后自动检查（默认开）。
+ */
+@Composable
+private fun AppUpdateSettingsPanel(viewModel: MainViewModel) {
+  val scope = rememberCoroutineScope()
+  var autoCheck by remember { mutableStateOf(true) }
+  LaunchedEffect(Unit) {
+    autoCheck = viewModel.getAutoCheckUpdates()
+  }
+
+  ClawPanel(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
+    Column(
+      modifier = Modifier.fillMaxWidth(),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = nativeString("App 更新"),
+            style = ClawTheme.type.label,
+            color = ClawTheme.colors.text,
+          )
+          Text(
+            text = nativeString("当前版本 ${BuildConfig.VERSION_NAME}"),
+            style = ClawTheme.type.caption,
+            color = ClawTheme.colors.textMuted,
+          )
+        }
+        ClawPrimaryButton(
+          text = nativeString("检查更新"),
+          onClick = { scope.launch { viewModel.checkForUpdateManually() } },
+        )
+      }
+      HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+          text = nativeString("启动时自动检查更新"),
+          style = ClawTheme.type.body,
+          color = ClawTheme.colors.text,
+          modifier = Modifier.weight(1f),
+        )
+        Switch(
+          checked = autoCheck,
+          onCheckedChange = {
+            autoCheck = it
+            viewModel.setAutoCheckUpdates(it)
+          },
+        )
+      }
+    }
   }
 }
 

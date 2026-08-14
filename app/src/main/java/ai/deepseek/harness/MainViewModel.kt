@@ -47,8 +47,11 @@ import ai.deepseek.harness.voice.VoiceConversationEntry
 import ai.deepseek.harness.voice.VoiceWakePreferences
 import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import ai.deepseek.harness.update.GitHubUpdateResult
+import ai.deepseek.harness.update.UpdateManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -619,6 +622,15 @@ class MainViewModel private constructor(
   val onboardingCompleted: StateFlow<Boolean> = prefs.onboardingCompleted
   val isLoggedIn: StateFlow<Boolean> = prefs.isLoggedIn
   val sessionUser: StateFlow<String> = prefs.sessionUser
+
+  // ── App 自身检查更新（GitHub Release 数据源，与 openlist-android 等一致）──
+  /** 非空时表示发现新版本，驱动更新弹窗。 */
+  private val _appUpdateResult = MutableStateFlow<GitHubUpdateResult?>(null)
+  val appUpdateResult: StateFlow<GitHubUpdateResult?> = _appUpdateResult
+
+  /** 手动检查结果提示（已是最新 / 检查失败）。 */
+  private val _appUpdateToast = MutableStateFlow<String?>(null)
+  val appUpdateToast: StateFlow<String?> = _appUpdateToast
   val canvasDebugStatusEnabled: StateFlow<Boolean> = prefs.canvasDebugStatusEnabled
   val installedAppsSharingEnabled: StateFlow<Boolean> = prefs.installedAppsSharingEnabled
   val accessibilityControlEnabled: StateFlow<Boolean> = prefs.accessibilityControlEnabled
@@ -921,6 +933,63 @@ class MainViewModel private constructor(
   /** Persists the session cookie returned by the DSH web login endpoint. */
   fun setSessionCookie(value: String) {
     prefs.setSessionCookie(value)
+  }
+
+  // ── App 自身检查更新 ──
+
+  /** 启动后自动检查：受"启动时检查更新"开关约束；仅发现新版本时弹出更新框。 */
+  fun maybeAutoCheckForUpdates() {
+    val context: Context = getApplication()
+    viewModelScope.launch(Dispatchers.IO) {
+      try {
+        if (!UpdateManager.getAutoCheckEnabled(context)) return@launch
+        val result = UpdateManager.checkForUpdate() ?: return@launch
+        if (result.hasUpdate) _appUpdateResult.value = result
+      } catch (_: Exception) {
+        // 自动检查失败静默，不干扰用户。
+      }
+    }
+  }
+
+  /** 设置页手动检查。结果通过 appUpdateToast 流展示。 */
+  suspend fun checkForUpdateManually() {
+    val context: Context = getApplication()
+    val message =
+      try {
+        val result = UpdateManager.checkForUpdate()
+        when {
+          result == null -> "检查更新失败，请检查网络"
+          result.hasUpdate -> {
+            _appUpdateResult.value = result
+            "发现新版本 ${result.latestVersion}"
+          }
+          else -> "已是最新版本 (${UpdateManager.currentVersionName})"
+        }
+      } catch (_: Exception) {
+        "检查更新失败，请检查网络"
+      }
+    _appUpdateToast.value = message
+  }
+
+  fun openAppUpdateRelease() {
+    val context: Context = getApplication()
+    _appUpdateResult.value?.let { UpdateManager.openRelease(context, it.releaseUrl) }
+  }
+
+  fun dismissAppUpdate() {
+    _appUpdateResult.value = null
+  }
+
+  fun consumeAppUpdateToast() {
+    _appUpdateToast.value = null
+  }
+
+  /** 启动时自动检查开关。 */
+  suspend fun getAutoCheckUpdates(): Boolean = UpdateManager.getAutoCheckEnabled(getApplication())
+
+  fun setAutoCheckUpdates(value: Boolean) {
+    val context: Context = getApplication()
+    UpdateManager.setAutoCheckEnabled(context, value)
   }
 
   /** Re-enters gateway setup after disconnecting and clearing one-time setup credentials. */

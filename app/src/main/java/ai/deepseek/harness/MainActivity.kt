@@ -34,6 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -220,6 +221,12 @@ class MainActivity : AppCompatActivity() {
         }
       }
     }
+
+    // 启动后稍候自动检查更新（受"启动时检查更新"开关约束，仅发现新版本才弹窗）。
+    lifecycleScope.launch {
+      delay(600)
+      readyViewModel.maybeAutoCheckForUpdates()
+    }
   }
 
   /**
@@ -380,7 +387,7 @@ private fun StartupSurface() {
       contentAlignment = Alignment.Center,
     ) {
       Text(
-        text = "OPENCLAW",
+        text = "DeepSeek Harness",
         fontSize = 22.sp,
         fontWeight = FontWeight.Medium,
       )
