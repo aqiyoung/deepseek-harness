@@ -1751,13 +1751,6 @@ private fun SettingsShellScreen(
 
       val settingsRows =
         listOfNotNull(
-          SettingsRow(
-            nativeText("Gateway"),
-            verbatimText(gatewaySummary(gatewayConnectionDisplay)),
-            Icons.Default.Cloud,
-            status = gatewayConnectionDisplay.isConnected,
-            route = SettingsRoute.Gateway,
-          ),
           SettingsRow(nativeText("Nodes & Devices"), verbatimText(nodesDevicesSummaryText(nodesDevicesSummary)), Icons.Default.Cloud, status = nodesDevicesStatus(nodesDevicesSummary), route = SettingsRoute.NodesDevices),
           SettingsRow(nativeText("Channels"), verbatimText(channelsSummaryText(channelsSummary)), Icons.Default.Notifications, status = channelsStatus(channelsSummary), route = SettingsRoute.Channels),
           SettingsRow(nativeText("Agents"), if (agents.isEmpty()) nativeText("Load from gateway") else nativeText("\${agents.size} available", agents.size), Icons.Default.Person, status = agents.isNotEmpty(), route = SettingsRoute.Agents),

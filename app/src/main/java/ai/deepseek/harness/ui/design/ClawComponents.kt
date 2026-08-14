@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Home
@@ -540,6 +542,8 @@ internal fun ClawTextField(
   minLines: Int = 1,
   label: String? = null,
   enabled: Boolean = true,
+  visualTransformation: VisualTransformation = VisualTransformation.None,
+  keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
   val fieldModifier =
     if (label == null) modifier else modifier.semantics { contentDescription = label }
@@ -559,6 +563,8 @@ internal fun ClawTextField(
         color = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textSubtle,
       ),
     cursorBrush = SolidColor(ClawTheme.colors.primary),
+    visualTransformation = visualTransformation,
+    keyboardOptions = keyboardOptions,
     minLines = minLines,
     decorationBox = { innerTextField ->
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

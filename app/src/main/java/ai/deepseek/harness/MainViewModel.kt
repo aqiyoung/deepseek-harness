@@ -617,6 +617,8 @@ class MainViewModel private constructor(
   val activeGatewayStableId: StateFlow<String?> = prefs.gatewayRegistry.activeStableId
   val connectedGatewayStableIds: StateFlow<List<String>> = prefs.gatewayRegistry.connectedStableIds
   val onboardingCompleted: StateFlow<Boolean> = prefs.onboardingCompleted
+  val isLoggedIn: StateFlow<Boolean> = prefs.isLoggedIn
+  val sessionUser: StateFlow<String> = prefs.sessionUser
   val canvasDebugStatusEnabled: StateFlow<Boolean> = prefs.canvasDebugStatusEnabled
   val installedAppsSharingEnabled: StateFlow<Boolean> = prefs.installedAppsSharingEnabled
   val accessibilityControlEnabled: StateFlow<Boolean> = prefs.accessibilityControlEnabled
@@ -909,6 +911,11 @@ class MainViewModel private constructor(
     if (value) {
       NodeForegroundService.resume(nodeApp, startNow = true)
     }
+  }
+
+  /** Marks the DSH web login session as active so the app shell is shown. */
+  fun setLoggedIn(value: Boolean, username: String = "") {
+    prefs.setLoggedIn(value, username)
   }
 
   /** Re-enters gateway setup after disconnecting and clearing one-time setup credentials. */

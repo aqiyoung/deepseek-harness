@@ -142,6 +142,14 @@ class SecurePrefs(
     MutableStateFlow(plainPrefs.getBoolean("onboarding.completed", false))
   val onboardingCompleted: StateFlow<Boolean> = _onboardingCompleted
 
+  private val _isLoggedIn =
+    MutableStateFlow(plainPrefs.getBoolean("auth.loggedIn", false))
+  val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
+
+  private val _sessionUser =
+    MutableStateFlow(securePrefs.getString("auth.username", "") ?: "")
+  val sessionUser: StateFlow<String> = _sessionUser
+
   private val _lastDiscoveredStableId =
     MutableStateFlow(
       plainPrefs.getString("gateway.lastDiscoveredStableID", "") ?: "",
@@ -297,6 +305,21 @@ class SecurePrefs(
     plainPrefs.edit { putBoolean("onboarding.completed", value) }
     _onboardingCompleted.value = value
   }
+
+  fun setLoggedIn(value: Boolean, username: String = "") {
+    plainPrefs.edit {
+      putBoolean("auth.loggedIn", value)
+      if (username.isNotEmpty()) putString("auth.username", username)
+    }
+    _isLoggedIn.value = value
+    if (username.isNotEmpty()) _sessionUser.value = username
+  }
+
+  fun setSessionCookie(value: String) {
+    securePrefs.edit { putString("auth.sessionCookie", value) }
+  }
+
+  fun getSessionCookie(): String? = securePrefs.getString("auth.sessionCookie", null)
 
   fun setCanvasDebugStatusEnabled(value: Boolean) {
     plainPrefs.edit { putBoolean("canvas.debugStatusEnabled", value) }

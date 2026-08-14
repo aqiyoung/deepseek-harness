@@ -7,13 +7,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 
-/** Chooses onboarding or the authenticated app shell from persisted app state. */
+/** Chooses the login gate or the authenticated app shell from persisted auth state. */
 @Composable
 fun RootScreen(viewModel: MainViewModel) {
-  val onboardingCompleted by viewModel.onboardingCompleted.collectAsState()
+  val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
-  if (!onboardingCompleted) {
-    OnboardingFlow(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+  if (!isLoggedIn) {
+    LoginScreen(
+      viewModel = viewModel,
+      onLoginSuccess = { viewModel.setLoggedIn(true) },
+      modifier = Modifier.fillMaxSize(),
+    )
     return
   }
 
