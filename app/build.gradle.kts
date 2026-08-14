@@ -138,9 +138,10 @@ ksp {
 
 android {
   namespace = "ai.openclaw.app"
-  // AndroidX Core 1.19 and Lifecycle 2.11 require API 37 compilation.
+  // Lowered from 37: GitHub Actions runners (and local SDKs) do not ship platforms;android-37 yet.
+  // 36 is the highest available platform. AndroidX minCompileSdk constraints are verified via CI.
   // targetSdk stays separate so runtime behavior changes remain an explicit migration.
-  compileSdk = 37
+  compileSdk = 36
 
   // Release signing is local-only; keep the keystore path and passwords out of the repo.
   signingConfigs {
