@@ -150,6 +150,12 @@ class SecurePrefs(
     MutableStateFlow(securePrefs.getString("auth.username", "") ?: "")
   val sessionUser: StateFlow<String> = _sessionUser
 
+  private val _serverUrl =
+    MutableStateFlow(
+      plainPrefs.getString("auth.serverUrl", "https://dsh.threel.site") ?: "https://dsh.threel.site",
+    )
+  val serverUrl: StateFlow<String> = _serverUrl
+
   private val _lastDiscoveredStableId =
     MutableStateFlow(
       plainPrefs.getString("gateway.lastDiscoveredStableID", "") ?: "",
@@ -320,6 +326,12 @@ class SecurePrefs(
   }
 
   fun getSessionCookie(): String? = securePrefs.getString("auth.sessionCookie", null)
+
+  fun setServerUrl(value: String) {
+    val url = value.trim().removeSuffix("/")
+    plainPrefs.edit { putString("auth.serverUrl", url) }
+    _serverUrl.value = url
+  }
 
   fun setCanvasDebugStatusEnabled(value: Boolean) {
     plainPrefs.edit { putBoolean("canvas.debugStatusEnabled", value) }

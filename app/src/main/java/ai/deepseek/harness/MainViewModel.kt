@@ -622,6 +622,7 @@ class MainViewModel private constructor(
   val onboardingCompleted: StateFlow<Boolean> = prefs.onboardingCompleted
   val isLoggedIn: StateFlow<Boolean> = prefs.isLoggedIn
   val sessionUser: StateFlow<String> = prefs.sessionUser
+  val serverUrl: StateFlow<String> = prefs.serverUrl
 
   // ── App 自身检查更新（GitHub Release 数据源，与 openlist-android 等一致）──
   /** 非空时表示发现新版本，驱动更新弹窗。 */
@@ -933,6 +934,11 @@ class MainViewModel private constructor(
   /** Persists the session cookie returned by the DSH web login endpoint. */
   fun setSessionCookie(value: String) {
     prefs.setSessionCookie(value)
+  }
+
+  /** Persists the DSH backend server address used by the login request. */
+  fun setServerUrl(value: String) {
+    prefs.setServerUrl(value)
   }
 
   // ── App 自身检查更新 ──
