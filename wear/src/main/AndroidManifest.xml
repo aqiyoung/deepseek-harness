@@ -23,7 +23,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OpenClawWear">
+        android:theme="@style/Theme.DeepSeekHarnessWear">
 
         <meta-data
             android:name="com.google.android.wearable.standalone"
@@ -61,7 +61,7 @@
         </service>
 
         <service
-            android:name=".OpenClawTileService"
+            android:name=".DeepSeekHarnessTileService"
             android:description="@string/tile_description"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_foreground"

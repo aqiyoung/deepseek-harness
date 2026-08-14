@@ -1,7 +1,7 @@
 <resources>
     <string-array name="ask_openclaw_query_patterns">
-        <item>"询问 OpenClaw %1$s"</item>
-        <item>"告诉 OpenClaw %1$s"</item>
-        <item>"打开 OpenClaw 并询问 %1$s"</item>
+        <item>"询问 DeepSeekHarness %1$s"</item>
+        <item>"告诉 DeepSeekHarness %1$s"</item>
+        <item>"打开 DeepSeekHarness 并询问 %1$s"</item>
     </string-array>
 </resources>

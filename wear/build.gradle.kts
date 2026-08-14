@@ -16,11 +16,11 @@ val openClawAndroidVersionProperties =
     openClawAndroidVersionFile.inputStream().use(::load)
   }
 
-fun requireOpenClawAndroidVersionProperty(name: String): String =
+fun requireDeepSeekHarnessAndroidVersionProperty(name: String): String =
   openClawAndroidVersionProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
     ?: error("Missing $name in Config/Version.properties. Run `pnpm android:version:sync`.")
 
-val openClawAndroidPhoneVersionCode = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_CODE").toInt()
+val openClawAndroidPhoneVersionCode = requireDeepSeekHarnessAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_CODE").toInt()
 val openClawAndroidBuildNumber = openClawAndroidPhoneVersionCode % 100
 check(openClawAndroidBuildNumber in 1..49) {
   "Android build number must be 01 through 49; Wear reserves 51 through 99."
@@ -38,16 +38,16 @@ val phoneReleaseSigning =
     .findByName("release")
 
 android {
-  namespace = "ai.openclaw.wear"
+  namespace = "ai.deepseek.wear"
   compileSdk = 37
 
   defaultConfig {
     // Data Layer traffic is scoped to matching package names and signatures.
-    applicationId = "ai.openclaw.app"
+    applicationId = "ai.deepseek.harness"
     minSdk = 31
     targetSdk = 36
     versionCode = openClawAndroidWearVersionCode
-    versionName = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_NAME")
+    versionName = requireDeepSeekHarnessAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_NAME")
   }
 
   buildTypes {
