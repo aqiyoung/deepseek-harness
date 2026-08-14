@@ -14,6 +14,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
@@ -127,7 +128,7 @@ class HarnessClient(
                     answers.forEach { a ->
                         add(buildJsonObject {
                             put("id", a.id)
-                            putJsonArray("selected") { a.selected.forEach { add(it) } }
+                            putJsonArray("selected") { a.selected.forEach { add(JsonPrimitive(it)) } }
                             a.custom?.let { put("custom", it) }
                         })
                     }
