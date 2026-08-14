@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.dsh"
+    namespace = "com.deepseek.dsh"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.dsh"
+        applicationId = "com.deepseek.dsh"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

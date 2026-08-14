@@ -1,4 +1,4 @@
-package com.example.dsh.ui
+package com.deepseek.dsh.ui
 
 import android.app.Application
 import androidx.compose.runtime.Immutable
@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dsh.data.HarnessClient
-import com.example.dsh.data.QuestionAnswer
-import com.example.dsh.data.SettingsStore
-import com.example.dsh.data.model.ServerRequest
+import com.deepseek.dsh.data.HarnessClient
+import com.deepseek.dsh.data.QuestionAnswer
+import com.deepseek.dsh.data.SettingsStore
+import com.deepseek.dsh.data.model.ServerRequest
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

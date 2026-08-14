@@ -1,10 +1,10 @@
-package com.example.dsh.data
+package com.deepseek.dsh.data
 
-import com.example.dsh.data.model.ClientRequest
-import com.example.dsh.data.model.ClientResponse
-import com.example.dsh.data.model.RpcResult
-import com.example.dsh.data.model.ServerRequest
-import com.example.dsh.data.model.ServerResponse
+import com.deepseek.dsh.data.model.ClientRequest
+import com.deepseek.dsh.data.model.ClientResponse
+import com.deepseek.dsh.data.model.RpcResult
+import com.deepseek.dsh.data.model.ServerRequest
+import com.deepseek.dsh.data.model.ServerResponse
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -50,8 +50,8 @@ class HarnessClient(
     suspend fun call(method: String, payload: JsonElement): RpcResult {
         val rpcId = UUID.randomUUID().toString()
         val body = json.encodeToString(
-            com.example.dsh.data.model.ClientRequest.serializer(),
-            com.example.dsh.data.model.ClientRequest(rpcId = rpcId, method = method, payload = payload),
+            com.deepseek.dsh.data.model.ClientRequest.serializer(),
+            com.deepseek.dsh.data.model.ClientRequest(rpcId = rpcId, method = method, payload = payload),
         )
         val request = okhttp3.Request.Builder()
             .url("$baseUrl/api/$method")
@@ -62,7 +62,7 @@ class HarnessClient(
             throw HarnessTransportException("HTTP ${response.code} on $method")
         }
         val text = response.body!!.string()
-        val sr = json.decodeFromString(com.example.dsh.data.model.ServerResponse.serializer(), text)
+        val sr = json.decodeFromString(com.deepseek.dsh.data.model.ServerResponse.serializer(), text)
         if (sr.rpcId != rpcId) {
             throw HarnessTransportException("rpcId mismatch on $method (sent $rpcId, got ${sr.rpcId})")
         }

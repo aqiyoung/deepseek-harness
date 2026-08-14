@@ -1,4 +1,4 @@
-package com.example.dsh.ui
+package com.deepseek.dsh.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

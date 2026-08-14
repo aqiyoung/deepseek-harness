@@ -1,4 +1,4 @@
-package com.example.dsh.data.model
+package com.deepseek.dsh.data.model
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
