@@ -16,10 +16,10 @@ jobs:
       ANDROID_BUILD_TOOLS: "36.1.0"
       ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
       # Release signing (decoded from GitHub Secrets in the step below).
-      ORG_GRADLE_PROJECT_OPENCLAW_ANDROID_STORE_FILE: ${{ github.workspace }}/dsh-release.p12
-      ORG_GRADLE_PROJECT_OPENCLAW_ANDROID_STORE_PASSWORD: ${{ secrets.DSH_KEYSTORE_PASSWORD }}
-      ORG_GRADLE_PROJECT_OPENCLAW_ANDROID_KEY_ALIAS: deepseekharness
-      ORG_GRADLE_PROJECT_OPENCLAW_ANDROID_KEY_PASSWORD: ${{ secrets.DSH_KEYSTORE_PASSWORD }}
+      ORG_GRADLE_PROJECT_DSH_ANDROID_STORE_FILE: ${{ github.workspace }}/dsh-release.p12
+      ORG_GRADLE_PROJECT_DSH_ANDROID_STORE_PASSWORD: ${{ secrets.DSH_KEYSTORE_PASSWORD }}
+      ORG_GRADLE_PROJECT_DSH_ANDROID_KEY_ALIAS: deepseekharness
+      ORG_GRADLE_PROJECT_DSH_ANDROID_KEY_PASSWORD: ${{ secrets.DSH_KEYSTORE_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

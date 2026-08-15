@@ -3,10 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 ANDROID_DIR="$ROOT_DIR/apps/android"
-PACKAGE_NAME="ai.openclaw.app"
+PACKAGE_NAME="ai.deepseek.harness"
 RECEIVER="$PACKAGE_NAME/.VoiceE2eReceiver"
-RUN_ACTION="ai.openclaw.app.debug.RUN_VOICE_E2E"
-OPEN_ACTION="ai.openclaw.app.debug.OPEN_VOICE_E2E"
+RUN_ACTION="ai.deepseek.harness.debug.RUN_VOICE_E2E"
+OPEN_ACTION="ai.deepseek.harness.debug.OPEN_VOICE_E2E"
 PORT=18789
 HOST="127.0.0.1"
 MODE="both"
