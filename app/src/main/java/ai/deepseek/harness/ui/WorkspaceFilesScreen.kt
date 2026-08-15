@@ -6,10 +6,10 @@ import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.ui.chat.ChatCodeBlock
 import ai.deepseek.harness.ui.chat.rememberBase64ImageState
-import ai.deepseek.harness.ui.design.ClawEmptyState
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshEmptyState
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTheme
 import android.content.Context
 import android.content.Intent
 import android.text.format.Formatter
@@ -157,7 +157,7 @@ private fun WorkspaceDirectoryScreen(
     }
   }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp),
     contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
   ) {
@@ -172,29 +172,29 @@ private fun WorkspaceDirectoryScreen(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          ClawPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back"), onClick = onBack)
+          DshPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back"), onClick = onBack)
           Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Text(
               text = if (path.isEmpty()) nativeString("Files") else path.substringAfterLast('/'),
-              style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp),
-              color = ClawTheme.colors.text,
+              style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp),
+              color = DshTheme.colors.text,
             )
             if (path.isNotEmpty()) {
               Text(
                 text = path,
-                style = ClawTheme.type.caption,
-                color = ClawTheme.colors.textMuted,
+                style = DshTheme.type.caption,
+                color = DshTheme.colors.textMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
             }
           }
           if (requestInFlight) {
-            Box(modifier = Modifier.size(ClawTheme.spacing.touchTarget), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(DshTheme.spacing.touchTarget), contentAlignment = Alignment.Center) {
               CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
             }
           } else if (isConnected) {
-            ClawPlainIconButton(
+            DshPlainIconButton(
               icon = Icons.Outlined.Refresh,
               contentDescription = nativeString("Refresh"),
               onClick = {
@@ -210,13 +210,13 @@ private fun WorkspaceDirectoryScreen(
 
       errorText?.let { message ->
         item {
-          ClawEmptyState(title = nativeString("Files unavailable"), body = message)
+          DshEmptyState(title = nativeString("Files unavailable"), body = message)
         }
       }
 
       if (errorText == null && !loading && entries.isEmpty()) {
         item {
-          ClawEmptyState(title = nativeString("Empty folder"), body = nativeString("This folder has no files yet."))
+          DshEmptyState(title = nativeString("Empty folder"), body = nativeString("This folder has no files yet."))
         }
       }
 
@@ -236,7 +236,7 @@ private fun WorkspaceDirectoryScreen(
             modifier =
               Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(ClawTheme.radii.row))
+                .clip(RoundedCornerShape(DshTheme.radii.row))
                 .clickable(enabled = !requestInFlight) {
                   if (isWorkspaceDirectoryRequestInFlight(loading, loadingMore)) return@clickable
                   loadingMore = true
@@ -256,11 +256,11 @@ private fun WorkspaceDirectoryScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            Text(text = nativeString("Load more"), style = ClawTheme.type.body, color = ClawTheme.colors.text)
+            Text(text = nativeString("Load more"), style = DshTheme.type.body, color = DshTheme.colors.text)
             Text(
               text = nativeString("\${entries.size} of \$totalEntries", entries.size, totalEntries),
-              style = ClawTheme.type.caption,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption,
+              color = DshTheme.colors.textMuted,
             )
           }
         }
@@ -287,7 +287,7 @@ private fun WorkspaceEntryRow(
     modifier =
       Modifier
         .fillMaxWidth()
-        .clip(RoundedCornerShape(ClawTheme.radii.row))
+        .clip(RoundedCornerShape(DshTheme.radii.row))
         .clickable(onClick = onClick)
         .padding(horizontal = 10.dp, vertical = 10.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -296,13 +296,13 @@ private fun WorkspaceEntryRow(
     Icon(
       imageVector = if (entry.isDirectory) Icons.Outlined.Folder else Icons.Outlined.Description,
       contentDescription = null,
-      tint = if (entry.isDirectory) ClawTheme.colors.primary else ClawTheme.colors.textMuted,
+      tint = if (entry.isDirectory) DshTheme.colors.primary else DshTheme.colors.textMuted,
       modifier = Modifier.size(20.dp),
     )
     Column(modifier = Modifier.weight(1f)) {
-      Text(text = entry.name, style = ClawTheme.type.body.copy(lineBreak = androidx.compose.ui.text.style.LineBreak.Heading), color = ClawTheme.colors.text)
+      Text(text = entry.name, style = DshTheme.type.body.copy(lineBreak = androidx.compose.ui.text.style.LineBreak.Heading), color = DshTheme.colors.text)
       workspaceEntryDetail(context, entry)?.let { detail ->
-        Text(text = detail, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1)
+        Text(text = detail, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1)
       }
     }
   }
@@ -341,7 +341,7 @@ private fun WorkspaceFilePreview(
     }
   }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp),
     contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
   ) {
@@ -351,16 +351,16 @@ private fun WorkspaceFilePreview(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        ClawPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back"), onClick = onBack)
+        DshPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back"), onClick = onBack)
         Text(
           text = path.substringAfterLast('/'),
-          style = ClawTheme.type.display.copy(fontSize = 20.sp, lineHeight = 24.sp, lineBreak = androidx.compose.ui.text.style.LineBreak.Heading),
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.display.copy(fontSize = 20.sp, lineHeight = 24.sp, lineBreak = androidx.compose.ui.text.style.LineBreak.Heading),
+          color = DshTheme.colors.text,
           softWrap = true,
           modifier = Modifier.weight(1f),
         )
         file?.let { loaded ->
-          ClawPlainIconButton(
+          DshPlainIconButton(
             icon = Icons.Outlined.Share,
             contentDescription = nativeString("Share file"),
             onClick = { shareWorkspaceFile(context, loaded) },
@@ -374,7 +374,7 @@ private fun WorkspaceFilePreview(
             CircularProgressIndicator(modifier = Modifier.size(22.dp))
           }
         errorText != null ->
-          ClawEmptyState(title = nativeString("No preview"), body = errorText.orEmpty())
+          DshEmptyState(title = nativeString("No preview"), body = errorText.orEmpty())
         file != null ->
           WorkspaceFileContent(file = file ?: return@Column)
       }
@@ -393,7 +393,7 @@ private fun WorkspaceFileContent(file: GatewayWorkspaceFile) {
           contentDescription = file.name,
           modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
         )
-      imageState.failed -> ClawEmptyState(title = nativeString("No preview"), body = nativeString("This image could not be decoded."))
+      imageState.failed -> DshEmptyState(title = nativeString("No preview"), body = nativeString("This image could not be decoded."))
       else -> CircularProgressIndicator(modifier = Modifier.size(22.dp))
     }
   } else {

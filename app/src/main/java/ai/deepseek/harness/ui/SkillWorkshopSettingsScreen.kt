@@ -6,14 +6,14 @@ import ai.deepseek.harness.GatewaySkillWorkshopSummary
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.selectableAgents
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawSegmentedControl
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTextField
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshSegmentedControl
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTextField
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -169,13 +169,13 @@ internal fun SkillWorkshopSettingsScreen(
     )
 
     noticeText?.let { message ->
-      ClawPanel {
-        Text(text = message, style = ClawTheme.type.body, color = ClawTheme.colors.success)
+      DshPanel {
+        Text(text = message, style = DshTheme.type.body, color = DshTheme.colors.success)
       }
     }
     errorText?.let { message ->
-      ClawPanel {
-        Text(text = message, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = message, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
 
@@ -310,7 +310,7 @@ private fun SkillWorkshopControls(
   isConnected: Boolean,
   onRefresh: () -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -324,20 +324,20 @@ private fun SkillWorkshopControls(
           onAgentChange = onAgentChange,
           modifier = Modifier.weight(1f),
         )
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"),
           onClick = onRefresh,
           enabled = isConnected && !refreshing,
           icon = Icons.Default.Refresh,
         )
       }
-      ClawSegmentedControl(
+      DshSegmentedControl(
         options = skillWorkshopFilterLabels.map(::nativeString),
         selected = skillWorkshopFilterLabel(statusFilter),
         onSelect = { label -> onStatusFilterChange(skillWorkshopFilterFromLabel(label)) },
         maxOptionsPerRow = 4,
       )
-      ClawTextField(
+      DshTextField(
         value = query,
         onValueChange = onQueryChange,
         placeholder = nativeString("Search proposals"),
@@ -363,7 +363,7 @@ private fun SkillWorkshopAgentMenu(
       selectedAgentId = selectedAgentId,
     )
   Box(modifier = modifier) {
-    ClawSecondaryButton(
+    DshSecondaryButton(
       text = label,
       onClick = { expanded = true },
       icon = Icons.Default.ArrowDropDown,
@@ -421,7 +421,7 @@ private fun SkillWorkshopProposalRow(
   busy: Boolean,
   onClick: () -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
@@ -430,33 +430,33 @@ private fun SkillWorkshopProposalRow(
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Text(
           text = proposal.title,
-          style = ClawTheme.type.body,
-          color = if (selected) ClawTheme.colors.primary else ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = if (selected) DshTheme.colors.primary else DshTheme.colors.text,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = proposal.description ?: proposal.skillKey,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
       }
       Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        ClawStatusPill(
+        DshStatusPill(
           text = skillWorkshopStatusLabel(if (busy) "loading" else proposal.status),
           status = skillWorkshopStatusPill(proposal.status),
         )
         Text(
           text = skillWorkshopDateLabel(proposal.updatedAt),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
           maxLines = 1,
         )
       }
     }
-    ClawSecondaryButton(
+    DshSecondaryButton(
       text = if (selected) nativeString("Selected") else nativeString("Open"),
       onClick = onClick,
       modifier = Modifier.fillMaxWidth(),
@@ -477,7 +477,7 @@ private fun SkillWorkshopProposalDetail(
   onReject: () -> Unit,
   onQuarantine: () -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -487,26 +487,26 @@ private fun SkillWorkshopProposalDetail(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
           Text(
             text = proposal.title,
-            style = ClawTheme.type.title,
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.title,
+            color = DshTheme.colors.text,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
           Text(
             text = proposal.skillKey,
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textSubtle,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textSubtle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
         }
-        ClawStatusPill(
+        DshStatusPill(
           text = skillWorkshopStatusLabel(proposal.status),
           status = skillWorkshopStatusPill(proposal.status),
         )
       }
       proposal.description?.let { description ->
-        Text(text = description, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        Text(text = description, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
       SettingsMetricPanel(
         rows =
@@ -518,23 +518,23 @@ private fun SkillWorkshopProposalDetail(
       )
       Text(
         text = proposal.content ?: nativeString("Inspect this proposal to load its markdown."),
-        style = ClawTheme.type.body,
-        color = if (proposal.content == null) ClawTheme.colors.textSubtle else ClawTheme.colors.text,
+        style = DshTheme.type.body,
+        color = if (proposal.content == null) DshTheme.colors.textSubtle else DshTheme.colors.text,
       )
       if (!operatorAdminScopeAvailable) {
         Text(
           text = nativeString("Apply, reject, and quarantine require operator.admin scope. Reconnect with shared gateway auth or approve an operator.admin device scope upgrade to enable lifecycle actions."),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.warning,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.warning,
         )
       }
       if (proposal.supportFiles.isNotEmpty()) {
-        HorizontalDivider(color = ClawTheme.colors.border)
+        HorizontalDivider(color = DshTheme.colors.border)
         proposal.supportFiles.forEach { file ->
           Text(
             text = file.path,
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
@@ -547,13 +547,13 @@ private fun SkillWorkshopProposalDetail(
             .semantics { contentDescription = nativeString("Skill Workshop inspect and apply actions") },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text = if (inspecting) nativeString("Inspecting") else nativeString("Inspect"),
           onClick = onInspect,
           enabled = isConnected && !inspecting && !mutating,
           modifier = Modifier.weight(1f),
         )
-        ClawPrimaryButton(
+        DshPrimaryButton(
           text = if (mutating) nativeString("Working") else nativeString("Apply"),
           onClick = onApply,
           enabled =
@@ -573,7 +573,7 @@ private fun SkillWorkshopProposalDetail(
             .semantics { contentDescription = nativeString("Skill Workshop reject and quarantine actions") },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text = nativeString("Reject"),
           onClick = onReject,
           enabled =
@@ -585,7 +585,7 @@ private fun SkillWorkshopProposalDetail(
             ),
           modifier = Modifier.weight(1f),
         )
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text = nativeString("Quarantine"),
           onClick = onQuarantine,
           enabled =
@@ -607,10 +607,10 @@ private fun SkillWorkshopEmptyPanel(
   title: String,
   detail: String,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text(text = title, style = ClawTheme.type.title, color = ClawTheme.colors.text)
-      Text(text = detail, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text)
+      Text(text = detail, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
   }
 }
@@ -707,12 +707,12 @@ private fun skillWorkshopAgentLabel(
   return nativeString("Default agent")
 }
 
-private fun skillWorkshopStatusPill(status: String): ClawStatus =
+private fun skillWorkshopStatusPill(status: String): DshStatus =
   when (status) {
-    "pending", "quarantined", "stale" -> ClawStatus.Warning
-    "applied" -> ClawStatus.Success
-    "rejected" -> ClawStatus.Neutral
-    else -> ClawStatus.Neutral
+    "pending", "quarantined", "stale" -> DshStatus.Warning
+    "applied" -> DshStatus.Success
+    "rejected" -> DshStatus.Neutral
+    else -> DshStatus.Neutral
   }
 
 private fun skillWorkshopDateLabel(value: String): String = value.trim().takeIf { it.isNotEmpty() }?.take(10) ?: nativeString("Unknown")

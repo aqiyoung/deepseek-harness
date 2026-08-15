@@ -2,7 +2,7 @@ package ai.deepseek.harness.ui.chat
 
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -418,7 +418,7 @@ internal fun ChatComposerMicButton(
   Surface(
     modifier =
       modifier
-        .size(ClawTheme.spacing.touchTarget)
+        .size(DshTheme.spacing.touchTarget)
         .combinedClickable(
           enabled = interactionEnabled,
           onClickLabel = dictationActionLabel,
@@ -430,12 +430,12 @@ internal fun ChatComposerMicButton(
           },
         ),
     shape = CircleShape,
-    color = if (dictationActive) ClawTheme.colors.primary else ClawTheme.colors.surfaceRaised,
+    color = if (dictationActive) DshTheme.colors.primary else DshTheme.colors.surfaceRaised,
     contentColor =
       when {
-        dictationActive -> ClawTheme.colors.primaryText
-        dictationEnabled || voiceNoteEnabled -> ClawTheme.colors.text
-        else -> ClawTheme.colors.textSubtle
+        dictationActive -> DshTheme.colors.primaryText
+        dictationEnabled || voiceNoteEnabled -> DshTheme.colors.text
+        else -> DshTheme.colors.textSubtle
       },
   ) {
     Box(contentAlignment = Alignment.Center) {
@@ -460,5 +460,5 @@ internal fun ChatDictationError(state: ChatDictationState) {
       ChatDictationFailure.NoSpeech -> nativeString("No matches")
       ChatDictationFailure.Generic -> nativeString("Speech recognition")
     }
-  Text(text = message, style = ClawTheme.type.caption, color = ClawTheme.colors.danger)
+  Text(text = message, style = DshTheme.type.caption, color = DshTheme.colors.danger)
 }

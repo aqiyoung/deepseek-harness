@@ -1211,17 +1211,17 @@ class NodeRuntime private constructor(
   val skillsRefreshing: StateFlow<Boolean> = _skillsRefreshing.asStateFlow()
   private val _skillsErrorText = MutableStateFlow<NativeText?>(null)
   val skillsErrorText: StateFlow<String?> = _skillsErrorText.resolveOptionalNativeText()
-  private val _clawHubSkillMethodsAvailable = MutableStateFlow(false)
-  val clawHubSkillMethodsAvailable: StateFlow<Boolean> = _clawHubSkillMethodsAvailable.asStateFlow()
+  private val _dshHubSkillMethodsAvailable = MutableStateFlow(false)
+  val dshHubSkillMethodsAvailable: StateFlow<Boolean> = _dshHubSkillMethodsAvailable.asStateFlow()
   private val systemAgentChatSupported = MutableStateFlow<Boolean?>(null)
   private val _skillMutationKeys = MutableStateFlow<Set<String>>(emptySet())
   val skillMutationKeys: StateFlow<Set<String>> = _skillMutationKeys.asStateFlow()
-  private val _clawHubSkillSearchState = MutableStateFlow(GatewayClawHubSkillSearchState())
-  val clawHubSkillSearchState: StateFlow<GatewayClawHubSkillSearchState> =
-    _clawHubSkillSearchState.asStateFlow()
-  private val clawHubSkillSearchSeq = AtomicLong(0)
-  private val clawHubSkillReviewSeq = AtomicLong(0)
-  private val clawHubSkillInstallMutex = Mutex()
+  private val _dshHubSkillSearchState = MutableStateFlow(GatewayDshHubSkillSearchState())
+  val dshHubSkillSearchState: StateFlow<GatewayDshHubSkillSearchState> =
+    _dshHubSkillSearchState.asStateFlow()
+  private val dshHubSkillSearchSeq = AtomicLong(0)
+  private val dshHubSkillReviewSeq = AtomicLong(0)
+  private val dshHubSkillInstallMutex = Mutex()
   private val _skillWorkshopSummary = MutableStateFlow(GatewaySkillWorkshopSummary(proposals = emptyList()))
   val skillWorkshopSummary: StateFlow<GatewaySkillWorkshopSummary> = _skillWorkshopSummary.asStateFlow()
   private val _skillWorkshopRefreshing = MutableStateFlow(false)
@@ -1282,7 +1282,7 @@ class NodeRuntime private constructor(
 
   @Volatile internal var gatewayDataRequestTimeoutObserverForTests: ((method: String, timeoutMs: Long) -> Unit)? = null
 
-  @Volatile internal var clawHubSkillInstallBeforeClaimObserverForTests: (() -> Unit)? = null
+  @Volatile internal var dshHubSkillInstallBeforeClaimObserverForTests: (() -> Unit)? = null
   private val _channelsSummary = MutableStateFlow(GatewayChannelsSummary(channels = emptyList()))
   val channelsSummary: StateFlow<GatewayChannelsSummary> = _channelsSummary.asStateFlow()
   private val _channelsRefreshing = MutableStateFlow(false)
@@ -1499,9 +1499,9 @@ class NodeRuntime private constructor(
     _skillsRefreshing.value = false
     _skillsErrorText.value = null
     _skillMutationKeys.value = emptySet()
-    clawHubSkillSearchSeq.incrementAndGet()
-    clawHubSkillReviewSeq.incrementAndGet()
-    _clawHubSkillSearchState.value = GatewayClawHubSkillSearchState()
+    dshHubSkillSearchSeq.incrementAndGet()
+    dshHubSkillReviewSeq.incrementAndGet()
+    _dshHubSkillSearchState.value = GatewayDshHubSkillSearchState()
     _skillWorkshopSummary.value = GatewaySkillWorkshopSummary(proposals = emptyList())
     _skillWorkshopRefreshing.value = false
     _skillWorkshopErrorText.value = null
@@ -2279,41 +2279,41 @@ class NodeRuntime private constructor(
     scope.launch { setSkillEnabledOnGateway(normalized, enabled) }
   }
 
-  fun searchClawHubSkills(query: String) {
-    scope.launch { searchClawHubSkillsFromGateway(query) }
+  fun searchDshHubSkills(query: String) {
+    scope.launch { searchDshHubSkillsFromGateway(query) }
   }
 
-  fun reviewClawHubSkillInstall(skill: GatewayClawHubSkillSummary) {
+  fun reviewDshHubSkillInstall(skill: GatewayDshHubSkillSummary) {
     if (skill.slug.isBlank()) return
-    scope.launch { reviewClawHubSkillInstallFromGateway(skill.copy(slug = skill.slug.trim())) }
+    scope.launch { reviewDshHubSkillInstallFromGateway(skill.copy(slug = skill.slug.trim())) }
   }
 
-  fun dismissClawHubSkillInstallReview() {
-    clawHubSkillReviewSeq.incrementAndGet()
-    _clawHubSkillSearchState.value =
-      _clawHubSkillSearchState.value.copy(reviewingSlug = null, installReview = null)
+  fun dismissDshHubSkillInstallReview() {
+    dshHubSkillReviewSeq.incrementAndGet()
+    _dshHubSkillSearchState.value =
+      _dshHubSkillSearchState.value.copy(reviewingSlug = null, installReview = null)
   }
 
-  internal fun installClawHubSkill(
+  internal fun installDshHubSkill(
     slug: String,
-    acknowledgeClawHubRisk: Boolean = false,
+    acknowledgeDshHubRisk: Boolean = false,
     version: String? = null,
   ): Job? {
     val normalized = slug.trim()
     if (normalized.isEmpty()) return null
     return scope.launch {
-      installClawHubSkillFromGateway(
+      installDshHubSkillFromGateway(
         slug = normalized,
-        acknowledgeClawHubRisk = acknowledgeClawHubRisk,
+        acknowledgeDshHubRisk = acknowledgeDshHubRisk,
         version = version,
       )
     }
   }
 
-  fun clearClawHubSkillMessage() {
-    clawHubSkillReviewSeq.incrementAndGet()
-    _clawHubSkillSearchState.value =
-      _clawHubSkillSearchState.value.copy(
+  fun clearDshHubSkillMessage() {
+    dshHubSkillReviewSeq.incrementAndGet()
+    _dshHubSkillSearchState.value =
+      _dshHubSkillSearchState.value.copy(
         reviewingSlug = null,
         installReview = null,
         acknowledgeSlug = null,
@@ -6022,29 +6022,29 @@ class NodeRuntime private constructor(
     }
   }
 
-  private suspend fun searchClawHubSkillsFromGateway(query: String) {
+  private suspend fun searchDshHubSkillsFromGateway(query: String) {
     val normalized = query.trim()
-    val searchSeq = clawHubSkillSearchSeq.incrementAndGet()
-    clawHubSkillReviewSeq.incrementAndGet()
+    val searchSeq = dshHubSkillSearchSeq.incrementAndGet()
+    dshHubSkillReviewSeq.incrementAndGet()
     val gatewayScope = captureGatewayDataScope()
     if (gatewayScope == null || !operatorConnected) {
-      _clawHubSkillSearchState.value =
-        GatewayClawHubSkillSearchState(
+      _dshHubSkillSearchState.value =
+        GatewayDshHubSkillSearchState(
           query = normalized,
-          errorText = nativeString("Connect the gateway to search ClawHub skills."),
+          errorText = nativeString("Connect the gateway to search DshHub skills."),
         )
       return
     }
-    if (!clawHubSkillMethodsAvailable.value) {
+    if (!dshHubSkillMethodsAvailable.value) {
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(errorText = CLAWHUB_SKILL_GATEWAY_UNAVAILABLE)
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(errorText = DSHHUB_SKILL_GATEWAY_UNAVAILABLE)
       }
       return
     }
     publishGatewayData(gatewayScope) {
-      _clawHubSkillSearchState.value =
-        _clawHubSkillSearchState.value.copy(
+      _dshHubSkillSearchState.value =
+        _dshHubSkillSearchState.value.copy(
           query = normalized,
           searching = true,
           results = emptyList(),
@@ -6057,15 +6057,15 @@ class NodeRuntime private constructor(
         )
     }
     try {
-      val response = requestGatewayData(gatewayScope, "skills.search", clawHubSearchParams(normalized))
-      val results = parseClawHubSearchResults(response, json)
+      val response = requestGatewayData(gatewayScope, "skills.search", dshHubSearchParams(normalized))
+      val results = parseDshHubSearchResults(response, json)
       publishGatewayData(gatewayScope) {
-        if (clawHubSkillSearchSeq.get() == searchSeq) {
-          _clawHubSkillSearchState.value =
-            _clawHubSkillSearchState.value.copy(
+        if (dshHubSkillSearchSeq.get() == searchSeq) {
+          _dshHubSkillSearchState.value =
+            _dshHubSkillSearchState.value.copy(
               searching = false,
               results = results,
-              messageText = if (results.isEmpty()) "No ClawHub skills matched." else null,
+              messageText = if (results.isEmpty()) "No DshHub skills matched." else null,
             )
         }
       }
@@ -6073,37 +6073,37 @@ class NodeRuntime private constructor(
       throw err
     } catch (_: Throwable) {
       publishGatewayData(gatewayScope) {
-        if (clawHubSkillSearchSeq.get() == searchSeq) {
-          _clawHubSkillSearchState.value =
-            _clawHubSkillSearchState.value.copy(
+        if (dshHubSkillSearchSeq.get() == searchSeq) {
+          _dshHubSkillSearchState.value =
+            _dshHubSkillSearchState.value.copy(
               searching = false,
-              errorText = nativeString("Could not search ClawHub skills."),
+              errorText = nativeString("Could not search DshHub skills."),
             )
         }
       }
     }
   }
 
-  private suspend fun reviewClawHubSkillInstallFromGateway(skill: GatewayClawHubSkillSummary) {
-    val reviewSeq = clawHubSkillReviewSeq.incrementAndGet()
+  private suspend fun reviewDshHubSkillInstallFromGateway(skill: GatewayDshHubSkillSummary) {
+    val reviewSeq = dshHubSkillReviewSeq.incrementAndGet()
     val gatewayScope = captureGatewayDataScope()
     if (gatewayScope == null || !operatorConnected) {
-      _clawHubSkillSearchState.value =
-        _clawHubSkillSearchState.value.copy(
-          errorText = nativeString("Connect the gateway to inspect ClawHub skills."),
+      _dshHubSkillSearchState.value =
+        _dshHubSkillSearchState.value.copy(
+          errorText = nativeString("Connect the gateway to inspect DshHub skills."),
         )
       return
     }
-    if (!clawHubSkillMethodsAvailable.value) {
+    if (!dshHubSkillMethodsAvailable.value) {
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(errorText = CLAWHUB_SKILL_GATEWAY_UNAVAILABLE)
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(errorText = DSHHUB_SKILL_GATEWAY_UNAVAILABLE)
       }
       return
     }
     publishGatewayData(gatewayScope) {
-      _clawHubSkillSearchState.value =
-        _clawHubSkillSearchState.value.copy(
+      _dshHubSkillSearchState.value =
+        _dshHubSkillSearchState.value.copy(
           reviewingSlug = skill.reference,
           installReview = null,
           acknowledgeSlug = null,
@@ -6113,17 +6113,17 @@ class NodeRuntime private constructor(
         )
     }
     try {
-      val response = requestGatewayData(gatewayScope, "skills.detail", clawHubDetailParams(skill.reference))
-      val review = parseClawHubInstallReview(response, skill, json)
+      val response = requestGatewayData(gatewayScope, "skills.detail", dshHubDetailParams(skill.reference))
+      val review = parseDshHubInstallReview(response, skill, json)
       publishGatewayData(gatewayScope) {
-        if (clawHubSkillReviewSeq.get() == reviewSeq) {
-          _clawHubSkillSearchState.value =
-            _clawHubSkillSearchState.value.copy(
+        if (dshHubSkillReviewSeq.get() == reviewSeq) {
+          _dshHubSkillSearchState.value =
+            _dshHubSkillSearchState.value.copy(
               reviewingSlug = null,
               installReview = review,
               errorText =
                 if (review == null) {
-                  "ClawHub did not return an installable version for ${skill.reference}."
+                  "DshHub did not return an installable version for ${skill.reference}."
                 } else {
                   null
                 },
@@ -6134,60 +6134,60 @@ class NodeRuntime private constructor(
       throw err
     } catch (_: Throwable) {
       publishGatewayData(gatewayScope) {
-        if (clawHubSkillReviewSeq.get() == reviewSeq) {
-          _clawHubSkillSearchState.value =
-            _clawHubSkillSearchState.value.copy(
+        if (dshHubSkillReviewSeq.get() == reviewSeq) {
+          _dshHubSkillSearchState.value =
+            _dshHubSkillSearchState.value.copy(
               reviewingSlug = null,
               errorText =
-                nativeString("Could not load ClawHub details for \${skill.reference}.", skill.reference),
+                nativeString("Could not load DshHub details for \${skill.reference}.", skill.reference),
             )
         }
       }
     }
   }
 
-  private suspend fun installClawHubSkillFromGateway(
+  private suspend fun installDshHubSkillFromGateway(
     slug: String,
-    acknowledgeClawHubRisk: Boolean,
+    acknowledgeDshHubRisk: Boolean,
     version: String?,
   ) {
     val gatewayScope = captureGatewayDataScope()
     if (gatewayScope == null || !operatorConnected) {
-      _clawHubSkillSearchState.value =
-        _clawHubSkillSearchState.value.copy(
-          errorText = nativeString("Connect the gateway to install ClawHub skills."),
+      _dshHubSkillSearchState.value =
+        _dshHubSkillSearchState.value.copy(
+          errorText = nativeString("Connect the gateway to install DshHub skills."),
         )
       return
     }
-    if (!clawHubSkillMethodsAvailable.value) {
+    if (!dshHubSkillMethodsAvailable.value) {
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(errorText = CLAWHUB_SKILL_GATEWAY_UNAVAILABLE)
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(errorText = DSHHUB_SKILL_GATEWAY_UNAVAILABLE)
       }
       return
     }
     if (!operatorAdminScopeAvailable.value) {
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
             errorText =
               nativeString(
-                "This gateway connection needs operator.admin to install ClawHub skills.",
+                "This gateway connection needs operator.admin to install DshHub skills.",
               ),
           )
       }
       return
     }
-    clawHubSkillInstallBeforeClaimObserverForTests?.invoke()
+    dshHubSkillInstallBeforeClaimObserverForTests?.invoke()
     val claimed =
-      clawHubSkillInstallMutex.withLock {
+      dshHubSkillInstallMutex.withLock {
         var published = false
         // Gateway switches reset this shared UI state while installs can wait
         // on the mutex. Claim under the scope lock so stale work cannot leak in.
         publishGatewayData(gatewayScope) {
-          val current = _clawHubSkillSearchState.value
+          val current = _dshHubSkillSearchState.value
           if (slug !in current.installingSlugs) {
-            _clawHubSkillSearchState.value =
+            _dshHubSkillSearchState.value =
               current.copy(installingSlugs = current.installingSlugs + slug)
             published = true
           }
@@ -6197,8 +6197,8 @@ class NodeRuntime private constructor(
     if (!claimed) return
     val attemptedVersion = version?.trim()?.takeIf(String::isNotEmpty)
     publishGatewayData(gatewayScope) {
-      _clawHubSkillSearchState.value =
-        _clawHubSkillSearchState.value.copy(
+      _dshHubSkillSearchState.value =
+        _dshHubSkillSearchState.value.copy(
           installReview = null,
           acknowledgeSlug = null,
           acknowledgeVersion = null,
@@ -6211,8 +6211,8 @@ class NodeRuntime private constructor(
         requestGatewayData(
           gatewayScope,
           "skills.install",
-          clawHubInstallParams(slug, attemptedVersion, acknowledgeClawHubRisk),
-          timeoutMs = CLAWHUB_INSTALL_REQUEST_TIMEOUT_MS,
+          dshHubInstallParams(slug, attemptedVersion, acknowledgeDshHubRisk),
+          timeoutMs = DSHHUB_INSTALL_REQUEST_TIMEOUT_MS,
         )
       val root = json.parseToJsonElement(response).asObjectOrNull()
       val message =
@@ -6229,10 +6229,10 @@ class NodeRuntime private constructor(
           ?.takeIf(String::isNotEmpty)
       val refreshed = refreshSkillsFromGateway()
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
             messageText =
-              formatClawHubInstallMessage(
+              formatDshHubInstallMessage(
                 message ?: "Installed $slug.",
                 listOfNotNull(
                   warning,
@@ -6244,57 +6244,57 @@ class NodeRuntime private constructor(
     } catch (err: CancellationException) {
       throw err
     } catch (_: GatewayRequestOutcomeUnknown) {
-      val confirmed = refreshAndConfirmClawHubInstall(gatewayScope, slug, attemptedVersion)
+      val confirmed = refreshAndConfirmDshHubInstall(gatewayScope, slug, attemptedVersion)
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
-            errorText = if (confirmed) null else clawHubInstallOutcomeUnknownMessage(slug),
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
+            errorText = if (confirmed) null else dshHubInstallOutcomeUnknownMessage(slug),
             messageText = if (confirmed) "Installed $slug." else null,
           )
       }
     } catch (err: GatewayRequestRejected) {
-      val confirmed = refreshAndConfirmClawHubInstall(gatewayScope, slug, attemptedVersion)
-      val rejection = if (confirmed) null else clawHubInstallRejection(err.gatewayError, attemptedVersion)
+      val confirmed = refreshAndConfirmDshHubInstall(gatewayScope, slug, attemptedVersion)
+      val rejection = if (confirmed) null else dshHubInstallRejection(err.gatewayError, attemptedVersion)
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
             acknowledgeSlug = if (rejection?.requiresAcknowledgement == true) slug else null,
             acknowledgeVersion = rejection?.acknowledgeVersion,
-            errorText = rejection?.let { formatClawHubInstallMessage(it.message, it.warning) },
+            errorText = rejection?.let { formatDshHubInstallMessage(it.message, it.warning) },
             messageText = if (confirmed) "Installed $slug." else null,
           )
       }
     } catch (_: Throwable) {
       publishGatewayData(gatewayScope) {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
-            errorText = nativeString("Could not install \${slug} from ClawHub.", slug),
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
+            errorText = nativeString("Could not install \${slug} from DshHub.", slug),
           )
       }
     } finally {
-      releaseClawHubInstallClaim(slug, gatewayScope)
+      releaseDshHubInstallClaim(slug, gatewayScope)
     }
   }
 
-  private suspend fun refreshAndConfirmClawHubInstall(
+  private suspend fun refreshAndConfirmDshHubInstall(
     gatewayScope: GatewayDataScope,
     slug: String,
     version: String?,
   ): Boolean {
     val exactVersion = version ?: return false
     if (!refreshSkillsFromGateway() || !isGatewayDataScopeCurrent(gatewayScope)) return false
-    return isClawHubSkillInstalled(_skillsSummary.value.skills, slug, exactVersion)
+    return isDshHubSkillInstalled(_skillsSummary.value.skills, slug, exactVersion)
   }
 
-  private suspend fun releaseClawHubInstallClaim(
+  private suspend fun releaseDshHubInstallClaim(
     slug: String,
     gatewayScope: GatewayDataScope? = null,
   ) {
-    clawHubSkillInstallMutex.withLock {
+    dshHubSkillInstallMutex.withLock {
       val release = {
-        _clawHubSkillSearchState.value =
-          _clawHubSkillSearchState.value.copy(
-            installingSlugs = _clawHubSkillSearchState.value.installingSlugs - slug,
+        _dshHubSkillSearchState.value =
+          _dshHubSkillSearchState.value.copy(
+            installingSlugs = _dshHubSkillSearchState.value.installingSlugs - slug,
           )
       }
       if (gatewayScope == null) release() else publishGatewayData(gatewayScope, release)
@@ -7264,7 +7264,7 @@ class NodeRuntime private constructor(
   private fun replaceGatewayMethods(methods: Set<String>) {
     synchronized(gatewayMethodsLock) {
       gatewayApprovalRpcFamily = selectGatewayApprovalRpcFamily(methods)
-      _clawHubSkillMethodsAvailable.value = supportsClawHubSkillManagement(methods)
+      _dshHubSkillMethodsAvailable.value = supportsDshHubSkillManagement(methods)
       _desktopObserveAvailable.value = GatewayMethod.DesktopObserve.rawValue in methods
       systemAgentChatSupported.value = GatewayMethod.DshChat.rawValue in methods
       gatewayMethodsEpoch += 1
@@ -7580,7 +7580,7 @@ class NodeRuntime private constructor(
         val name = obj["name"].asStringOrNull()?.trim().orEmpty()
         if (name.isEmpty()) return@mapNotNull null
         val missing = obj["missing"].asObjectOrNull()
-        val clawHub = obj["clawhub"].asObjectOrNull()
+        val dshHub = obj["dshhub"].asObjectOrNull()
         GatewaySkillSummary(
           skillKey = obj["skillKey"].asStringOrNull()?.trim()?.takeIf { it.isNotEmpty() } ?: name,
           name = name,
@@ -7594,21 +7594,21 @@ class NodeRuntime private constructor(
           bundled = obj.boolean("bundled"),
           missingCount = skillMissingCount(missing),
           installCount = (obj["install"] as? JsonArray)?.size ?: 0,
-          clawHubSlug =
-            clawHub
+          dshHubSlug =
+            dshHub
               ?.get("slug")
               .asStringOrNull()
               ?.trim()
               ?.takeIf(String::isNotEmpty),
-          clawHubValid = clawHub?.boolean("valid") == true,
-          clawHubOwnerHandle =
-            clawHub
+          dshHubValid = dshHub?.boolean("valid") == true,
+          dshHubOwnerHandle =
+            dshHub
               ?.get("ownerHandle")
               .asStringOrNull()
               ?.trim()
               ?.takeIf(String::isNotEmpty),
-          clawHubInstalledVersion =
-            clawHub
+          dshHubInstalledVersion =
+            dshHub
               ?.get("installedVersion")
               .asStringOrNull()
               ?.trim()
@@ -8451,10 +8451,10 @@ data class GatewaySkillSummary(
   val bundled: Boolean,
   val missingCount: Int,
   val installCount: Int,
-  val clawHubSlug: String? = null,
-  val clawHubValid: Boolean = false,
-  val clawHubOwnerHandle: String? = null,
-  val clawHubInstalledVersion: String? = null,
+  val dshHubSlug: String? = null,
+  val dshHubValid: Boolean = false,
+  val dshHubOwnerHandle: String? = null,
+  val dshHubInstalledVersion: String? = null,
 )
 
 data class GatewayNodesDevicesSummary(

@@ -4,9 +4,9 @@ import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.chat.BackgroundTask
 import ai.deepseek.harness.chat.BackgroundTaskDisplayStatus
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -87,8 +87,8 @@ internal fun BackgroundTasksSheet(
 
   ModalBottomSheet(
     onDismissRequest = onDismiss,
-    containerColor = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
+    containerColor = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
   ) {
     if (selectedTask != null) {
       BackgroundTaskDetail(
@@ -133,7 +133,7 @@ private fun BackgroundTaskList(
       ) {
         Text(
           text = nativeString("Background tasks"),
-          style = ClawTheme.type.title,
+          style = DshTheme.type.title,
           modifier = Modifier.weight(1f),
         )
         if (loading) {
@@ -149,8 +149,8 @@ private fun BackgroundTaskList(
       item {
         Text(
           text = message,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.danger,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.danger,
           modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
       }
@@ -159,8 +159,8 @@ private fun BackgroundTaskList(
       item {
         Text(
           text = nativeString("No background tasks for this agent."),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
           modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
         )
       }
@@ -185,8 +185,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.taskSection(
   item(key = "section-$title") {
     Text(
       text = title,
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.textMuted,
       modifier = Modifier.padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 6.dp),
     )
   }
@@ -196,7 +196,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.taskSection(
       onClick = { onSelect(task) },
       modifier = Modifier.fillMaxWidth(),
       color = Color.Transparent,
-      contentColor = ClawTheme.colors.text,
+      contentColor = DshTheme.colors.text,
     ) {
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 13.dp),
@@ -206,36 +206,36 @@ private fun androidx.compose.foundation.lazy.LazyListScope.taskSection(
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
           Text(
             text = task.displayTitle,
-            style = ClawTheme.type.body,
+            style = DshTheme.type.body,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
           )
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            ClawStatusPill(
+            DshStatusPill(
               text = statusLabel,
               status =
                 when {
-                  task.isActive -> ClawStatus.Warning
-                  task.status == "completed" -> ClawStatus.Success
-                  else -> ClawStatus.Danger
+                  task.isActive -> DshStatus.Warning
+                  task.status == "completed" -> DshStatus.Success
+                  else -> DshStatus.Danger
                 },
             )
-            Text(task.runtime, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+            Text(task.runtime, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
           }
           task.output?.let { output ->
             Text(
               text = output,
-              style = ClawTheme.type.caption,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption,
+              color = DshTheme.colors.textMuted,
               maxLines = 2,
               overflow = TextOverflow.Ellipsis,
             )
           }
         }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = ClawTheme.colors.textMuted)
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = DshTheme.colors.textMuted)
       }
     }
-    HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+    HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
   }
 }
 
@@ -260,7 +260,7 @@ private fun BackgroundTaskDetail(
           Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back to background tasks"))
         }
         Column(modifier = Modifier.weight(1f)) {
-          Text(task.displayTitle, style = ClawTheme.type.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
+          Text(task.displayTitle, style = DshTheme.type.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
           Text(
             text =
               nativeString(
@@ -268,8 +268,8 @@ private fun BackgroundTaskDetail(
                 statusLabel,
                 task.runtime,
               ),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
         if (loading) CircularProgressIndicator(strokeWidth = 2.dp)
@@ -279,8 +279,8 @@ private fun BackgroundTaskDetail(
       item {
         Text(
           text = message,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.danger,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.danger,
           modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
       }
@@ -307,15 +307,15 @@ private fun TaskTextBlock(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
     verticalArrangement = Arrangement.spacedBy(7.dp),
   ) {
-    Text(label, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+    Text(label, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
     Surface(
       modifier = Modifier.fillMaxWidth(),
-      color = ClawTheme.colors.surfaceRaised,
-      contentColor = ClawTheme.colors.text,
-      shape = RoundedCornerShape(ClawTheme.radii.panel),
+      color = DshTheme.colors.surfaceRaised,
+      contentColor = DshTheme.colors.text,
+      shape = RoundedCornerShape(DshTheme.radii.panel),
     ) {
       SelectionContainer {
-        Text(text, style = ClawTheme.type.mono, modifier = Modifier.padding(12.dp))
+        Text(text, style = DshTheme.type.mono, modifier = Modifier.padding(12.dp))
       }
     }
   }

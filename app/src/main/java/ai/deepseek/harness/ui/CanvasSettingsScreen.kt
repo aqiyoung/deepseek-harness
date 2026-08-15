@@ -2,10 +2,10 @@ package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,26 +67,26 @@ internal fun CanvasSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawPrimaryButton(
+      DshPrimaryButton(
         text = if (rehydratePending) nativeString("Refreshing") else nativeString("Refresh Screen"),
         onClick = { viewModel.requestCanvasRehydrate(source = "settings_canvas") },
         enabled = isConnected && !rehydratePending,
         modifier = Modifier.weight(1f),
       )
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (isConnected) nativeString("Open Screen") else nativeString("Reconnect"),
         onClick = if (isConnected) viewModel::showCanvas else viewModel::refreshGatewayConnection,
         modifier = Modifier.weight(1f),
       )
     }
     rehydrateErrorText?.let {
-      ClawPanel {
-        Text(text = it, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = it, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
-    ClawPanel(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)) {
       Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = canvasLabel, style = ClawTheme.type.section, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = canvasLabel, style = DshTheme.type.section, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         CanvasStandbyPanel(isConnected = isConnected)
       }
     }
@@ -102,10 +102,10 @@ private fun CanvasStandbyPanel(isConnected: Boolean) {
   ) {
     Surface(
       modifier = Modifier.size(54.dp),
-      shape = RoundedCornerShape(ClawTheme.radii.panel),
-      color = ClawTheme.colors.surfacePressed,
-      border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
-      contentColor = ClawTheme.colors.text,
+      shape = RoundedCornerShape(DshTheme.radii.panel),
+      color = DshTheme.colors.surfacePressed,
+      border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
+      contentColor = DshTheme.colors.text,
     ) {
       Box(contentAlignment = Alignment.Center) {
         Icon(imageVector = Icons.AutoMirrored.Filled.ScreenShare, contentDescription = null, modifier = Modifier.size(26.dp))
@@ -113,14 +113,14 @@ private fun CanvasStandbyPanel(isConnected: Boolean) {
     }
     Text(
       text = if (isConnected) nativeString("Screen surface ready") else nativeString("Connect the gateway"),
-      style = ClawTheme.type.title,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.title,
+      color = DshTheme.colors.text,
       modifier = Modifier.padding(top = 18.dp),
     )
     Text(
       text = if (isConnected) nativeString("Open the current Canvas surface to inspect or interact with it.") else nativeString("Canvas output needs an active gateway connection."),
-      style = ClawTheme.type.body,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.body,
+      color = DshTheme.colors.textMuted,
       modifier = Modifier.padding(top = 6.dp),
     )
   }

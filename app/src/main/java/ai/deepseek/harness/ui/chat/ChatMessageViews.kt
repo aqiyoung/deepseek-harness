@@ -10,7 +10,7 @@ import ai.deepseek.harness.gateway.GatewayLoadedImage
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.i18n.nativeStringResource
 import ai.deepseek.harness.ui.MobileColorsAccessor
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.image.RemoteImageResult
 import ai.deepseek.harness.ui.image.safeRemoteImageStore
 import ai.deepseek.harness.ui.mobileAccent
@@ -193,7 +193,7 @@ private fun ChatLinkPreview(
       }
   }
   val uriHandler = LocalUriHandler.current
-  val cardShape = RoundedCornerShape(ClawTheme.radii.sheet)
+  val cardShape = RoundedCornerShape(DshTheme.radii.sheet)
   Surface(
     onClick = { uriHandler.openUri(url) },
     shape = cardShape,
@@ -269,7 +269,7 @@ fun ChatTypingIndicatorBubble(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      WorkingClawIcon(runKey = runKey, color = mobileAccent)
+      WorkingDshIcon(runKey = runKey, color = mobileAccent)
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),

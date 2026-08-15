@@ -48,16 +48,16 @@ import ai.deepseek.harness.resolveAgentIdFromMainSessionKey
 import ai.deepseek.harness.selectableAgents
 import ai.deepseek.harness.ui.copyGatewayDiagnosticsReport
 import ai.deepseek.harness.ui.design.AgentAvatarSource
-import ai.deepseek.harness.ui.design.ClawAgentAvatar
-import ai.deepseek.harness.ui.design.ClawListItem
-import ai.deepseek.harness.ui.design.ClawLoadingState
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawSegmentedControl
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshAgentAvatar
+import ai.deepseek.harness.ui.design.DshListItem
+import ai.deepseek.harness.ui.design.DshLoadingState
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshSegmentedControl
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.DeepSeekHarnessMascot
 import ai.deepseek.harness.ui.design.agentAvatarSource
 import ai.deepseek.harness.ui.gatewayDiagnosticsEndpoint
@@ -1048,11 +1048,11 @@ private fun ChatSessionSwitcher(
     if (hasMoreSessions) {
       Surface(
         onClick = onOpenSessions,
-        modifier = Modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-        shape = RoundedCornerShape(ClawTheme.radii.pill),
-        color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.72f),
-        contentColor = ClawTheme.colors.textMuted,
-        border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.7f)),
+        modifier = Modifier.heightIn(min = DshTheme.spacing.touchTarget),
+        shape = RoundedCornerShape(DshTheme.radii.pill),
+        color = DshTheme.colors.surfaceRaised.copy(alpha = 0.72f),
+        contentColor = DshTheme.colors.textMuted,
+        border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.7f)),
       ) {
         Row(
           modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
@@ -1060,7 +1060,7 @@ private fun ChatSessionSwitcher(
           horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
           Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null, modifier = Modifier.size(16.dp))
-          Text(text = nativeString("All"), style = ClawTheme.type.caption, maxLines = 1)
+          Text(text = nativeString("All"), style = DshTheme.type.caption, maxLines = 1)
         }
       }
     }
@@ -1076,11 +1076,11 @@ private fun ChatSessionChip(
 ) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
-    color = if (active) ClawTheme.colors.surfacePressed.copy(alpha = 0.9f) else ClawTheme.colors.surfaceRaised.copy(alpha = 0.72f),
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, if (active) ClawTheme.colors.borderStrong else ClawTheme.colors.border.copy(alpha = 0.7f)),
+    modifier = Modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
+    color = if (active) DshTheme.colors.surfacePressed.copy(alpha = 0.9f) else DshTheme.colors.surfaceRaised.copy(alpha = 0.72f),
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, if (active) DshTheme.colors.borderStrong else DshTheme.colors.border.copy(alpha = 0.7f)),
   ) {
     Row(
       modifier =
@@ -1092,11 +1092,11 @@ private fun ChatSessionChip(
       horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       if (avatarSource != null) {
-        ClawAgentAvatar(source = avatarSource, size = 20.dp) {}
+        DshAgentAvatar(source = avatarSource, size = 20.dp) {}
       }
       Text(
         text = text,
-        style = ClawTheme.type.caption,
+        style = DshTheme.type.caption,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -1147,8 +1147,8 @@ private fun ChatHeader(
       DeepSeekHarnessMascot(modifier = Modifier.size(25.dp))
       Text(
         text = nativeString("DeepSeekHarness"),
-        style = ClawTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
+        color = DshTheme.colors.text,
         modifier = Modifier.weight(1f),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -1162,9 +1162,9 @@ private fun ChatHeader(
           },
         status =
           when {
-            pendingRunCount > 0 -> ClawStatus.Warning
-            healthOk -> ClawStatus.Success
-            else -> ClawStatus.Danger
+            pendingRunCount > 0 -> DshStatus.Warning
+            healthOk -> DshStatus.Success
+            else -> DshStatus.Danger
           },
       )
       HeaderIcon(icon = Icons.Default.Add, contentDescription = nativeString("New chat"), enabled = newChatEnabled, onClick = onNewChat)
@@ -1224,11 +1224,11 @@ private fun ChatHeader(
       }
     }
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-      Text(text = nativeString("Chat"), style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = ClawTheme.colors.text, maxLines = 1)
+      Text(text = nativeString("Chat"), style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = DshTheme.colors.text, maxLines = 1)
       Text(
         text = sessionTitle,
-        style = ClawTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp),
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp),
+        color = DshTheme.colors.textMuted,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -1239,30 +1239,30 @@ private fun ChatHeader(
 @Composable
 private fun ModelPill(
   text: String,
-  status: ClawStatus,
+  status: DshStatus,
 ) {
   val borderColor =
-    if (status == ClawStatus.Warning) {
-      ClawTheme.colors.warning
+    if (status == DshStatus.Warning) {
+      DshTheme.colors.warning
     } else {
-      ClawTheme.colors.border
+      DshTheme.colors.border
     }
   Surface(
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
     color =
       when (status) {
-        ClawStatus.Success -> ClawTheme.colors.successSoft
-        ClawStatus.Warning -> ClawTheme.colors.warningSoft
-        ClawStatus.Danger -> ClawTheme.colors.dangerSoft
-        ClawStatus.Neutral -> ClawTheme.colors.surfaceRaised
+        DshStatus.Success -> DshTheme.colors.successSoft
+        DshStatus.Warning -> DshTheme.colors.warningSoft
+        DshStatus.Danger -> DshTheme.colors.dangerSoft
+        DshStatus.Neutral -> DshTheme.colors.surfaceRaised
       },
-    contentColor = ClawTheme.colors.textMuted,
+    contentColor = DshTheme.colors.textMuted,
     border = BorderStroke(1.dp, borderColor),
   ) {
     Text(
       text = text,
       modifier = Modifier.padding(horizontal = 7.dp, vertical = 1.5.dp),
-      style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+      style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
       maxLines = 1,
     )
   }
@@ -1275,11 +1275,11 @@ private fun HeaderIcon(
   enabled: Boolean = true,
   onClick: () -> Unit,
 ) {
-  val contentColor = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textMuted
+  val contentColor = if (enabled) DshTheme.colors.text else DshTheme.colors.textMuted
   Surface(
     onClick = onClick,
     enabled = enabled,
-    modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = Modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
     color = Color.Transparent,
     contentColor = contentColor,
@@ -1476,7 +1476,7 @@ private fun ChatMessageList(
 
     if (timeline.items.isEmpty()) {
       if (showChatLoadingPlaceholder(historyLoading = historyLoading, healthOk = healthOk, gatewayOffline = gatewayOffline)) {
-        ClawLoadingState(title = nativeString("Loading thread"), modifier = Modifier.align(Alignment.Center))
+        DshLoadingState(title = nativeString("Loading thread"), modifier = Modifier.align(Alignment.Center))
       } else {
         EmptyChatHint(
           healthOk = healthOk,
@@ -1501,10 +1501,10 @@ private fun ChatMessageList(
           Surface(
             modifier = Modifier.size(36.dp),
             shape = CircleShape,
-            color = ClawTheme.colors.surfaceRaised,
-            contentColor = ClawTheme.colors.text,
+            color = DshTheme.colors.surfaceRaised,
+            contentColor = DshTheme.colors.text,
             shadowElevation = 6.dp,
-            border = BorderStroke(1.dp, ClawTheme.colors.border),
+            border = BorderStroke(1.dp, DshTheme.colors.border),
           ) {
             Box(contentAlignment = Alignment.Center) {
               Icon(
@@ -1583,7 +1583,7 @@ private fun EmptyChatHint(
     verticalArrangement = Arrangement.spacedBy(12.dp),
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-      Text(text = if (healthOk) nativeString("Ready when you are") else nativeString("Gateway offline"), style = ClawTheme.type.title.copy(fontSize = 18.sp, lineHeight = 23.sp), color = ClawTheme.colors.text)
+      Text(text = if (healthOk) nativeString("Ready when you are") else nativeString("Gateway offline"), style = DshTheme.type.title.copy(fontSize = 18.sp, lineHeight = 23.sp), color = DshTheme.colors.text)
       Text(
         text =
           if (healthOk) {
@@ -1593,8 +1593,8 @@ private fun EmptyChatHint(
           } else {
             nativeString("Chat is checking Gateway health.")
           },
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
         textAlign = TextAlign.Center,
       )
     }
@@ -1614,20 +1614,20 @@ private fun ChatOfflineActions(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    ClawPrimaryButton(text = nativeString("Fix connection"), icon = Icons.Default.Cloud, onClick = onFixConnection, modifier = Modifier.fillMaxWidth())
-    ClawSecondaryButton(text = nativeString("Copy diagnostics"), icon = Icons.Default.ContentCopy, onClick = onCopyDiagnostics, modifier = Modifier.fillMaxWidth())
+    DshPrimaryButton(text = nativeString("Fix connection"), icon = Icons.Default.Cloud, onClick = onFixConnection, modifier = Modifier.fillMaxWidth())
+    DshSecondaryButton(text = nativeString("Copy diagnostics"), icon = Icons.Default.ContentCopy, onClick = onCopyDiagnostics, modifier = Modifier.fillMaxWidth())
   }
 }
 
 @Composable
 private fun StarterPromptList(onStarterPrompt: (String) -> Unit) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
     Column {
       starterPrompts.forEachIndexed { index, prompt ->
         val message = prompt.message.resolveNativeTextResource()
         StarterPromptRow(prompt = prompt, onClick = { onStarterPrompt(message) })
         if (index != starterPrompts.lastIndex) {
-          HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+          HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
         }
       }
     }
@@ -1639,7 +1639,7 @@ private fun StarterPromptRow(
   prompt: StarterPrompt,
   onClick: () -> Unit,
 ) {
-  Surface(onClick = onClick, color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(onClick = onClick, color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).padding(horizontal = 10.dp, vertical = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -1649,14 +1649,14 @@ private fun StarterPromptRow(
         modifier =
           Modifier
             .size(30.dp)
-            .background(ClawTheme.colors.surfacePressed, RoundedCornerShape(ClawTheme.radii.row)),
+            .background(DshTheme.colors.surfacePressed, RoundedCornerShape(DshTheme.radii.row)),
         contentAlignment = Alignment.Center,
       ) {
-        Text(text = prompt.mark, style = ClawTheme.type.label, color = ClawTheme.colors.text)
+        Text(text = prompt.mark, style = DshTheme.type.label, color = DshTheme.colors.text)
       }
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-        Text(text = prompt.title.resolveNativeTextResource(), style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1)
-        Text(text = prompt.subtitle.resolveNativeTextResource(), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = prompt.title.resolveNativeTextResource(), style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1)
+        Text(text = prompt.subtitle.resolveNativeTextResource(), style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
     }
   }
@@ -1762,9 +1762,9 @@ internal fun ChatBubble(
       Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(7.dp),
-        color = if (isUser) ClawTheme.colors.surfacePressed.copy(alpha = 0.86f) else ClawTheme.colors.surfaceRaised.copy(alpha = 0.84f),
-        contentColor = ClawTheme.colors.text,
-        border = BorderStroke(1.dp, if (live) ClawTheme.colors.borderStrong else ClawTheme.colors.border.copy(alpha = 0.45f)),
+        color = if (isUser) DshTheme.colors.surfacePressed.copy(alpha = 0.86f) else DshTheme.colors.surfaceRaised.copy(alpha = 0.84f),
+        contentColor = DshTheme.colors.text,
+        border = BorderStroke(1.dp, if (live) DshTheme.colors.borderStrong else DshTheme.colors.border.copy(alpha = 0.45f)),
         tonalElevation = 1.dp,
         shadowElevation = 2.dp,
       ) {
@@ -1777,8 +1777,8 @@ internal fun ChatBubble(
                 normalizedRole == "system" -> nativeString("System")
                 else -> nativeString("DeepSeekHarness")
               },
-            style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold),
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold),
+            color = DshTheme.colors.text,
           )
           if (collapsibleUserText && messageText.isNotBlank()) {
             ChatUserMessageText(
@@ -1790,7 +1790,7 @@ internal fun ChatBubble(
           }
           displayableContent.forEach { part ->
             when {
-              part.type == "text" && !collapsibleUserText -> ChatText(text = part.text.orEmpty(), textColor = ClawTheme.colors.text, isStreaming = live)
+              part.type == "text" && !collapsibleUserText -> ChatText(text = part.text.orEmpty(), textColor = DshTheme.colors.text, isStreaming = live)
               part.type == "text" -> Unit
               part.isAudioAttachment() && part.hasPlayableMediaArtifact() ->
                 ChatAudioPlayerCard(
@@ -1825,14 +1825,14 @@ internal fun ChatBubble(
                   resolverReady = inlineWidgetResolverReady,
                   resolveResource = resolveInlineWidgetResource,
                 )
-              else -> Text(text = part.fileName ?: nativeString("Attachment"), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+              else -> Text(text = part.fileName ?: nativeString("Attachment"), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
             }
           }
           if (omittedImageCount > 0) {
             Text(
               text = nativeString("Additional images hidden: \${omittedImageCount}", omittedImageCount),
-              style = ClawTheme.type.caption,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption,
+              color = DshTheme.colors.textMuted,
             )
           }
           if (messageId != null) {
@@ -1847,8 +1847,8 @@ internal fun ChatBubble(
           timestampMs?.let {
             Text(
               text = formatChatTimestamp(it),
-              style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+              color = DshTheme.colors.textMuted,
               modifier = Modifier.align(Alignment.End),
             )
           }
@@ -1866,7 +1866,7 @@ private fun FullChatSpeechIndicator(
   Surface(
     onClick = onStop,
     shape = RoundedCornerShape(999.dp),
-    color = ClawTheme.colors.surfacePressed,
+    color = DshTheme.colors.surfacePressed,
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
@@ -1882,12 +1882,12 @@ private fun FullChatSpeechIndicator(
           },
         contentDescription = null,
         modifier = Modifier.size(14.dp),
-        tint = ClawTheme.colors.textMuted,
+        tint = DshTheme.colors.textMuted,
       )
       Text(
         text = if (phase == MessageSpeechPhase.Preparing) nativeString("Preparing audio…") else nativeString("Speaking…"),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
       )
     }
   }
@@ -1905,12 +1905,12 @@ private fun ChatUserMessageText(
     Text(
       text = preview,
       style = mobileCallout,
-      color = ClawTheme.colors.text,
+      color = DshTheme.colors.text,
     )
   } else {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       textParts.forEach { text ->
-        ChatMarkdown(text = text, textColor = ClawTheme.colors.text, isStreaming = false)
+        ChatMarkdown(text = text, textColor = DshTheme.colors.text, isStreaming = false)
       }
     }
   }
@@ -1920,9 +1920,9 @@ private fun ChatUserMessageText(
     Surface(
       onClick = onToggleExpanded,
       shape = RoundedCornerShape(8.dp),
-      color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.72f),
-      contentColor = ClawTheme.colors.textMuted,
-      border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.6f)),
+      color = DshTheme.colors.surfaceRaised.copy(alpha = 0.72f),
+      contentColor = DshTheme.colors.textMuted,
+      border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.6f)),
     ) {
       Text(
         text = toggleLabel,
@@ -1944,18 +1944,18 @@ private fun ChatText(
 
 @Composable
 private fun ToolBubble(toolCalls: List<ChatPendingToolCall>) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawStatusPill(text = nativeString("Tools running"), status = ClawStatus.Warning)
+      DshStatusPill(text = nativeString("Tools running"), status = DshStatus.Warning)
       toolCalls.take(4).forEach { tool ->
-        ClawListItem(
+        DshListItem(
           title = tool.name,
           subtitle = nativeString("DeepSeekHarness is working"),
           trailing = { tool.liveDiff?.let { DiffStatChips(it) } },
         )
       }
       if (toolCalls.size > 4) {
-        Text(text = nativeString("+\${toolCalls.size - 4} more", toolCalls.size - 4), style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle)
+        Text(text = nativeString("+\${toolCalls.size - 4} more", toolCalls.size - 4), style = DshTheme.type.caption, color = DshTheme.colors.textSubtle)
       }
     }
   }
@@ -1967,7 +1967,7 @@ private fun SubagentActivityRows(
   moreWorkingCount: Int,
 ) {
   val animationsEnabled = rememberSystemAnimationsEnabled()
-  ClawPanel {
+  DshPanel {
     Column(
       modifier = if (animationsEnabled) Modifier.animateContentSize() else Modifier,
       verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -1976,8 +1976,8 @@ private fun SubagentActivityRows(
       if (moreWorkingCount > 0) {
         Text(
           text = nativeString("+\${moreWorkingCount} more working", moreWorkingCount),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
         )
       }
     }
@@ -1996,19 +1996,19 @@ private fun SubagentActivityRow(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     if (activity.isWorking) {
-      WorkingClawIcon(runKey = activity.id, color = ClawTheme.colors.primary)
+      WorkingDshIcon(runKey = activity.id, color = DshTheme.colors.primary)
     } else {
       Icon(
         imageVector = if (completed) Icons.Default.Check else Icons.Default.Close,
         contentDescription = null,
         modifier = Modifier.size(15.dp),
-        tint = if (completed) ClawTheme.colors.success else ClawTheme.colors.danger,
+        tint = if (completed) DshTheme.colors.success else DshTheme.colors.danger,
       )
     }
     Text(
       text = subagentActivityStatusLabel(activity.status),
-      style = ClawTheme.type.label,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.label,
+      color = DshTheme.colors.text,
       maxLines = 1,
     )
     if (summary.isNullOrBlank()) {
@@ -2035,8 +2035,8 @@ private fun SubagentActivitySnippet(
   Text(
     text = text,
     modifier = modifier,
-    style = ClawTheme.type.caption,
-    color = ClawTheme.colors.textMuted,
+    style = DshTheme.type.caption,
+    color = DshTheme.colors.textMuted,
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,
   )
@@ -2046,10 +2046,10 @@ private fun SubagentActivitySnippet(
 private fun DiffStatChips(diff: ChatDiffStat) {
   Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
     if (diff.added > 0) {
-      DiffStatChip(text = nativeString("+\${diff.added}", diff.added), color = ClawTheme.colors.success, background = ClawTheme.colors.successSoft)
+      DiffStatChip(text = nativeString("+\${diff.added}", diff.added), color = DshTheme.colors.success, background = DshTheme.colors.successSoft)
     }
     if (diff.removed > 0) {
-      DiffStatChip(text = nativeString("−\${diff.removed}", diff.removed), color = ClawTheme.colors.danger, background = ClawTheme.colors.dangerSoft)
+      DiffStatChip(text = nativeString("−\${diff.removed}", diff.removed), color = DshTheme.colors.danger, background = DshTheme.colors.dangerSoft)
     }
   }
 }
@@ -2060,11 +2060,11 @@ private fun DiffStatChip(
   color: Color,
   background: Color,
 ) {
-  Surface(shape = RoundedCornerShape(ClawTheme.radii.control), color = background) {
+  Surface(shape = RoundedCornerShape(DshTheme.radii.control), color = background) {
     Text(
       text = text,
       modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
-      style = ClawTheme.type.caption.copy(fontWeight = FontWeight.SemiBold),
+      style = DshTheme.type.caption.copy(fontWeight = FontWeight.SemiBold),
       color = color,
       maxLines = 1,
     )
@@ -2088,20 +2088,20 @@ private fun ChatNotice(
 ) {
   Surface(
     modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-      Box(modifier = Modifier.size(6.dp).background(ClawTheme.colors.warning, CircleShape))
+      Box(modifier = Modifier.size(6.dp).background(DshTheme.colors.warning, CircleShape))
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = title, style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        Text(text = body, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = title, style = DshTheme.type.section, color = DshTheme.colors.text)
+        Text(text = body, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
     }
   }
@@ -2119,9 +2119,9 @@ private fun PlanChecklistPill(steps: List<ChatPlanStep>) {
   Surface(
     onClick = { expanded = !expanded },
     modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
-    color = ClawTheme.colors.canvas,
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.pill),
+    color = DshTheme.colors.canvas,
+    contentColor = DshTheme.colors.text,
   ) {
     Column(
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
@@ -2131,43 +2131,43 @@ private fun PlanChecklistPill(steps: List<ChatPlanStep>) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        Box(modifier = Modifier.size(8.dp).background(ClawTheme.colors.primary, CircleShape))
+        Box(modifier = Modifier.size(8.dp).background(DshTheme.colors.primary, CircleShape))
         Text(
           text = currentStep.step,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(1f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = "$completedCount/${steps.size}",
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
           maxLines = 1,
         )
         Icon(
           imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
           contentDescription = if (expanded) nativeString("Collapse plan checklist") else nativeString("Expand plan checklist"),
           modifier = Modifier.size(16.dp),
-          tint = ClawTheme.colors.textSubtle,
+          tint = DshTheme.colors.textSubtle,
         )
       }
 
       if (expanded) {
-        HorizontalDivider(color = ClawTheme.colors.border)
+        HorizontalDivider(color = DshTheme.colors.border)
         Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
           steps.forEach { step ->
             val textColor =
               when (step.status) {
-                ChatPlanStepStatus.Completed -> ClawTheme.colors.textMuted
-                ChatPlanStepStatus.InProgress -> ClawTheme.colors.primary
-                ChatPlanStepStatus.Pending -> ClawTheme.colors.textSubtle
+                ChatPlanStepStatus.Completed -> DshTheme.colors.textMuted
+                ChatPlanStepStatus.InProgress -> DshTheme.colors.primary
+                ChatPlanStepStatus.Pending -> DshTheme.colors.textSubtle
               }
             val textStyle =
               when (step.status) {
-                ChatPlanStepStatus.InProgress -> ClawTheme.type.label
-                else -> ClawTheme.type.caption
+                ChatPlanStepStatus.InProgress -> DshTheme.type.label
+                else -> DshTheme.type.caption
               }
             Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -2178,13 +2178,13 @@ private fun PlanChecklistPill(steps: List<ChatPlanStep>) {
                   ChatPlanStepStatus.Completed ->
                     Text(
                       text = "✓",
-                      style = ClawTheme.type.caption.copy(fontWeight = FontWeight.Bold),
-                      color = ClawTheme.colors.success,
+                      style = DshTheme.type.caption.copy(fontWeight = FontWeight.Bold),
+                      color = DshTheme.colors.success,
                     )
                   ChatPlanStepStatus.InProgress ->
-                    Box(modifier = Modifier.size(8.dp).background(ClawTheme.colors.primary, CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(DshTheme.colors.primary, CircleShape))
                   ChatPlanStepStatus.Pending ->
-                    Box(modifier = Modifier.size(8.dp).background(ClawTheme.colors.textSubtle, CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(DshTheme.colors.textSubtle, CircleShape))
                 }
               }
               Text(
@@ -2276,8 +2276,8 @@ private fun ChatComposer(
       ) {
         Text(
           text = shareImportNotice.resolveNativeTextResource(),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.warning,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.warning,
           modifier = Modifier.weight(1f),
         )
         IconButton(onClick = onDismissShareImportNotice, modifier = Modifier.size(32.dp)) {
@@ -2381,7 +2381,7 @@ private fun ChatThinkingLevelSelector(
   ) {
     rows.forEach { row ->
       val labels = row.map { option -> chatThinkingOptionLabel(option, languageTag) }
-      ClawSegmentedControl(
+      DshSegmentedControl(
         options = labels,
         selected = selectedLabel,
         onSelect = { selected ->
@@ -2403,17 +2403,17 @@ private fun BranchSwitcherSheet(
 ) {
   ModalBottomSheet(
     onDismissRequest = onDismiss,
-    containerColor = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
+    containerColor = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
   ) {
     Column(modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp)) {
       Text(
         text = nativeString("Switch branch"),
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-        style = ClawTheme.type.title,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.title,
+        color = DshTheme.colors.text,
       )
-      HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+      HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
       LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(bottom = 24.dp),
@@ -2422,33 +2422,33 @@ private fun BranchSwitcherSheet(
           Surface(
             onClick = { if (!branch.active) onSelect(branch.leafEntryId) },
             enabled = !loading && !branch.active,
-            color = if (branch.active) ClawTheme.colors.surfacePressed else Color.Transparent,
-            contentColor = ClawTheme.colors.text,
+            color = if (branch.active) DshTheme.colors.surfacePressed else Color.Transparent,
+            contentColor = DshTheme.colors.text,
           ) {
             Row(
-              modifier = Modifier.fillMaxWidth().heightIn(min = ClawTheme.spacing.touchTarget).padding(horizontal = 20.dp, vertical = 12.dp),
+              modifier = Modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget).padding(horizontal = 20.dp, vertical = 12.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
               Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
                   text = branch.headline.trim().takeIf(String::isNotEmpty) ?: nativeString("Untitled branch"),
-                  style = ClawTheme.type.body,
-                  color = ClawTheme.colors.text,
+                  style = DshTheme.type.body,
+                  color = DshTheme.colors.text,
                   maxLines = 2,
                   overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                   text = branchMetadataText(branch),
-                  style = ClawTheme.type.caption,
-                  color = ClawTheme.colors.textMuted,
+                  style = DshTheme.type.caption,
+                  color = DshTheme.colors.textMuted,
                 )
               }
               if (branch.active) {
                 Icon(
                   imageVector = Icons.Default.Check,
                   contentDescription = nativeString("Current branch"),
-                  tint = ClawTheme.colors.primary,
+                  tint = DshTheme.colors.primary,
                 )
               }
             }
@@ -2481,8 +2481,8 @@ private fun ChatModelPickerSheet(
 ) {
   ModalBottomSheet(
     onDismissRequest = onDismiss,
-    containerColor = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
+    containerColor = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
   ) {
     LazyColumn(
       modifier = Modifier.fillMaxWidth().heightIn(max = 560.dp),
@@ -2491,19 +2491,19 @@ private fun ChatModelPickerSheet(
       item {
         Surface(
           onClick = { onSelect(null) },
-          modifier = Modifier.fillMaxWidth().heightIn(min = ClawTheme.spacing.touchTarget),
+          modifier = Modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget),
           color = Color.Transparent,
-          contentColor = ClawTheme.colors.text,
+          contentColor = DshTheme.colors.text,
         ) {
           Text(
             text = nativeString("Default"),
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-            style = ClawTheme.type.body,
+            style = DshTheme.type.body,
           )
         }
       }
       item {
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
       }
       listOf(
         "Pinned" to sections.pinned,
@@ -2515,8 +2515,8 @@ private fun ChatModelPickerSheet(
             Text(
               text = title,
               modifier = Modifier.padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 6.dp),
-              style = ClawTheme.type.caption,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption,
+              color = DshTheme.colors.textMuted,
             )
           }
           itemsIndexed(
@@ -2548,7 +2548,7 @@ private fun ChatModelPickerRow(
     onClick = onSelect,
     modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
     color = Color.Transparent,
-    contentColor = ClawTheme.colors.text,
+    contentColor = DshTheme.colors.text,
   ) {
     Row(
       modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
@@ -2556,14 +2556,14 @@ private fun ChatModelPickerRow(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = model.name, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = model.provider, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = model.name, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = model.provider, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
       IconButton(onClick = onToggleFavorite) {
         Icon(
           imageVector = if (pinned) Icons.Default.Star else Icons.Default.StarBorder,
           contentDescription = if (pinned) nativeString("Unpin model") else nativeString("Pin model"),
-          tint = if (pinned) ClawTheme.colors.primary else ClawTheme.colors.textMuted,
+          tint = if (pinned) DshTheme.colors.primary else DshTheme.colors.textMuted,
         )
       }
     }
@@ -2575,20 +2575,20 @@ private fun SlashCommandPanel(
   commands: List<ChatCommandEntry>,
   onSelect: (ChatCommandEntry) -> Unit,
 ) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
     Column {
       if (commands.isEmpty()) {
         Text(
           text = nativeString("No commands found"),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
           modifier = Modifier.padding(horizontal = 11.dp, vertical = 9.dp),
         )
       } else {
         commands.forEachIndexed { index, command ->
           SlashCommandRow(command = command, onClick = { onSelect(command) })
           if (index != commands.lastIndex) {
-            HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+            HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
           }
         }
       }
@@ -2601,7 +2601,7 @@ private fun SlashCommandRow(
   command: ChatCommandEntry,
   onClick: () -> Unit,
 ) {
-  Surface(onClick = onClick, color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(onClick = onClick, color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier =
         Modifier
@@ -2613,8 +2613,8 @@ private fun SlashCommandRow(
     ) {
       Text(
         text = slashCommandText(command),
-        style = ClawTheme.type.label,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.label,
+        color = DshTheme.colors.text,
         modifier = Modifier.width(82.dp),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -2622,8 +2622,8 @@ private fun SlashCommandRow(
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
         Text(
           text = command.description.ifBlank { command.category ?: nativeString("Command") },
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -2638,17 +2638,17 @@ private fun ChatOfflineNotice(
   onFixConnection: () -> Unit,
   onCopyDiagnostics: () -> Unit,
 ) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 9.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 9.dp)) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Text(
         text = nativeString("Gateway offline"),
-        style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-        color = ClawTheme.colors.warning,
+        style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+        color = DshTheme.colors.warning,
       )
       Text(
         text = status,
-        style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+        color = DshTheme.colors.textMuted,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
@@ -2688,11 +2688,11 @@ private fun ChatInputPill(
   var attachmentMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
   Surface(
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Column {
       Row(
@@ -2701,7 +2701,7 @@ private fun ChatInputPill(
         horizontalArrangement = Arrangement.spacedBy(7.dp),
       ) {
         Box {
-          Surface(onClick = { attachmentMenuExpanded = true }, modifier = Modifier.size(ClawTheme.spacing.touchTarget), shape = CircleShape, color = ClawTheme.colors.surfaceRaised, contentColor = ClawTheme.colors.text) {
+          Surface(onClick = { attachmentMenuExpanded = true }, modifier = Modifier.size(DshTheme.spacing.touchTarget), shape = CircleShape, color = DshTheme.colors.surfaceRaised, contentColor = DshTheme.colors.text) {
             Box(contentAlignment = Alignment.Center) {
               Icon(imageVector = Icons.Default.Add, contentDescription = nativeString("Add attachment"), modifier = Modifier.size(20.dp))
             }
@@ -2730,8 +2730,8 @@ private fun ChatInputPill(
             BasicTextField(
               value = textFieldValue,
               onValueChange = updateTextFieldValue,
-              textStyle = ClawTheme.type.body.copy(color = ClawTheme.colors.text),
-              cursorBrush = SolidColor(ClawTheme.colors.primary),
+              textStyle = DshTheme.type.body.copy(color = DshTheme.colors.text),
+              cursorBrush = SolidColor(DshTheme.colors.primary),
               minLines = 1,
               maxLines = 4,
               modifier =
@@ -2749,7 +2749,7 @@ private fun ChatInputPill(
               decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                   if (value.isEmpty()) {
-                    Text(text = nativeString("Message DeepSeekHarness"), style = ClawTheme.type.body, color = ClawTheme.colors.textSubtle)
+                    Text(text = nativeString("Message DeepSeekHarness"), style = DshTheme.type.body, color = DshTheme.colors.textSubtle)
                   }
                   innerTextField()
                 }
@@ -2821,8 +2821,8 @@ private fun ChatComposerFooter(
     Spacer(modifier = Modifier.weight(1f))
     if (contextFraction != null && contextPercent != null) {
       val description = nativeString("Context \${contextPercent}% used", contextPercent)
-      val trackColor = ClawTheme.colors.surfacePressed
-      val progressColor = ClawTheme.colors.primary
+      val trackColor = DshTheme.colors.surfacePressed
+      val progressColor = DshTheme.colors.primary
       Row(
         modifier = Modifier.clearAndSetSemantics { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
@@ -2833,7 +2833,7 @@ private fun ChatComposerFooter(
           drawCircle(color = trackColor, style = stroke)
           drawArc(color = progressColor, startAngle = -90f, sweepAngle = contextFraction * 360f, useCenter = false, style = stroke)
         }
-        Text(text = nativeString("\${contextPercent}%", contextPercent), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+        Text(text = nativeString("\${contextPercent}%", contextPercent), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       }
     }
   }
@@ -2849,18 +2849,18 @@ private fun ChatComposerFooterChip(
   Surface(
     onClick = onClick,
     enabled = enabled,
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
     color = Color.Transparent,
-    contentColor = if (enabled) ClawTheme.colors.textMuted else ClawTheme.colors.textSubtle,
+    contentColor = if (enabled) DshTheme.colors.textMuted else DshTheme.colors.textSubtle,
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      Text(text = label, modifier = Modifier.weight(1f, fill = false), style = ClawTheme.type.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
-      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(13.dp), tint = ClawTheme.colors.textSubtle)
+      Text(text = label, modifier = Modifier.weight(1f, fill = false), style = DshTheme.type.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(13.dp), tint = DshTheme.colors.textSubtle)
     }
   }
 }
@@ -2875,11 +2875,11 @@ private fun LiveTalkButton(
     onClick = onClick,
     modifier =
       Modifier
-        .size(ClawTheme.spacing.touchTarget)
+        .size(DshTheme.spacing.touchTarget)
         .semantics { contentDescription = buttonDescription },
     shape = CircleShape,
-    color = if (active) ClawTheme.colors.danger else ClawTheme.colors.surfaceRaised,
-    contentColor = if (active) Color.White else ClawTheme.colors.text,
+    color = if (active) DshTheme.colors.danger else DshTheme.colors.surfaceRaised,
+    contentColor = if (active) Color.White else DshTheme.colors.text,
   ) {
     Box(contentAlignment = Alignment.Center) {
       if (active) {
@@ -2899,9 +2899,9 @@ private fun LiveTalkButton(
 private fun StopButton(onClick: () -> Unit) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = Modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
-    color = ClawTheme.colors.danger,
+    color = DshTheme.colors.danger,
     contentColor = Color.White,
   ) {
     Box(contentAlignment = Alignment.Center) {
@@ -2959,10 +2959,10 @@ private fun AttachmentChip(
       attachment.videoThumbnailBase64?.let(::decodeBase64Bitmap)
     }
   Surface(
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(start = 9.dp, top = 5.dp, end = 5.dp, bottom = 5.dp),
@@ -2970,7 +2970,7 @@ private fun AttachmentChip(
       horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       if (attachment.mimeType.startsWith("audio/")) {
-        Icon(imageVector = Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(14.dp), tint = ClawTheme.colors.textMuted)
+        Icon(imageVector = Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(14.dp), tint = DshTheme.colors.textMuted)
       } else if (attachment.mimeType.startsWith("video/")) {
         if (videoThumbnail != null) {
           Image(
@@ -2980,19 +2980,19 @@ private fun AttachmentChip(
             modifier = Modifier.size(28.dp).clip(RoundedCornerShape(5.dp)),
           )
         } else {
-          Icon(imageVector = Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(14.dp), tint = ClawTheme.colors.textMuted)
+          Icon(imageVector = Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(14.dp), tint = DshTheme.colors.textMuted)
         }
       }
       Text(
         text =
           attachment.durationMs?.let { duration -> nativeString("Voice note · \${formatVoiceNoteDuration(duration)}", formatVoiceNoteDuration(duration)) }
             ?: attachment.fileName,
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
-      Surface(onClick = onRemove, modifier = Modifier.size(ClawTheme.spacing.touchTarget), shape = CircleShape, color = ClawTheme.colors.canvas, contentColor = ClawTheme.colors.text) {
+      Surface(onClick = onRemove, modifier = Modifier.size(DshTheme.spacing.touchTarget), shape = CircleShape, color = DshTheme.colors.canvas, contentColor = DshTheme.colors.text) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = Icons.Default.Close, contentDescription = nativeString("Remove attachment"), modifier = Modifier.size(13.dp))
         }
@@ -3075,11 +3075,11 @@ private fun SendButton(
   Surface(
     onClick = onClick,
     enabled = enabled,
-    modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = Modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
-    color = if (enabled) ClawTheme.colors.primary else ClawTheme.colors.surfacePressed,
-    contentColor = if (enabled) ClawTheme.colors.primaryText else ClawTheme.colors.textSubtle,
-    border = BorderStroke(1.dp, if (enabled) ClawTheme.colors.primary else ClawTheme.colors.border),
+    color = if (enabled) DshTheme.colors.primary else DshTheme.colors.surfacePressed,
+    contentColor = if (enabled) DshTheme.colors.primaryText else DshTheme.colors.textSubtle,
+    border = BorderStroke(1.dp, if (enabled) DshTheme.colors.primary else DshTheme.colors.border),
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = nativeString("Send"), modifier = Modifier.size(18.dp))

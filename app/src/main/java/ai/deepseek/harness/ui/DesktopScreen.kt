@@ -2,9 +2,9 @@ package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,8 +39,8 @@ internal fun DesktopScreen(
 ) {
   val isConnected by viewModel.isConnected.collectAsState()
   val controlPage by viewModel.gatewayControlPage.collectAsState()
-  ClawScaffold(
-    contentPadding = PaddingValues(start = ClawTheme.spacing.lg, top = 14.dp, end = ClawTheme.spacing.lg, bottom = 6.dp),
+  DshScaffold(
+    contentPadding = PaddingValues(start = DshTheme.spacing.lg, top = 14.dp, end = DshTheme.spacing.lg, bottom = 6.dp),
   ) {
     // The viewer's keyboard affordance opens the soft keyboard over the canvas; without
     // imePadding it would also cover the viewer's own touch toolbar.
@@ -50,15 +50,15 @@ internal fun DesktopScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
       ) {
-        ClawPlainIconButton(
+        DshPlainIconButton(
           icon = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = nativeString("Back"),
           onClick = onBack,
         )
         Text(
           text = nativeString("Desktop"),
-          style = ClawTheme.type.title,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.title,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(1f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -66,7 +66,7 @@ internal fun DesktopScreen(
         Icon(
           imageVector = Icons.Outlined.DesktopWindows,
           contentDescription = null,
-          tint = ClawTheme.colors.textMuted,
+          tint = DshTheme.colors.textMuted,
         )
       }
       Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -88,13 +88,13 @@ internal fun DesktopScreen(
           ) {
             Text(
               text = nativeString("Desktop needs a connected gateway"),
-              style = ClawTheme.type.section,
-              color = ClawTheme.colors.text,
+              style = DshTheme.type.section,
+              color = DshTheme.colors.text,
             )
             Text(
               text = nativeString("Connect to your gateway to view a machine screen."),
-              style = ClawTheme.type.body,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.body,
+              color = DshTheme.colors.textMuted,
             )
           }
         }

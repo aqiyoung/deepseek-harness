@@ -181,9 +181,9 @@ data class GatewayErrorDetails(
   val clientMaxProtocol: Int? = null,
   val expectedProtocol: Int? = null,
   val minimumProbeProtocol: Int? = null,
-  val clawhubTrustCode: String? = null,
-  val clawhubWarning: String? = null,
-  val clawhubVersion: String? = null,
+  val dshhubTrustCode: String? = null,
+  val dshhubWarning: String? = null,
+  val dshhubVersion: String? = null,
   val missingScope: String? = null,
   val requiredScopes: List<String> = emptyList(),
 )
@@ -1669,9 +1669,9 @@ class GatewaySession(
                 clientMaxProtocol = it["clientMaxProtocol"].asIntOrNull(),
                 expectedProtocol = it["expectedProtocol"].asIntOrNull(),
                 minimumProbeProtocol = it["minimumProbeProtocol"].asIntOrNull(),
-                clawhubTrustCode = it["clawhubTrustCode"].asStringOrNull(),
-                clawhubWarning = it["warning"].asStringOrNull(),
-                clawhubVersion = it["version"].asStringOrNull(),
+                dshhubTrustCode = it["dshhubTrustCode"].asStringOrNull(),
+                dshhubWarning = it["warning"].asStringOrNull(),
+                dshhubVersion = it["version"].asStringOrNull(),
                 missingScope = it["missingScope"].asStringOrNull(),
                 requiredScopes =
                   it["requiredScopes"]

@@ -5,10 +5,10 @@ import ai.deepseek.harness.GatewayDreamingSummary
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.i18n.resolveNativeText
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawStatusRow
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshStatusRow
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,7 +66,7 @@ internal fun DreamingSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"),
         onClick = viewModel::refreshDreaming,
         enabled = isConnected && !refreshing,
@@ -74,14 +74,14 @@ internal fun DreamingSettingsScreen(
       )
     }
     errorText?.let { error ->
-      ClawPanel {
-        Text(text = error, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = error, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load dreaming."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load dreaming."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       else -> DreamingPanel(summary = summary)
     }
@@ -91,21 +91,21 @@ internal fun DreamingSettingsScreen(
 @Composable
 private fun DreamingPanel(summary: GatewayDreamingSummary) {
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
       Column {
-        ClawStatusRow(
+        DshStatusRow(
           title = nativeString("Memory Store"),
           value = if (summary.storeHealthy) nativeString("Healthy") else nativeString("Needs attention"),
           healthy = summary.storeHealthy,
         )
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
-        ClawStatusRow(
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
+        DshStatusRow(
           title = nativeString("Signal Index"),
           value = if (summary.phaseSignalHealthy) nativeString("Healthy") else nativeString("Needs attention"),
           healthy = summary.phaseSignalHealthy,
         )
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
-        ClawStatusRow(
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
+        DshStatusRow(
           title = nativeString("Promoted"),
           value = nativeString("\${summary.promotedToday} today · \${summary.promotedTotal} total", summary.promotedToday, summary.promotedTotal),
           healthy = true,
@@ -119,28 +119,28 @@ private fun DreamingPanel(summary: GatewayDreamingSummary) {
 @Composable
 private fun DreamDiaryPanel(summary: GatewayDreamingSummary) {
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-    Text(text = nativeString("DIARY"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+    Text(text = nativeString("DIARY"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
     if (!summary.diaryFound) {
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-          Text(text = nativeString("No dream diary yet."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-          Text(text = nativeString("Entries appear after a dreaming cycle writes a narrative summary."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("No dream diary yet."), style = DshTheme.type.section, color = DshTheme.colors.text)
+          Text(text = nativeString("Entries appear after a dreaming cycle writes a narrative summary."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       }
       return
     }
     if (summary.diaryEntries.isEmpty()) {
-      ClawPanel {
-        Text(text = nativeString("The diary is waiting for its first entry."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = nativeString("The diary is waiting for its first entry."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
       return
     }
-    ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
       Column {
         summary.diaryEntries.forEachIndexed { index, entry ->
           DreamDiaryRow(entry = entry)
           if (index != summary.diaryEntries.lastIndex) {
-            HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+            HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
           }
         }
       }
@@ -158,22 +158,22 @@ private fun DreamDiaryRow(entry: GatewayDreamDiaryEntry) {
     Surface(
       modifier = Modifier.size(30.dp),
       shape = CircleShape,
-      color = ClawTheme.colors.surfacePressed,
-      border = BorderStroke(1.dp, ClawTheme.colors.border),
+      color = DshTheme.colors.surfacePressed,
+      border = BorderStroke(1.dp, DshTheme.colors.border),
     ) {
       Box(contentAlignment = Alignment.Center) {
-        Text(text = "D", style = ClawTheme.type.label, color = ClawTheme.colors.text)
+        Text(text = "D", style = DshTheme.type.label, color = DshTheme.colors.text)
       }
     }
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
       Text(
         text = entry.date.resolveNativeText(),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
-      Text(text = entry.text, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+      Text(text = entry.text, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
   }
 }

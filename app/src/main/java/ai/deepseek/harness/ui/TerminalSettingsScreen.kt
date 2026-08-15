@@ -2,9 +2,9 @@ package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,18 +40,18 @@ internal fun TerminalSettingsScreen(
 ) {
   val isConnected by viewModel.isConnected.collectAsState()
   val controlPage by viewModel.gatewayControlPage.collectAsState()
-  ClawScaffold(
-    contentPadding = PaddingValues(start = ClawTheme.spacing.lg, top = 14.dp, end = ClawTheme.spacing.lg, bottom = 6.dp),
+  DshScaffold(
+    contentPadding = PaddingValues(start = DshTheme.spacing.lg, top = 14.dp, end = DshTheme.spacing.lg, bottom = 6.dp),
   ) {
     Column(modifier = Modifier.fillMaxSize().imePadding(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-        ClawPlainIconButton(
+        DshPlainIconButton(
           icon = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = nativeString("Back"),
           onClick = onBack,
         )
-        Text(text = nativeString("Terminal"), style = ClawTheme.type.title, color = ClawTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Icon(imageVector = Icons.Outlined.Terminal, contentDescription = null, tint = ClawTheme.colors.textMuted)
+        Text(text = nativeString("Terminal"), style = DshTheme.type.title, color = DshTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Icon(imageVector = Icons.Outlined.Terminal, contentDescription = null, tint = DshTheme.colors.textMuted)
       }
       Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
         val page = controlPage
@@ -67,8 +67,8 @@ internal fun TerminalSettingsScreen(
           }
         } else {
           Column(modifier = Modifier.fillMaxWidth().padding(top = 48.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(text = nativeString("Terminal needs a connected gateway"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-            Text(text = nativeString("Connect to your gateway to open a shell in the agent workspace."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("Terminal needs a connected gateway"), style = DshTheme.type.section, color = DshTheme.colors.text)
+            Text(text = nativeString("Connect to your gateway to open a shell in the agent workspace."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       }

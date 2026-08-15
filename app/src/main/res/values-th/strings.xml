@@ -47,7 +47,7 @@
     <string name="native_035edd9bd720fa18" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"นำออกจากกลุ่ม"</string>
     <string name="native_03bd6fca9cf5c1fb" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"กำลังค้นหา"</string>
     <string name="native_03eecb0f3d94798b" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"หยุดชั่วคราวเพื่อเล่นเสียง"</string>
-    <string name="native_03f1bc06c3f9b0fe" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway จะตรวจสอบรีลีสนี้กับ ClawHub ก่อนดาวน์โหลด หากรีลีสต้องมีการยอมรับความเสี่ยงอย่างชัดแจ้ง Android จะแสดงคำเตือนจาก Gateway ก่อนลองอีกครั้ง"</string>
+    <string name="native_03f1bc06c3f9b0fe" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway จะตรวจสอบรีลีสนี้กับ DeepSeek Harness Hub ก่อนดาวน์โหลด หากรีลีสต้องมีการยอมรับความเสี่ยงอย่างชัดแจ้ง Android จะแสดงคำเตือนจาก Gateway ก่อนลองอีกครั้ง"</string>
     <string name="native_040435e3caaf64b1" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"รหัสการตั้งค่าใช้ IPv6 zone ID โปรดใช้ที่อยู่ IPv6 แบบไม่มีขอบเขตหรือชื่อโฮสต์ LAN"</string>
     <string name="native_040d2b3689dd1d4c" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไฟล์แนบ"</string>
     <string name="native_046cd59be9d4d081" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"กำหนดค่าคำปลุก การพูด และการเล่นเสียง"</string>
@@ -153,7 +153,7 @@
     <string name="native_15b61974b2707a7b" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ตำแหน่งที่ตั้ง"</string>
     <string name="native_16196f98cecd6839" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เช่น America/New_York"</string>
     <string name="native_16524d7409d37507" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เป้าหมายเซสชัน"</string>
-    <string name="native_1669ad8d6f188594" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ตรวจสอบ Skills ของ ClawHub"</string>
+    <string name="native_1669ad8d6f188594" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ตรวจสอบ Skills ของ DeepSeek Harness Hub"</string>
     <string name="native_16a0eeb0791b6c92" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"snapshot"</string>
     <string name="native_16a5b7ad567a8093" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ปฏิเสธคำขอจับคู่จากอุปกรณ์นี้หรือไม่?"</string>
     <string name="native_16b1a05e1d987ed1" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไมโครโฟนที่ต้องการ"</string>
@@ -367,7 +367,7 @@
     <string name="native_35322b5bb5a218a1" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"บันทึกการเปลี่ยนแปลง"</string>
     <string name="native_354496484f14daf5" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway ปฏิเสธการทำงานของระบบอัตโนมัติ"</string>
     <string name="native_35458ac899311b76" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Session Send"</string>
-    <string name="native_3597cbc37666845f" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ค้นหาบน ClawHub"</string>
+    <string name="native_3597cbc37666845f" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ค้นหาบน DeepSeek Harness Hub"</string>
     <string name="native_35af8190fbe6549c" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"อนุญาตการตรวจสอบตำแหน่งที่ร้องขอเสมอขณะที่ DeepSeek Harness ทำงานอยู่เบื้องหลัง; Android จะแสดงสิ่งนี้ในการแจ้งเตือนโหนดแบบถาวร"</string>
     <string name="native_35bca7671ee6700b" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เหตุการณ์ของระบบ"</string>
     <string name="native_35cb408d8973ebba" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อดูผู้ให้บริการ"</string>
@@ -728,7 +728,7 @@
     <string name="native_6d305fa4c95bcbcc" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"โทรศัพท์เครื่องนี้จะอยู่ในโหมดพักจนกว่า Gateway จะต้องการใช้งาน จากนั้นจะตื่นขึ้น ซิงค์ และกลับเข้าสู่โหมดพัก"</string>
     <string name="native_6d46878b8f2895d5" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"โมเดลที่กำหนดค่าแล้ว %1$s รายการ"</string>
     <string name="native_6d5d9004797377e1" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ใบอนุญาต"</string>
-    <string name="native_6d7c95a353d873cd" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อค้นหา Skills ใน ClawHub"</string>
+    <string name="native_6d7c95a353d873cd" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อค้นหา Skills ใน DeepSeek Harness Hub"</string>
     <string name="native_6df1bb18a59ab97d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ทักษะ"</string>
     <string name="native_6e034875b3baa6ee" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การเชื่อมต่อ Gateway เปลี่ยนแปลง รีสตาร์ท DeepSeek Harness เพื่อเชื่อมต่อใหม่"</string>
     <string name="native_6e0a0b9d8c5ee4d9" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"รหัสอุปกรณ์"</string>
@@ -805,7 +805,7 @@
     <string name="native_7728331d12fcfc1a" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ประกาศด้านความปลอดภัย"</string>
     <string name="native_773e7729b237d4ea" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"คำตอบอื่น"</string>
     <string name="native_7765ad1890a192a8" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ปิดคำเตือนรูปภาพที่แชร์"</string>
-    <string name="native_779aa3df405560c4" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway ประเมิน ClawHub รุ่นอื่น โปรดตรวจสอบ Skill อีกครั้งก่อนติดตั้ง"</string>
+    <string name="native_779aa3df405560c4" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway ประเมิน DeepSeek Harness Hub รุ่นอื่น โปรดตรวจสอบ Skill อีกครั้งก่อนติดตั้ง"</string>
     <string name="native_77a9c080491599ff" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Subagent เสร็จสิ้น"</string>
     <string name="native_77ab6bb71f77154d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เปิดการเข้าถึงระบบ"</string>
     <string name="native_7804f7a79a9eee32" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เสร็จสิ้น"</string>
@@ -823,7 +823,7 @@
     <string name="native_79e675583adc1ab5" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"กำลังรอการอนุมัติโหนด"</string>
     <string name="native_7a1058bb81879dbd" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway กำลังรอดำเนินการ"</string>
     <string name="native_7a211017043ea5cb" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ต้องมีการยืนยันตัวตน"</string>
-    <string name="native_7a50b4ba32889b2e" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถโหลดรายละเอียด ClawHub สำหรับ %1$s"</string>
+    <string name="native_7a50b4ba32889b2e" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถโหลดรายละเอียด DeepSeek Harness Hub สำหรับ %1$s"</string>
     <string name="native_7ac362063b9f2046" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"โหนด"</string>
     <string name="native_7ace190202442cde" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เปิดเครื่องค้างไว้"</string>
     <string name="native_7adcb107d8b93c15" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"DeepSeek Harness กำลังตอบกลับ"</string>
@@ -991,7 +991,7 @@
     <string name="native_94da52ecd6c5c3b7" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เอเจนต์เริ่มต้น"</string>
     <string name="native_94f5698f54d7d31a" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"%1$s ชม."</string>
     <string name="native_950d7da1f43f723a" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การสนทนากำลังดำเนินอยู่"</string>
-    <string name="native_95204ae1796ddfab" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถติดตั้ง %1$s จาก ClawHub ได้"</string>
+    <string name="native_95204ae1796ddfab" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถติดตั้ง %1$s จาก DeepSeek Harness Hub ได้"</string>
     <string name="native_953a8bd0a18d7a3d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ยินดีต้อนรับสู่ DeepSeek Harness"</string>
     <string name="native_958074a2ffa6bae8" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ควบคุมแอปอื่น"</string>
     <string name="native_95d0536838bd0e14" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ดัชนี Signal"</string>
@@ -1111,7 +1111,7 @@
     <string name="native_a9d4d060cdc21d3d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"สูงเป็นพิเศษ"</string>
     <string name="native_aa1983a56dc4a1eb" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เรียกใช้บนโฮสต์ Gateway:"</string>
     <string name="native_aa6e887501659d7c" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การเปลี่ยนแปลง Skill ต้องใช้ operator.admin โปรดเชื่อมต่อใหม่ด้วยโทเค็น Gateway ที่มีสิทธิ์ผู้ดูแลระบบ"</string>
-    <string name="native_aa73b4d5ffec85f6" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อตรวจสอบ Skills ใน ClawHub"</string>
+    <string name="native_aa73b4d5ffec85f6" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อตรวจสอบ Skills ใน DeepSeek Harness Hub"</string>
     <string name="native_aab53a916682c720" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"รายการแอปจะอยู่บนโทรศัพท์เครื่องนี้"</string>
     <string name="native_ab0171ca0494d441" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่ได้ใช้งาน"</string>
     <string name="native_ab3b3d3706f7f158" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"แสดงในการตั้งค่าการช่วยการเข้าถึงของ Android"</string>
@@ -1126,7 +1126,7 @@
     <string name="native_abefee79c9ed4bb3" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"แตะเพื่อคัดลอก"</string>
     <string name="native_abf88bc4972bb194" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"รอ %1$s นาที"</string>
     <string name="native_ac07bf982425811c" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"%1$s."</string>
-    <string name="native_ac1c17acbaa7cf14" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อติดตั้ง Skills จาก ClawHub"</string>
+    <string name="native_ac1c17acbaa7cf14" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อติดตั้ง Skills จาก DeepSeek Harness Hub"</string>
     <string name="native_ac2e8f4025b42994" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ค้นหาเสียง"</string>
     <string name="native_ac3a53754a79a614" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">" · ไมค์: กำลังฟัง"</string>
     <string name="native_ac4ae1579a18e0bb" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อใหม่ด้วยสิทธิ์เข้าถึง operator.admin เพื่อตรวจสอบและเปลี่ยนการตั้งค่า Gateway"</string>
@@ -1196,10 +1196,10 @@
     <string name="native_b861aa63f330cf11" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"%1$s ขอบเขต"</string>
     <string name="native_b864d76c8fcec3d9" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมต่อ Gateway เพื่อโหลดบันทึกล่าสุด"</string>
     <string name="native_b8b90581b766682d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"บันทึกคำปลุก"</string>
-    <string name="native_b8be1981f8a9ecc2" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"จัดการ Skills ที่ติดตั้งแล้วและเพิ่มรุ่นที่เชื่อถือได้จาก ClawHub"</string>
+    <string name="native_b8be1981f8a9ecc2" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"จัดการ Skills ที่ติดตั้งแล้วและเพิ่มรุ่นที่เชื่อถือได้จาก DeepSeek Harness Hub"</string>
     <string name="native_b8ed5279e897be5d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"กำลังส่ง…"</string>
     <string name="native_b906e4f5d8dd6128" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ยังไม่ได้โหลด Agents"</string>
-    <string name="native_b93a70717669740b" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ค้นหา ClawHub"</string>
+    <string name="native_b93a70717669740b" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ค้นหา DeepSeek Harness Hub"</string>
     <string name="native_b95a17e08fdcdf57" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"แชตกำลังตรวจสอบสถานะของ Gateway"</string>
     <string name="native_b96a4e034aae9cd8" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ต้องจับคู่"</string>
     <string name="native_b9cf97697898d132" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การทำงานที่ใช้งานอยู่"</string>
@@ -1234,7 +1234,7 @@
     <string name="native_bfda026e6c598dde" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เชื่อมโยงแล้ว"</string>
     <string name="native_bfe59c5dac8860ff" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เปิด %1$s"</string>
     <string name="native_c0401b1b10c85562" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"%1$s/%2$s"</string>
-    <string name="native_c0be048b378aa057" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ClawHub ไม่ได้ส่งคืนเวอร์ชันที่ติดตั้งได้สำหรับ %1$s"</string>
+    <string name="native_c0be048b378aa057" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"DeepSeek Harness Hub ไม่ได้ส่งคืนเวอร์ชันที่ติดตั้งได้สำหรับ %1$s"</string>
     <string name="native_c0dd528567bf67e2" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การทำงานของระบบอัตโนมัติเสร็จสิ้นโดยมีสถานะที่ไม่ทราบ"</string>
     <string name="native_c126029e43f5ff90" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"คิวออฟไลน์เต็มแล้ว (%1$s ข้อความ) โปรดลบรายการที่อยู่ในคิวก่อน"</string>
     <string name="native_c1272aab485f1172" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway สาธารณะต้องใช้ wss:// หรือ Tailscale Serve ส่วน ws:// ใช้ได้กับ localhost, โฮสต์ .local, โปรแกรมจำลอง Android และ IP ของ LAN ส่วนตัว"</string>
@@ -1556,7 +1556,7 @@
     <string name="native_f0ac2eabb5a584e3" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"แชร์จำนวนก้าวและกิจกรรม"</string>
     <string name="native_f0cae79a3657c1db" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ต้องตั้งค่า"</string>
     <string name="native_f0d1fb4ac220db11" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"อัปเดต Gateway นี้เพื่อใช้ผู้ช่วยตั้งค่า DeepSeek Harness"</string>
-    <string name="native_f113b3bd283e216c" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การเชื่อมต่อ Gateway นี้ต้องมีสิทธิ์ operator.admin เพื่อติดตั้ง Skills จาก ClawHub"</string>
+    <string name="native_f113b3bd283e216c" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"การเชื่อมต่อ Gateway นี้ต้องมีสิทธิ์ operator.admin เพื่อติดตั้ง Skills จาก DeepSeek Harness Hub"</string>
     <string name="native_f12b7a9412a51a7d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"นำข้อเสนอไปใช้แล้ว"</string>
     <string name="native_f14cc3ede97361fd" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"รอดำเนินการ %1$s รายการ"</string>
     <string name="native_f14cd8dd44162255" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"%1$s ชั่วโมงที่แล้ว"</string>
@@ -1641,7 +1641,7 @@
     <string name="native_fc5af920bc4a256d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway ออฟไลน์ แก้ไขการเชื่อมต่อด้านล่างหรือคัดลอกข้อมูลการวินิจฉัย"</string>
     <string name="native_fcd589c1bc20cd2d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"สแตนด์บาย"</string>
     <string name="native_fcdeb9947bc94101" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ทดสอบ ทดสอบ 1 2 3"</string>
-    <string name="native_fcea13c79c2f85a6" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถค้นหา Skills ใน ClawHub ได้"</string>
+    <string name="native_fcea13c79c2f85a6" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่สามารถค้นหา Skills ใน DeepSeek Harness Hub ได้"</string>
     <string name="native_fd175ecd65f7353d" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"ไม่มีพรอมต์"</string>
     <string name="native_fd301dc5d0e7ccf1" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"กล้องหน้า"</string>
     <string name="native_fda8fc3b85420d14" formatted="false" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"เปิดรายการบันทึก"</string>

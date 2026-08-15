@@ -9,9 +9,9 @@ import androidx.compose.ui.tooling.preview.Preview
   backgroundColor = 0xFF030303,
 )
 @Composable
-private fun ClawComponentShowcasePreview() {
+private fun DshComponentShowcasePreview() {
   // Preview uses the design-system theme directly so token regressions show up in isolation.
-  ClawDesignTheme {
-    ClawComponentShowcase()
+  DshDesignTheme {
+    DshComponentShowcase()
   }
 }

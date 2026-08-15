@@ -29,8 +29,8 @@ data class MascotPose(
   var floatOffset: Double = 0.0,
   var antennaDegrees: Double = 0.0,
   var antennaDroop: Double = 0.0,
-  var leftClawDegrees: Double = 0.0,
-  var rightClawDegrees: Double = 0.0,
+  var leftDshDegrees: Double = 0.0,
+  var rightDshDegrees: Double = 0.0,
   var eyeGlowAlpha: Double = 1.0,
   var glowScale: Double = 1.0,
   var leftEyeOpenness: Double = 1.0,
@@ -52,8 +52,8 @@ data class MascotPose(
     floatOffset = floatOffset.coerceIn(-12.0, 2.0)
     antennaDegrees = antennaDegrees.coerceIn(-14.0, 14.0)
     antennaDroop = antennaDroop.coerceIn(0.0, 1.0)
-    leftClawDegrees = leftClawDegrees.coerceIn(-45.0, 45.0)
-    rightClawDegrees = rightClawDegrees.coerceIn(-45.0, 45.0)
+    leftDshDegrees = leftDshDegrees.coerceIn(-45.0, 45.0)
+    rightDshDegrees = rightDshDegrees.coerceIn(-45.0, 45.0)
     eyeGlowAlpha = eyeGlowAlpha.coerceIn(0.0, 1.0)
     glowScale = glowScale.coerceIn(0.5, 1.6)
     leftEyeOpenness = leftEyeOpenness.coerceIn(0.0, 1.0)
@@ -82,7 +82,7 @@ data class MascotPose(
           MascotMood.Thinking -> gaze = MascotGaze(x = 0.3, y = -0.5)
           MascotMood.Working -> {
             hardHat = 1.0
-            rightClawDegrees = -28.0
+            rightDshDegrees = -28.0
             gaze = MascotGaze(x = 0.4, y = 0.35)
             mouthCurve = 0.15
             bodyTilt = 2.0
@@ -95,8 +95,8 @@ data class MascotPose(
             mouthCurve = 0.9
             mouthOpen = 0.4
             happyEyes = 0.8
-            leftClawDegrees = 30.0
-            rightClawDegrees = -30.0
+            leftDshDegrees = 30.0
+            rightDshDegrees = -30.0
           }
           MascotMood.Sad -> {
             antennaDroop = 0.75

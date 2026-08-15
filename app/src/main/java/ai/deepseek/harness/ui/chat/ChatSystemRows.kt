@@ -1,7 +1,7 @@
 package ai.deepseek.harness.ui.chat
 
 import ai.deepseek.harness.i18n.nativeStringResource
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,41 +67,41 @@ private fun ChatSystemRow(
       HorizontalDivider(
         modifier = Modifier.weight(1f),
         thickness = 0.5.dp,
-        color = ClawTheme.colors.border,
+        color = DshTheme.colors.border,
       )
       Icon(
         imageVector = icon,
         contentDescription = null,
-        tint = ClawTheme.colors.textSubtle,
+        tint = DshTheme.colors.textSubtle,
         modifier = Modifier.size(14.dp),
       )
       Text(
         text = label,
         style =
-          ClawTheme.type.caption.copy(
+          DshTheme.type.caption.copy(
             fontSize = 10.5.sp,
             lineHeight = 13.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.6.sp,
           ),
-        color = ClawTheme.colors.textMuted,
+        color = DshTheme.colors.textMuted,
       )
       metric?.let {
-        Text(text = nativeStringResource("·"), style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle)
-        Text(text = it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+        Text(text = nativeStringResource("·"), style = DshTheme.type.caption, color = DshTheme.colors.textSubtle)
+        Text(text = it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       }
       HorizontalDivider(
         modifier = Modifier.weight(1f),
         thickness = 0.5.dp,
-        color = ClawTheme.colors.border,
+        color = DshTheme.colors.border,
       )
     }
     body?.takeIf { it.isNotBlank() }?.let {
       Text(
         text = it,
         modifier = Modifier.fillMaxWidth(),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
         textAlign = TextAlign.Center,
       )
     }

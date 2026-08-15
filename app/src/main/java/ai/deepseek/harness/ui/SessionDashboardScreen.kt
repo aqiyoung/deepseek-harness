@@ -2,9 +2,9 @@ package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,8 +51,8 @@ internal fun SessionDashboardScreen(
     DesktopScreen(viewModel = viewModel, session = sessionKey, onBack = { showingDesktop = false })
     return
   }
-  ClawScaffold(
-    contentPadding = PaddingValues(start = ClawTheme.spacing.lg, top = 14.dp, end = ClawTheme.spacing.lg, bottom = 6.dp),
+  DshScaffold(
+    contentPadding = PaddingValues(start = DshTheme.spacing.lg, top = 14.dp, end = DshTheme.spacing.lg, bottom = 6.dp),
   ) {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(
@@ -60,21 +60,21 @@ internal fun SessionDashboardScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp),
       ) {
-        ClawPlainIconButton(
+        DshPlainIconButton(
           icon = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = nativeString("Back"),
           onClick = onBack,
         )
         Text(
           text = nativeString("Dashboard"),
-          style = ClawTheme.type.title,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.title,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(1f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         if (desktopObserveAvailable) {
-          ClawPlainIconButton(
+          DshPlainIconButton(
             icon = Icons.Outlined.DesktopWindows,
             contentDescription = nativeString("Open desktop"),
             onClick = { showingDesktop = true },
@@ -83,7 +83,7 @@ internal fun SessionDashboardScreen(
         Icon(
           imageVector = Icons.Outlined.Dashboard,
           contentDescription = null,
-          tint = ClawTheme.colors.textMuted,
+          tint = DshTheme.colors.textMuted,
         )
       }
       Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -104,13 +104,13 @@ internal fun SessionDashboardScreen(
           ) {
             Text(
               text = nativeString("Dashboard needs a connected gateway"),
-              style = ClawTheme.type.section,
-              color = ClawTheme.colors.text,
+              style = DshTheme.type.section,
+              color = DshTheme.colors.text,
             )
             Text(
               text = nativeString("Connect to your gateway to open this session dashboard."),
-              style = ClawTheme.type.body,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.body,
+              color = DshTheme.colors.textMuted,
             )
           }
         }

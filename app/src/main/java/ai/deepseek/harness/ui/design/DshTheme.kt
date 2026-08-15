@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * App color tokens consumed by ClawTheme and bridged into Material components.
+ * App color tokens consumed by DshTheme and bridged into Material components.
  */
 @Immutable
-internal data class ClawColors(
+internal data class DshColors(
   val canvas: Color,
   val surface: Color,
   val surfaceRaised: Color,
@@ -50,7 +50,7 @@ internal data class ClawColors(
  * App spacing scale for Compose screens and shared controls.
  */
 @Immutable
-internal data class ClawSpacing(
+internal data class DshSpacing(
   val xxxs: Dp = 4.dp,
   val xxs: Dp = 8.dp,
   val xs: Dp = 12.dp,
@@ -66,7 +66,7 @@ internal data class ClawSpacing(
  * Radius scale for rows, panels, controls, sheets, and status pills.
  */
 @Immutable
-internal data class ClawRadii(
+internal data class DshRadii(
   val row: Dp = 4.dp,
   val panel: Dp = 5.dp,
   val control: Dp = 6.dp,
@@ -79,7 +79,7 @@ internal data class ClawRadii(
  * App text styles kept independent from Material typography names.
  */
 @Immutable
-internal data class ClawTypography(
+internal data class DshTypography(
   val display: TextStyle,
   val title: TextStyle,
   val section: TextStyle,
@@ -89,8 +89,8 @@ internal data class ClawTypography(
   val mono: TextStyle,
 )
 
-private val ClawDarkColors =
-  ClawColors(
+private val DshDarkColors =
+  DshColors(
     canvas = Color(0xFF030303),
     surface = Color(0xFF0A0A0A),
     surfaceRaised = Color(0xFF111111),
@@ -110,8 +110,8 @@ private val ClawDarkColors =
     dangerSoft = Color(0xFF2C1414),
   )
 
-private val ClawLightColors =
-  ClawColors(
+private val DshLightColors =
+  DshColors(
     canvas = Color(0xFFFAFBFC),
     surface = Color(0xFFFFFEFB),
     surfaceRaised = Color(0xFFFFFFFF),
@@ -131,57 +131,57 @@ private val ClawLightColors =
     dangerSoft = Color(0xFFFFE9E9),
   )
 
-private val LocalClawColors = staticCompositionLocalOf { ClawDarkColors }
-private val LocalClawSpacing = staticCompositionLocalOf { ClawSpacing() }
-private val LocalClawRadii = staticCompositionLocalOf { ClawRadii() }
-private val LocalClawTypography = staticCompositionLocalOf { clawTypography(mobileFontFamily) }
+private val LocalDshColors = staticCompositionLocalOf { DshDarkColors }
+private val LocalDshSpacing = staticCompositionLocalOf { DshSpacing() }
+private val LocalDshRadii = staticCompositionLocalOf { DshRadii() }
+private val LocalDshTypography = staticCompositionLocalOf { dshTypography(mobileFontFamily) }
 
 /**
  * Composition-local access point for DeepSeekHarness Android design tokens.
  */
-internal object ClawTheme {
-  val colors: ClawColors
+internal object DshTheme {
+  val colors: DshColors
     @Composable
     @ReadOnlyComposable
-    get() = LocalClawColors.current
+    get() = LocalDshColors.current
 
-  val spacing: ClawSpacing
+  val spacing: DshSpacing
     @Composable
     @ReadOnlyComposable
-    get() = LocalClawSpacing.current
+    get() = LocalDshSpacing.current
 
-  val radii: ClawRadii
+  val radii: DshRadii
     @Composable
     @ReadOnlyComposable
-    get() = LocalClawRadii.current
+    get() = LocalDshRadii.current
 
-  val type: ClawTypography
+  val type: DshTypography
     @Composable
     @ReadOnlyComposable
-    get() = LocalClawTypography.current
+    get() = LocalDshTypography.current
 }
 
 /**
  * Installs DeepSeekHarness design tokens and maps them into MaterialTheme for Material3 controls.
  */
 @Composable
-internal fun ClawDesignTheme(
+internal fun DshDesignTheme(
   dark: Boolean = true,
   content: @Composable () -> Unit,
 ) {
-  val colors = if (dark) ClawDarkColors else ClawLightColors
+  val colors = if (dark) DshDarkColors else DshLightColors
   val mobileColors = if (dark) darkMobileColors() else lightMobileColors()
-  val typography = clawTypography(mobileFontFamily)
+  val typography = dshTypography(mobileFontFamily)
 
   CompositionLocalProvider(
-    LocalClawColors provides colors,
+    LocalDshColors provides colors,
     LocalMobileColors provides mobileColors,
-    LocalClawSpacing provides ClawSpacing(),
-    LocalClawRadii provides ClawRadii(),
-    LocalClawTypography provides typography,
+    LocalDshSpacing provides DshSpacing(),
+    LocalDshRadii provides DshRadii(),
+    LocalDshTypography provides typography,
   ) {
     MaterialTheme(
-      colorScheme = clawMaterialColorScheme(colors, dark),
+      colorScheme = dshMaterialColorScheme(colors, dark),
       typography = materialTypography(typography),
       shapes = Shapes(),
       content = content,
@@ -189,8 +189,8 @@ internal fun ClawDesignTheme(
   }
 }
 
-private fun clawTypography(fontFamily: FontFamily) =
-  ClawTypography(
+private fun dshTypography(fontFamily: FontFamily) =
+  DshTypography(
     display =
       TextStyle(
         fontFamily = fontFamily,
@@ -249,7 +249,7 @@ private fun clawTypography(fontFamily: FontFamily) =
       ),
   )
 
-private fun materialTypography(type: ClawTypography) =
+private fun materialTypography(type: DshTypography) =
   Typography(
     displayMedium = type.display,
     titleLarge = type.title,
@@ -259,8 +259,8 @@ private fun materialTypography(type: ClawTypography) =
     labelSmall = type.caption,
   )
 
-private fun clawMaterialColorScheme(
-  colors: ClawColors,
+private fun dshMaterialColorScheme(
+  colors: DshColors,
   dark: Boolean,
 ) = if (dark) {
   darkColorScheme(

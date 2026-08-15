@@ -37,16 +37,16 @@ import java.util.Locale
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
-private const val DEFAULT_CLAW_CYCLE_MS = 2_400L
-private const val DRUMMER_CLAW_CYCLE_MS = 1_200L
-private const val FLURRY_CLAW_CYCLE_MS = 1_300L
-private const val NODOFF_CLAW_CYCLE_MS = 3_600L
-private const val SPIN_CLAW_CYCLE_MS = 3_600L
-private const val ZEN_CLAW_CYCLE_MS = 6_000L
+private const val DEFAULT_DSH_CYCLE_MS = 2_400L
+private const val DRUMMER_DSH_CYCLE_MS = 1_200L
+private const val FLURRY_DSH_CYCLE_MS = 1_300L
+private const val NODOFF_DSH_CYCLE_MS = 3_600L
+private const val SPIN_DSH_CYCLE_MS = 3_600L
+private const val ZEN_DSH_CYCLE_MS = 6_000L
 internal const val WORKING_PHRASE_SHOW_AFTER_MS = 30_000L
 internal const val WORKING_PHRASE_ROTATE_EVERY_MS = 45_000L
 
-private val clawBodyPath by lazy {
+private val dshBodyPath by lazy {
   PathParser()
     .parsePathString(
       "M8.2 10 A5.2 5.2 0 1 0 8.2 20.4 A5.2 5.2 0 0 0 8.2 10 Z " +
@@ -54,7 +54,7 @@ private val clawBodyPath by lazy {
         "L17.5 14.6 L16 12.9 L14.3 14.5 L13.5 13 L11.5 14.2 Z",
     ).toPath()
 }
-private val clawJawPath by lazy {
+private val dshJawPath by lazy {
   PathParser()
     .parsePathString(
       "M5.6 12.2 C5.2 5.6 10.4 1.4 15.6 2 C19.4 2.6 21.8 5.2 22.6 8.2 " +
@@ -63,7 +63,7 @@ private val clawJawPath by lazy {
     ).toPath()
 }
 
-internal enum class WorkingClawStance {
+internal enum class WorkingDshStance {
   Default,
   Southpaw,
   Flurry,
@@ -81,23 +81,23 @@ internal enum class WorkingClawStance {
 
 private val stanceWeights =
   listOf(
-    WorkingClawStance.Default to 55,
-    WorkingClawStance.Southpaw to 18,
-    WorkingClawStance.Flurry to 5,
-    WorkingClawStance.Spin to 4,
-    WorkingClawStance.Shadowbox to 3,
-    WorkingClawStance.Backflip to 2,
-    WorkingClawStance.Zen to 2,
-    WorkingClawStance.Drummer to 2,
-    WorkingClawStance.Peekaboo to 2,
-    WorkingClawStance.NodOff to 2,
-    WorkingClawStance.Curious to 2,
-    WorkingClawStance.OmNom to 2,
-    WorkingClawStance.FakeOut to 1,
+    WorkingDshStance.Default to 55,
+    WorkingDshStance.Southpaw to 18,
+    WorkingDshStance.Flurry to 5,
+    WorkingDshStance.Spin to 4,
+    WorkingDshStance.Shadowbox to 3,
+    WorkingDshStance.Backflip to 2,
+    WorkingDshStance.Zen to 2,
+    WorkingDshStance.Drummer to 2,
+    WorkingDshStance.Peekaboo to 2,
+    WorkingDshStance.NodOff to 2,
+    WorkingDshStance.Curious to 2,
+    WorkingDshStance.OmNom to 2,
+    WorkingDshStance.FakeOut to 1,
   )
 private val processStanceSalt = Random.nextInt()
 
-internal fun workingClawHash(value: String): Int {
+internal fun workingDshHash(value: String): Int {
   var hash = 0x811c9dc5.toInt()
   value.forEach { character ->
     hash = (hash xor character.code) * 0x01000193
@@ -105,20 +105,20 @@ internal fun workingClawHash(value: String): Int {
   return hash
 }
 
-internal fun pickWorkingClawStance(
+internal fun pickWorkingDshStance(
   runKey: String,
   salt: Int = processStanceSalt,
-): WorkingClawStance {
-  var roll = ((workingClawHash(runKey) xor salt).toUInt().toLong() % 1_000L).toInt()
+): WorkingDshStance {
+  var roll = ((workingDshHash(runKey) xor salt).toUInt().toLong() % 1_000L).toInt()
   stanceWeights.forEach { (stance, weight) ->
     val buckets = weight * 10
     if (roll < buckets) return stance
     roll -= buckets
   }
-  return WorkingClawStance.Default
+  return WorkingDshStance.Default
 }
 
-private data class ClawKeyframe(
+private data class DshKeyframe(
   val phase: Float,
   val value: Float,
 )
@@ -162,10 +162,10 @@ private val fakeOutRotationFrames =
 private val fakeOutJawFrames =
   frames(0f to -10f, 0.06f to -10f, 0.10f to -26f, 0.55f to -26f, 0.58f to 4f, 0.62f to -24f, 0.66f to 4f, 0.70f to -22f, 0.74f to 4f, 0.80f to -10f, 1f to -10f)
 
-private fun frames(vararg values: Pair<Float, Float>): List<ClawKeyframe> = values.map { (phase, value) -> ClawKeyframe(phase, value) }
+private fun frames(vararg values: Pair<Float, Float>): List<DshKeyframe> = values.map { (phase, value) -> DshKeyframe(phase, value) }
 
 private fun sampleFrames(
-  keyframes: List<ClawKeyframe>,
+  keyframes: List<DshKeyframe>,
   phase: Float,
   easing: CubicBezierEasing = easeOut,
 ): Float {
@@ -179,7 +179,7 @@ private fun sampleFrames(
   return previous.value + (next.value - previous.value) * progress
 }
 
-internal data class WorkingClawPose(
+internal data class WorkingDshPose(
   val rotationZ: Float = 0f,
   val rotationY: Float = 0f,
   val translationXDp: Float = 0f,
@@ -190,98 +190,98 @@ internal data class WorkingClawPose(
   val powScale: Float = 0.4f,
 )
 
-internal fun workingClawPose(
-  stance: WorkingClawStance,
+internal fun workingDshPose(
+  stance: WorkingDshStance,
   phase: Float,
-): WorkingClawPose =
+): WorkingDshPose =
   when (stance) {
-    WorkingClawStance.Spin ->
-      WorkingClawPose(
+    WorkingDshStance.Spin ->
+      WorkingDshPose(
         rotationY = phase * 360f,
         jawRotation = sampleFrames(snipFrames, phase),
       )
-    WorkingClawStance.Shadowbox ->
-      WorkingClawPose(
+    WorkingDshStance.Shadowbox ->
+      WorkingDshPose(
         rotationZ = sampleFrames(comboRotationFrames, phase),
         translationXDp = sampleFrames(comboXFrames, phase),
         jawRotation = sampleFrames(comboJawFrames, phase),
         powAlpha = sampleFrames(powAlphaFrames, phase),
         powScale = sampleFrames(powScaleFrames, phase),
       )
-    WorkingClawStance.Backflip ->
-      WorkingClawPose(
+    WorkingDshStance.Backflip ->
+      WorkingDshPose(
         rotationZ = sampleFrames(backflipRotationFrames, phase),
         translationYDp = sampleFrames(backflipYFrames, phase),
         jawRotation = sampleFrames(snipFrames, phase),
       )
-    WorkingClawStance.Zen ->
-      WorkingClawPose(
+    WorkingDshStance.Zen ->
+      WorkingDshPose(
         scale = sampleFrames(zenScaleFrames, phase, easeInOut),
         jawRotation = sampleFrames(zenJawFrames, phase),
       )
-    WorkingClawStance.Drummer ->
-      WorkingClawPose(
+    WorkingDshStance.Drummer ->
+      WorkingDshPose(
         rotationZ = sampleFrames(drummerRotationFrames, phase),
         jawRotation = sampleFrames(drummerJawFrames, phase),
       )
-    WorkingClawStance.Peekaboo ->
-      WorkingClawPose(
+    WorkingDshStance.Peekaboo ->
+      WorkingDshPose(
         translationYDp = sampleFrames(peekabooYFrames, phase),
         scale = sampleFrames(peekabooScaleFrames, phase),
         jawRotation = sampleFrames(peekabooJawFrames, phase),
       )
-    WorkingClawStance.NodOff ->
-      WorkingClawPose(
+    WorkingDshStance.NodOff ->
+      WorkingDshPose(
         rotationZ = sampleFrames(nodOffRotationFrames, phase),
         translationYDp = sampleFrames(nodOffYFrames, phase),
         jawRotation = sampleFrames(nodOffJawFrames, phase),
       )
-    WorkingClawStance.Curious ->
-      WorkingClawPose(
+    WorkingDshStance.Curious ->
+      WorkingDshPose(
         rotationZ = sampleFrames(curiousRotationFrames, phase),
         jawRotation = sampleFrames(curiousJawFrames, phase),
       )
-    WorkingClawStance.OmNom ->
-      WorkingClawPose(
+    WorkingDshStance.OmNom ->
+      WorkingDshPose(
         translationXDp = sampleFrames(omNomXFrames, phase),
         jawRotation = sampleFrames(omNomJawFrames, phase),
       )
-    WorkingClawStance.FakeOut ->
-      WorkingClawPose(
+    WorkingDshStance.FakeOut ->
+      WorkingDshPose(
         rotationZ = sampleFrames(fakeOutRotationFrames, phase),
         jawRotation = sampleFrames(fakeOutJawFrames, phase),
       )
-    WorkingClawStance.Default,
-    WorkingClawStance.Southpaw,
-    WorkingClawStance.Flurry,
+    WorkingDshStance.Default,
+    WorkingDshStance.Southpaw,
+    WorkingDshStance.Flurry,
     ->
-      WorkingClawPose(
+      WorkingDshPose(
         rotationZ = sampleFrames(flexFrames, phase),
         jawRotation = sampleFrames(snipFrames, phase),
       )
   }
 
-internal fun workingClawCycleMs(stance: WorkingClawStance): Long =
+internal fun workingDshCycleMs(stance: WorkingDshStance): Long =
   when (stance) {
-    WorkingClawStance.Drummer -> DRUMMER_CLAW_CYCLE_MS
-    WorkingClawStance.Flurry -> FLURRY_CLAW_CYCLE_MS
-    WorkingClawStance.NodOff -> NODOFF_CLAW_CYCLE_MS
-    WorkingClawStance.Spin -> SPIN_CLAW_CYCLE_MS
-    WorkingClawStance.Zen -> ZEN_CLAW_CYCLE_MS
-    else -> DEFAULT_CLAW_CYCLE_MS
+    WorkingDshStance.Drummer -> DRUMMER_DSH_CYCLE_MS
+    WorkingDshStance.Flurry -> FLURRY_DSH_CYCLE_MS
+    WorkingDshStance.NodOff -> NODOFF_DSH_CYCLE_MS
+    WorkingDshStance.Spin -> SPIN_DSH_CYCLE_MS
+    WorkingDshStance.Zen -> ZEN_DSH_CYCLE_MS
+    else -> DEFAULT_DSH_CYCLE_MS
   }
 
 @Composable
-internal fun WorkingClawIcon(
+internal fun WorkingDshIcon(
   runKey: String,
   color: Color,
   modifier: Modifier = Modifier,
   parked: Boolean = false,
 ) {
-  val stance = remember(runKey, parked) { if (parked) WorkingClawStance.Default else pickWorkingClawStance(runKey) }
+  val stance = remember(runKey, parked) { if (parked) WorkingDshStance.Default else pickWorkingDshStance(runKey) }
   val density = LocalDensity.current
   val animationsEnabled = rememberSystemAnimationsEnabled() && !parked
-  val cycleMs = workingClawCycleMs(stance)
+  val cycleMs = workingDshCycleMs(stance)
   var phase by remember(runKey) { mutableFloatStateOf(0f) }
   LaunchedEffect(animationsEnabled, runKey, cycleMs) {
     if (!animationsEnabled) {
@@ -299,11 +299,11 @@ internal fun WorkingClawIcon(
   }
   val pose =
     when {
-      parked -> WorkingClawPose(rotationZ = 8f, jawRotation = -4f)
-      animationsEnabled -> workingClawPose(stance, phase)
-      else -> WorkingClawPose()
+      parked -> WorkingDshPose(rotationZ = 8f, jawRotation = -4f)
+      animationsEnabled -> workingDshPose(stance, phase)
+      else -> WorkingDshPose()
     }
-  val iconWidth = if (stance == WorkingClawStance.Shadowbox) 30.dp else 18.dp
+  val iconWidth = if (stance == WorkingDshStance.Shadowbox) 30.dp else 18.dp
   Box(modifier = modifier.size(width = iconWidth, height = 20.dp), contentAlignment = Alignment.CenterStart) {
     Canvas(
       modifier =
@@ -314,20 +314,20 @@ internal fun WorkingClawIcon(
             rotationY = pose.rotationY
             translationX = with(density) { pose.translationXDp.dp.toPx() }
             translationY = with(density) { pose.translationYDp.dp.toPx() }
-            scaleX = pose.scale * if (stance == WorkingClawStance.Southpaw) -1f else 1f
+            scaleX = pose.scale * if (stance == WorkingDshStance.Southpaw) -1f else 1f
             scaleY = pose.scale
             cameraDistance = with(density) { 60.dp.toPx() }
           },
     ) {
       val scale = size.minDimension / 24f
       withTransform({ scale(scale, scale, pivot = Offset.Zero) }) {
-        drawPath(path = clawBodyPath, color = color)
+        drawPath(path = dshBodyPath, color = color)
         withTransform({ rotate(pose.jawRotation, pivot = Offset(8.6f, 11f)) }) {
-          drawPath(path = clawJawPath, color = color)
+          drawPath(path = dshJawPath, color = color)
         }
       }
     }
-    if (stance == WorkingClawStance.Shadowbox && animationsEnabled) {
+    if (stance == WorkingDshStance.Shadowbox && animationsEnabled) {
       Text(
         text = nativeStringResource("✦"),
         color = color,
@@ -457,8 +457,8 @@ internal fun workingPhraseIndex(
   bucket: Long,
 ): Int {
   val length = WORKING_PHRASE_COUNT
-  val offset = workingClawHash("$seed:offset").toUInt().toLong() % length
-  val stride = 1L + (workingClawHash("$seed:stride").toUInt().toLong() % (length - 1))
+  val offset = workingDshHash("$seed:offset").toUInt().toLong() % length
+  val stride = 1L + (workingDshHash("$seed:stride").toUInt().toLong() % (length - 1))
   return ((offset + (bucket % length) * stride) % length).toInt()
 }
 
@@ -484,7 +484,7 @@ private fun localizedWorkingPhrase(index: Int): String =
   when (index) {
     0 -> nativeStringResource("Shelling")
     1 -> nativeStringResource("Scuttling")
-    2 -> nativeStringResource("Clawing")
+    2 -> nativeStringResource("Dshing")
     3 -> nativeStringResource("Pinching")
     4 -> nativeStringResource("Molting")
     5 -> nativeStringResource("Bubbling")

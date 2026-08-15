@@ -6,12 +6,12 @@ import ai.deepseek.harness.systemagent.SystemAgentChatAccess
 import ai.deepseek.harness.systemagent.SystemAgentChatMessage
 import ai.deepseek.harness.systemagent.SystemAgentChatQuestionOption
 import ai.deepseek.harness.systemagent.SystemAgentChatState
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -71,27 +71,27 @@ internal fun SystemAgentSettingsScreen(
     }
   }
 
-  ClawScaffold {
+  DshScaffold {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        ClawPlainIconButton(
+        DshPlainIconButton(
           icon = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = nativeString("Back"),
           onClick = onBack,
         )
         Text(
           text = nativeString("DeepSeekHarness"),
-          style = ClawTheme.type.display,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.display,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(1f),
         )
         Icon(
           imageVector = Icons.Default.Bolt,
           contentDescription = null,
-          tint = ClawTheme.colors.primary,
+          tint = DshTheme.colors.primary,
           modifier = Modifier.size(24.dp),
         )
       }
@@ -131,7 +131,7 @@ private fun SystemAgentAccessGate(state: SystemAgentChatState) {
       SystemAgentChatAccess.GatewayUpdateRequired -> nativeString("Update this Gateway to use the DeepSeekHarness settings assistant.")
       SystemAgentChatAccess.Ready -> ""
     }
-  ClawPanel(modifier = Modifier.fillMaxWidth()) {
+  DshPanel(modifier = Modifier.fillMaxWidth()) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(24.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -140,14 +140,14 @@ private fun SystemAgentAccessGate(state: SystemAgentChatState) {
       Icon(
         imageVector = if (state.access == SystemAgentChatAccess.Disconnected) Icons.Default.Lock else Icons.Default.Bolt,
         contentDescription = null,
-        tint = ClawTheme.colors.warning,
+        tint = DshTheme.colors.warning,
         modifier = Modifier.size(42.dp),
       )
-      Text(text = title, style = ClawTheme.type.title, color = ClawTheme.colors.text)
+      Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text)
       Text(
         text = detail,
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
         textAlign = TextAlign.Center,
       )
     }
@@ -181,28 +181,28 @@ private fun SystemAgentConversation(
         }
       }
       if (state.sending) {
-        item { Text(nativeString("DeepSeekHarness is working…"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted) }
+        item { Text(nativeString("DeepSeekHarness is working…"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted) }
       }
     }
 
     state.errorText?.let { error ->
-      ClawPanel(modifier = Modifier.fillMaxWidth()) {
+      DshPanel(modifier = Modifier.fillMaxWidth()) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(12.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-          Text(error, style = ClawTheme.type.caption, color = ClawTheme.colors.warning, modifier = Modifier.weight(1f))
-          ClawSecondaryButton(text = nativeString("Restart"), onClick = onRestart, icon = Icons.Default.Refresh)
+          Text(error, style = DshTheme.type.caption, color = DshTheme.colors.warning, modifier = Modifier.weight(1f))
+          DshSecondaryButton(text = nativeString("Restart"), onClick = onRestart, icon = Icons.Default.Refresh)
         }
       }
     }
 
     state.handoff?.let {
-      ClawPanel(modifier = Modifier.fillMaxWidth()) {
+      DshPanel(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          Text(nativeString("DeepSeekHarness is ready to continue in your ordinary chat."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
-          ClawPrimaryButton(text = nativeString("Open Chat"), onClick = onOpenChat)
+          Text(nativeString("DeepSeekHarness is ready to continue in your ordinary chat."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
+          DshPrimaryButton(text = nativeString("Open Chat"), onClick = onOpenChat)
         }
       }
     }
@@ -224,12 +224,12 @@ private fun SystemAgentMessage(message: SystemAgentChatMessage) {
     if (user) Spacer(modifier = Modifier.weight(1f))
     Text(
       text = message.text,
-      style = ClawTheme.type.body,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.body,
+      color = DshTheme.colors.text,
       modifier =
         Modifier
           .weight(if (user) 0.8f else 0.9f, fill = false)
-          .background(if (user) ClawTheme.colors.primary.copy(alpha = 0.14f) else ClawTheme.colors.surfaceRaised, RoundedCornerShape(14.dp))
+          .background(if (user) DshTheme.colors.primary.copy(alpha = 0.14f) else DshTheme.colors.surfaceRaised, RoundedCornerShape(14.dp))
           .padding(horizontal = 12.dp, vertical = 9.dp),
     )
     if (!user) Spacer(modifier = Modifier.weight(1f))
@@ -243,12 +243,12 @@ private fun SystemAgentQuestionCard(
   onAnswer: (SystemAgentChatQuestionOption) -> Unit,
   onSkip: () -> Unit,
 ) {
-  ClawPanel(modifier = Modifier.fillMaxWidth()) {
+  DshPanel(modifier = Modifier.fillMaxWidth()) {
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-      Text(question.header.uppercase(), style = ClawTheme.type.caption, color = ClawTheme.colors.primary)
-      Text(question.question, style = ClawTheme.type.body, color = ClawTheme.colors.text)
+      Text(question.header.uppercase(), style = DshTheme.type.caption, color = DshTheme.colors.primary)
+      Text(question.question, style = DshTheme.type.body, color = DshTheme.colors.text)
       question.options.forEach { option ->
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text =
             if (option.recommended) {
               nativeString(
@@ -262,9 +262,9 @@ private fun SystemAgentQuestionCard(
           onClick = { onAnswer(option) },
           enabled = enabled,
         )
-        option.description?.let { Text(it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted) }
+        option.description?.let { Text(it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted) }
       }
-      ClawSecondaryButton(text = nativeString("Skip for now"), onClick = onSkip, enabled = enabled)
+      DshSecondaryButton(text = nativeString("Skip for now"), onClick = onSkip, enabled = enabled)
     }
   }
 }
@@ -282,10 +282,10 @@ private fun SystemAgentComposer(
       modifier =
         Modifier
           .fillMaxWidth()
-          .border(1.dp, ClawTheme.colors.border, RoundedCornerShape(ClawTheme.radii.control))
-          .background(ClawTheme.colors.surfaceRaised, RoundedCornerShape(ClawTheme.radii.control))
+          .border(1.dp, DshTheme.colors.border, RoundedCornerShape(DshTheme.radii.control))
+          .background(DshTheme.colors.surfaceRaised, RoundedCornerShape(DshTheme.radii.control))
           .padding(12.dp),
-      textStyle = ClawTheme.type.body.copy(color = ClawTheme.colors.text),
+      textStyle = DshTheme.type.body.copy(color = DshTheme.colors.text),
       keyboardOptions = KeyboardOptions(keyboardType = if (state.expectsSensitiveReply) KeyboardType.Password else KeyboardType.Text),
       visualTransformation = if (state.expectsSensitiveReply) PasswordVisualTransformation() else VisualTransformation.None,
       minLines = 1,
@@ -302,15 +302,15 @@ private fun SystemAgentComposer(
               }
             Text(
               placeholder,
-              style = ClawTheme.type.body,
-              color = ClawTheme.colors.textSubtle,
+              style = DshTheme.type.body,
+              color = DshTheme.colors.textSubtle,
             )
           }
           inner()
         }
       },
     )
-    ClawPrimaryButton(
+    DshPrimaryButton(
       text = nativeString("Send"),
       onClick = onSend,
       enabled = state.input.isNotBlank() && !state.sending && state.errorText == null,

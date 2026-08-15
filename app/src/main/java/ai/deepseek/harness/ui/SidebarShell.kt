@@ -1,6 +1,6 @@
 package ai.deepseek.harness.ui
 
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DrawerState
@@ -162,8 +162,8 @@ internal fun AdaptiveNavigationShell(
           navigationMode = navigationMode,
           compactNavigationVisible = compactNavigationVisible,
         ),
-      containerColor = ClawTheme.colors.canvas,
-      contentColor = ClawTheme.colors.text,
+      containerColor = DshTheme.colors.canvas,
+      contentColor = DshTheme.colors.text,
       content = content,
     )
   }

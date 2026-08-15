@@ -3,12 +3,12 @@ package ai.deepseek.harness.ui
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.chat.ChatSessionEntry
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawEmptyState
-import ai.deepseek.harness.ui.design.ClawLoadingState
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshEmptyState
+import ai.deepseek.harness.ui.design.DshLoadingState
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -170,7 +170,7 @@ internal fun SessionsScreen(
     }
   }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp),
     contentWindowInsets = WindowInsets.safeDrawing,
   ) {
@@ -186,15 +186,15 @@ internal fun SessionsScreen(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
           if (showSidebarButton) {
-            ClawPlainIconButton(
+            DshPlainIconButton(
               icon = Icons.Default.Menu,
               contentDescription = nativeString("Show Sidebar"),
               onClick = onOpenSidebar,
               modifier = Modifier.testTag("sidebar-open-sessions"),
             )
           }
-          Text(text = nativeString("Threads"), style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = ClawTheme.colors.text, modifier = Modifier.weight(1f))
-          ClawPlainIconButton(
+          Text(text = nativeString("Threads"), style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = DshTheme.colors.text, modifier = Modifier.weight(1f))
+          DshPlainIconButton(
             icon = Icons.Default.Search,
             contentDescription = nativeString("Focus thread search"),
             onClick = {
@@ -218,7 +218,7 @@ internal fun SessionsScreen(
           value = searchText,
           onValueChange = { searchText = it },
           modifier = Modifier.fillMaxWidth().focusRequester(searchFocusRequester),
-          placeholder = { Text(text = nativeString("Search threads"), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted) },
+          placeholder = { Text(text = nativeString("Search threads"), style = DshTheme.type.body, color = DshTheme.colors.textMuted) },
           singleLine = true,
           trailingIcon = {
             if (searchText.isNotEmpty()) {
@@ -234,16 +234,16 @@ internal fun SessionsScreen(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
           Surface(
             modifier = Modifier.widthIn(min = 140.dp, max = 180.dp).heightIn(min = 36.dp),
-            shape = RoundedCornerShape(ClawTheme.radii.row),
+            shape = RoundedCornerShape(DshTheme.radii.row),
             color = Color.Transparent,
-            contentColor = ClawTheme.colors.textMuted,
-            border = BorderStroke(1.dp, ClawTheme.colors.border),
+            contentColor = DshTheme.colors.textMuted,
+            border = BorderStroke(1.dp, DshTheme.colors.border),
           ) {
             Column {
               Surface(
                 onClick = { sortMenuExpanded = !sortMenuExpanded },
                 color = Color.Transparent,
-                contentColor = ClawTheme.colors.textMuted,
+                contentColor = DshTheme.colors.textMuted,
               ) {
                 Row(
                   modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
@@ -258,19 +258,19 @@ internal fun SessionsScreen(
                     }
                   Text(
                     text = nativeString("Sort: \$sortOrder", sortOrder),
-                    style = ClawTheme.type.body,
-                    color = ClawTheme.colors.textMuted,
+                    style = DshTheme.type.body,
+                    color = DshTheme.colors.textMuted,
                   )
                   Icon(
                     imageVector = if (sortMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
                     modifier = Modifier.size(13.dp),
-                    tint = ClawTheme.colors.textMuted,
+                    tint = DshTheme.colors.textMuted,
                   )
                 }
               }
               if (sortMenuExpanded) {
-                HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+                HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
                 listOf(true to nativeString("Newest first"), false to nativeString("Oldest first")).forEach { (value, label) ->
                   Surface(
                     onClick = {
@@ -279,13 +279,13 @@ internal fun SessionsScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.Transparent,
-                    contentColor = if (recentFirst == value) ClawTheme.colors.text else ClawTheme.colors.textMuted,
+                    contentColor = if (recentFirst == value) DshTheme.colors.text else DshTheme.colors.textMuted,
                   ) {
                     Text(
                       text = label,
                       modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
-                      style = ClawTheme.type.body,
-                      color = if (recentFirst == value) ClawTheme.colors.text else ClawTheme.colors.textMuted,
+                      style = DshTheme.type.body,
+                      color = if (recentFirst == value) DshTheme.colors.text else DshTheme.colors.textMuted,
                     )
                   }
                 }
@@ -297,7 +297,7 @@ internal fun SessionsScreen(
       }
 
       item {
-        Text(text = if (compactLayout) nativeString("Layout: Compact") else nativeString("Layout: Detailed"), style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle)
+        Text(text = if (compactLayout) nativeString("Layout: Compact") else nativeString("Layout: Detailed"), style = DshTheme.type.caption, color = DshTheme.colors.textSubtle)
       }
 
       if (visibleSessions.isEmpty()) {
@@ -307,18 +307,18 @@ internal fun SessionsScreen(
             contentAlignment = Alignment.Center,
           ) {
             when (sessionEmptyMode(searchQuery, searchLoading)) {
-              SessionEmptyMode.SearchLoading -> ClawLoadingState(title = nativeString("Searching threads"))
+              SessionEmptyMode.SearchLoading -> DshLoadingState(title = nativeString("Searching threads"))
               SessionEmptyMode.SearchNoMatches ->
-                ClawEmptyState(
+                DshEmptyState(
                   title = nativeString("No matching threads"),
                   body = nativeString("Try a different search or clear the current query."),
-                  action = { ClawPrimaryButton(text = nativeString("Clear Search"), onClick = { searchText = "" }) },
+                  action = { DshPrimaryButton(text = nativeString("Clear Search"), onClick = { searchText = "" }) },
                 )
               SessionEmptyMode.Filter ->
-                ClawEmptyState(
+                DshEmptyState(
                   title = emptySessionTitle(filter),
                   body = emptySessionBody(filter),
-                  action = { ClawPrimaryButton(text = nativeString("Start Chat"), onClick = onOpenChat) },
+                  action = { DshPrimaryButton(text = nativeString("Start Chat"), onClick = onOpenChat) },
                 )
             }
           }
@@ -337,8 +337,8 @@ internal fun SessionsScreen(
               } else {
                 Text(
                   text = title,
-                  style = ClawTheme.type.label,
-                  color = ClawTheme.colors.textMuted,
+                  style = DshTheme.type.label,
+                  color = DshTheme.colors.textMuted,
                   modifier = Modifier.padding(top = 6.dp),
                 )
               }
@@ -491,9 +491,9 @@ internal fun SessionsScreen(
   deleteGroupName?.let { group ->
     AlertDialog(
       onDismissRequest = { deleteGroupName = null },
-      containerColor = ClawTheme.colors.surfaceRaised,
-      title = { Text(nativeString("Delete group?"), style = ClawTheme.type.section, color = ClawTheme.colors.text) },
-      text = { Text(nativeString("Threads in \"\$group\" are kept and move back to Ungrouped.", group), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted) },
+      containerColor = DshTheme.colors.surfaceRaised,
+      title = { Text(nativeString("Delete group?"), style = DshTheme.type.section, color = DshTheme.colors.text) },
+      text = { Text(nativeString("Threads in \"\$group\" are kept and move back to Ungrouped.", group), style = DshTheme.type.body, color = DshTheme.colors.textMuted) },
       confirmButton = {
         TextButton(
           onClick = {
@@ -501,7 +501,7 @@ internal fun SessionsScreen(
             coroutineScope.launch { viewModel.deleteChatSessionGroup(group) }
           },
         ) {
-          Text(nativeString("Delete"), color = ClawTheme.colors.danger)
+          Text(nativeString("Delete"), color = DshTheme.colors.danger)
         }
       },
       dismissButton = {
@@ -515,9 +515,9 @@ internal fun SessionsScreen(
   deleteSessionTarget?.let { session ->
     AlertDialog(
       onDismissRequest = { deleteSessionTarget = null },
-      containerColor = ClawTheme.colors.surfaceRaised,
-      title = { Text(nativeString("Delete thread?"), style = ClawTheme.type.section, color = ClawTheme.colors.text) },
-      text = { Text(nativeString("This permanently deletes the thread and its transcript."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted) },
+      containerColor = DshTheme.colors.surfaceRaised,
+      title = { Text(nativeString("Delete thread?"), style = DshTheme.type.section, color = DshTheme.colors.text) },
+      text = { Text(nativeString("This permanently deletes the thread and its transcript."), style = DshTheme.type.body, color = DshTheme.colors.textMuted) },
       confirmButton = {
         TextButton(
           onClick = {
@@ -526,7 +526,7 @@ internal fun SessionsScreen(
             coroutineScope.launch { viewModel.deleteChatSession(session.key, session.ownerAgentId) }
           },
         ) {
-          Text(nativeString("Delete"), color = ClawTheme.colors.danger)
+          Text(nativeString("Delete"), color = DshTheme.colors.danger)
         }
       },
       dismissButton = {
@@ -551,22 +551,22 @@ private fun FilterPill(
     onClick = onClick ?: {},
     enabled = onClick != null,
     shape = RoundedCornerShape(7.dp),
-    color = if (active) ClawTheme.colors.surfaceRaised else Color.Transparent,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, if (active) ClawTheme.colors.borderStrong else ClawTheme.colors.border),
+    color = if (active) DshTheme.colors.surfaceRaised else Color.Transparent,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, if (active) DshTheme.colors.borderStrong else DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-      icon?.let { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(12.dp), tint = ClawTheme.colors.text) }
-      Text(text = text, style = ClawTheme.type.label, color = ClawTheme.colors.text, maxLines = 1)
+      icon?.let { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(12.dp), tint = DshTheme.colors.text) }
+      Text(text = text, style = DshTheme.type.label, color = DshTheme.colors.text, maxLines = 1)
       if (showDot) {
-        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(ClawTheme.colors.success))
+        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(DshTheme.colors.success))
       }
       if (dropdown) {
-        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(11.dp), tint = ClawTheme.colors.textMuted)
+        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(11.dp), tint = DshTheme.colors.textMuted)
       }
     }
   }
@@ -597,7 +597,7 @@ private fun SessionRow(
   var groupMenuVisible by remember { mutableStateOf(false) }
   val canChangeArchived = !session.sessionId.isNullOrBlank()
 
-  Surface(color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Box {
       Column {
         Row(
@@ -617,16 +617,16 @@ private fun SessionRow(
         ) {
           Surface(
             modifier = Modifier.size(32.dp),
-            shape = RoundedCornerShape(ClawTheme.radii.control),
+            shape = RoundedCornerShape(DshTheme.radii.control),
             color = Color.Transparent,
-            border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+            border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
           ) {
             Box(contentAlignment = Alignment.Center) {
               Icon(
                 imageVector = if (active) Icons.Default.StarBorder else Icons.Outlined.ChatBubbleOutline,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = ClawTheme.colors.text,
+                tint = DshTheme.colors.text,
               )
             }
           }
@@ -635,8 +635,8 @@ private fun SessionRow(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
               Text(
                 text = title,
-                style = ClawTheme.type.body,
-                color = ClawTheme.colors.text,
+                style = DshTheme.type.body,
+                color = DshTheme.colors.text,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -648,19 +648,19 @@ private fun SessionRow(
                   horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
                 ) {
                   if (active) {
-                    Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(ClawTheme.colors.success))
+                    Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(DshTheme.colors.success))
                   }
                   if (session.unread == true) {
-                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(ClawTheme.colors.primary))
+                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(DshTheme.colors.primary))
                   }
                   if (session.pinned == true) {
-                    Icon(imageVector = Icons.Default.PushPin, contentDescription = nativeString("Pinned"), modifier = Modifier.size(13.dp), tint = ClawTheme.colors.textMuted)
+                    Icon(imageVector = Icons.Default.PushPin, contentDescription = nativeString("Pinned"), modifier = Modifier.size(13.dp), tint = DshTheme.colors.textMuted)
                   }
                 }
               }
             }
             if (!compact) {
-              Text(text = subtitle, style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+              Text(text = subtitle, style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted, maxLines = 1)
               Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 SessionMiniTag(text = nativeString("Workspace"))
                 SessionMiniTag(text = if (active) nativeString("Current") else nativeString("DeepSeekHarness"))
@@ -669,11 +669,11 @@ private fun SessionRow(
           }
 
           Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Icon(imageVector = Icons.Outlined.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(13.dp), tint = ClawTheme.colors.textMuted)
-            Text(text = metadata, style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+            Icon(imageVector = Icons.Outlined.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(13.dp), tint = DshTheme.colors.textMuted)
+            Text(text = metadata, style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted, maxLines = 1)
           }
         }
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
       }
       DropdownMenu(
         expanded = menuExpanded,
@@ -759,8 +759,8 @@ private fun SessionGroupHeader(
   Box(modifier = Modifier.padding(top = 6.dp)) {
     Text(
       text = title,
-      style = ClawTheme.type.label,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.label,
+      color = DshTheme.colors.textMuted,
       modifier =
         Modifier.combinedClickable(
           onClick = {},
@@ -790,7 +790,7 @@ private fun SessionMenuItem(
   onClick: () -> Unit,
 ) {
   DropdownMenuItem(
-    text = { Text(text, style = ClawTheme.type.body) },
+    text = { Text(text, style = DshTheme.type.body) },
     onClick = onClick,
   )
 }
@@ -809,8 +809,8 @@ private fun SessionTextDialog(
   val canConfirm = allowEmpty || value.isNotBlank()
   AlertDialog(
     onDismissRequest = onDismiss,
-    containerColor = ClawTheme.colors.surfaceRaised,
-    title = { Text(title, style = ClawTheme.type.section, color = ClawTheme.colors.text) },
+    containerColor = DshTheme.colors.surfaceRaised,
+    title = { Text(title, style = DshTheme.type.section, color = DshTheme.colors.text) },
     text = {
       OutlinedTextField(
         value = value,
@@ -840,11 +840,11 @@ private fun SessionOutlineIconButton(
 ) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = Modifier.size(DshTheme.spacing.touchTarget),
     shape = RoundedCornerShape(7.dp),
     color = Color.Transparent,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(14.dp))
@@ -857,10 +857,10 @@ private fun SessionMiniTag(text: String) {
   Surface(
     shape = RoundedCornerShape(5.dp),
     color = Color.Transparent,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
-    contentColor = ClawTheme.colors.textMuted,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
+    contentColor = DshTheme.colors.textMuted,
   ) {
-    Text(text = text, modifier = Modifier.padding(horizontal = 4.dp, vertical = 0.5.dp), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), maxLines = 1)
+    Text(text = text, modifier = Modifier.padding(horizontal = 4.dp, vertical = 0.5.dp), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), maxLines = 1)
   }
 }
 
