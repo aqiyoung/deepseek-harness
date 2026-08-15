@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 /** Chooses the login gate or the authenticated app shell from persisted auth state. */
 @Composable
 fun RootScreen(viewModel: MainViewModel) {
-  val isLoggedIn by viewModel.isLoggedIn.collectAsState()
   val updateResult by viewModel.appUpdateResult.collectAsState()
   val updateToast by viewModel.appUpdateToast.collectAsState()
   val context = LocalContext.current
@@ -31,16 +30,8 @@ fun RootScreen(viewModel: MainViewModel) {
     }
   }
 
-  if (!isLoggedIn) {
-    LoginScreen(
-      viewModel = viewModel,
-      onLoginSuccess = { viewModel.setLoggedIn(true) },
-      modifier = Modifier.fillMaxSize(),
-    )
-    return
-  }
-
-  ShellScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+  // 主界面改为 WebView 套壳加载 DSH Web 应用（自带登录与全部功能）。
+  WebHostScreen(modifier = Modifier.fillMaxSize())
 
   // 发现新版本时弹出更新框。
   updateResult?.let { result ->
