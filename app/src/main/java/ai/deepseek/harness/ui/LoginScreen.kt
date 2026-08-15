@@ -94,7 +94,7 @@ fun LoginScreen(
           Image(
             painter = painterResource(R.drawable.login_logo_black),
             contentDescription = "DeepSeek Harness",
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(100.dp),
           )
 
           Spacer(modifier = Modifier.height(20.dp))
