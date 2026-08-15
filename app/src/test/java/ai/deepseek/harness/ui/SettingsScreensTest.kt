@@ -396,6 +396,9 @@ class SettingsScreensTest {
 
   @Test
   fun gatewayPairingSurfacesStayProminentUntilPaired() {
+    // The old full-screen "Scan QR to Pair" hero has been removed in favor of the
+    // Add Gateway panel; the helper still reflects whether onboarding should push
+    // pairing as the primary action.
     assertTrue(gatewayShowsScanHero(pairedGatewayCount = 0))
     assertFalse(gatewayShowsScanHero(pairedGatewayCount = 1))
 
@@ -404,18 +407,18 @@ class SettingsScreensTest {
   }
 
   @Test
-  fun gatewayScreenOrdersPairingAheadOfManualSetup() {
+  fun gatewayScreenSurfacesManualConfigFirstWhenUnpaired() {
     val source = settingsScreensSource()
     val screenStart = source.indexOf("private fun GatewaySettingsScreen(")
-    // Pairing stays reachable without scrolling: nav-bar scanner action plus a
-    // hero CTA while nothing is paired, then Add Gateway before manual plumbing.
-    val trailingScan = source.indexOf("trailingAction = {", screenStart)
+    // The redundant hero CTA has been removed; manual configuration is the
+    // primary action for first-run / server-hosted users (above the metric panel).
     val scanHero = source.indexOf("nativeString(\"Scan QR to Pair\")", screenStart)
+    assertEquals(-1, scanHero)
+    val manualPanel = source.indexOf("nativeString(\"Manual Gateway\")", screenStart)
     val addPanel = source.indexOf("nativeString(\"Add Gateway\")", screenStart)
     val pairedPanel = source.indexOf("nativeString(\"Gateways\")", screenStart)
-    val manualPanel = source.indexOf("nativeString(\"Manual Gateway\")", screenStart)
-    assertTrue(screenStart >= 0 && trailingScan > screenStart && scanHero > trailingScan)
-    assertTrue(addPanel > scanHero && pairedPanel > addPanel && manualPanel > pairedPanel)
+    assertTrue(screenStart >= 0 && manualPanel > screenStart)
+    assertTrue(addPanel > manualPanel && pairedPanel > addPanel)
     // Discovered gateways surface inside Add Gateway with a per-row connect.
     val discoveredRows = source.indexOf("discoveredGateways.forEachIndexed", screenStart)
     assertTrue(discoveredRows > addPanel && discoveredRows < pairedPanel)
