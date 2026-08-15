@@ -18,7 +18,6 @@ enum class AndroidScreenshotScene(
   Gateway("gateway", HomeDestination.Settings, SettingsRoute.Gateway),
   DeepSeekHarness("dsh", HomeDestination.Settings, SettingsRoute.SystemAgent),
   Desktop("desktop", HomeDestination.Settings, SettingsRoute.Desktop),
-  VoiceWake("voice-wake", HomeDestination.Settings, SettingsRoute.Voice),
   ;
 
   companion object {

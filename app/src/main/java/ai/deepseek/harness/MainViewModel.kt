@@ -439,7 +439,7 @@ class MainViewModel private constructor(
         "Screenshot fixture mode must be selected before live runtime startup"
       }
       runtime.setForeground(foreground)
-      runtime.setVoiceWakeEnabled(scene == AndroidScreenshotScene.VoiceWake)
+      runtime.setVoiceWakeEnabled(false)
       _requestedHomeDestination.value = scene.homeDestination
       requestedSettingsRouteState.value = scene.settingsRoute
       return
@@ -448,7 +448,7 @@ class MainViewModel private constructor(
     prefs.setAppearanceThemeMode(AppearanceThemeMode.Dark)
     prefs.setDisplayName("Pixel")
     prefs.setSpeakerEnabled(true)
-    prefs.setVoiceWakeEnabled(scene == AndroidScreenshotScene.VoiceWake)
+    prefs.setVoiceWakeEnabled(false)
     prefs.setVoiceWakeWords(VoiceWakePreferences.defaultTriggerWords)
     val runtime = nodeApp.ensureScreenshotFixtureRuntime()
     runtime.setForeground(foreground)

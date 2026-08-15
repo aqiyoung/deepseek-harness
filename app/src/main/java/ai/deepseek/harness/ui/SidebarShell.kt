@@ -119,7 +119,9 @@ internal fun AdaptiveNavigationShell(
   ) {
     NavigationSuiteScaffold(
       navigationSuiteItems = {
-        SidebarDestination.entries.forEach { destination ->
+        SidebarDestination.entries
+          .filter { it != SidebarDestination.Usage && it != SidebarDestination.Automations && it != SidebarDestination.Sessions }
+          .forEach { destination ->
           val fullLabel = destination.localizedLabel()
           val displayLabel =
             if (navigationMode == AdaptiveNavigationMode.Bar) {

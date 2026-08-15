@@ -870,7 +870,6 @@ internal val nativeStringResourceIds: Map<String, Int> =
     "Notification listener" to R.string.native_55a12cbe0995e214,
     "Notifications" to R.string.native_788011833a5a0f22,
     "Now" to R.string.native_fe18013d93d22f4f,
-    "OC" to R.string.native_3a386d2bb69adffc,
     "OK" to R.string.native_565339bc4d33d728,
     "DSH" to R.string.native_5c0c8c9aa658f4a0,
     "Observe" to R.string.native_744ea732e226adc1,

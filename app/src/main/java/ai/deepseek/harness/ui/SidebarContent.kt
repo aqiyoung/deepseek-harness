@@ -322,14 +322,16 @@ internal fun DeepSeekHarnessSidebar(
       }
 
       SidebarSectionTitle(nativeString("Pages"), palette, modifier = Modifier.padding(top = 12.dp))
-      SidebarDestination.entries.forEach { destination ->
-        SidebarNavigationRow(
-          destination = destination,
-          selected = destination == activeDestination,
-          palette = palette,
-          onClick = { onSelectDestination(destination) },
-        )
-      }
+      SidebarDestination.entries
+        .filter { it != SidebarDestination.Usage && it != SidebarDestination.Automations && it != SidebarDestination.Sessions }
+        .forEach { destination ->
+          SidebarNavigationRow(
+            destination = destination,
+            selected = destination == activeDestination,
+            palette = palette,
+            onClick = { onSelectDestination(destination) },
+          )
+        }
 
       SidebarSectionTitle(nativeString("Recent sessions"), palette, modifier = Modifier.padding(top = 12.dp))
       if (recentSessions.isEmpty()) {

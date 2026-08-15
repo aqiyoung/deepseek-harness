@@ -2308,48 +2308,33 @@ private fun ChatComposer(
     }
 
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      if (voiceNoteState is VoiceNoteRecorderState.Recording) {
-        VoiceNoteRecordingControls(
-          elapsedMs = voiceNoteElapsedMs,
-          level = voiceNoteLevel,
-          onCancel = onCancelVoiceNote,
-          onDone = onFinishVoiceNote,
-          modifier = Modifier.weight(1f),
-        )
-      } else if (voiceNoteState is VoiceNoteRecorderState.Preparing) {
-        VoiceNotePreparing(modifier = Modifier.weight(1f))
-      } else {
-        ChatInputPill(
-          value = value,
-          onValueChange = onValueChange,
-          onPickImages = onPickImages,
-          onPickAudioOrDocument = onPickAudioOrDocument,
-          onPickVideo = onPickVideo,
-          onStartVoiceNote = onStartVoiceNote,
-          recordVoiceNoteEnabled = recordVoiceNoteEnabled,
-          dictationActive = dictationActive,
-          dictationEnabled = dictationEnabled,
-          onToggleDictation = onToggleDictation,
-          talkActive = talkActive,
-          onToggleTalk = onToggleTalk,
-          runActive = pendingRunCount > 0,
-          onAbort = onAbort,
-          sendEnabled = sendEnabled,
-          onSend = onSend,
-          selectedModelLabel = selectedModelLabel,
-          modelPickerEnabled = modelPickerEnabled,
-          onOpenModelPicker = onOpenModelPicker,
-          thinkingLevel = thinkingLevel,
-          thinkingSupported = thinkingSupported,
-          onToggleThinkingSelector = { thinkingSelectorExpanded = !thinkingSelectorExpanded },
-          contextUsage = contextUsage,
-          modifier = Modifier.weight(1f),
-        )
-      }
+      ChatInputPill(
+        value = value,
+        onValueChange = onValueChange,
+        onPickImages = onPickImages,
+        onPickAudioOrDocument = onPickAudioOrDocument,
+        onPickVideo = onPickVideo,
+        onStartVoiceNote = onStartVoiceNote,
+        recordVoiceNoteEnabled = recordVoiceNoteEnabled,
+        dictationActive = dictationActive,
+        dictationEnabled = dictationEnabled,
+        onToggleDictation = onToggleDictation,
+        talkActive = talkActive,
+        onToggleTalk = onToggleTalk,
+        runActive = pendingRunCount > 0,
+        onAbort = onAbort,
+        sendEnabled = sendEnabled,
+        onSend = onSend,
+        selectedModelLabel = selectedModelLabel,
+        modelPickerEnabled = modelPickerEnabled,
+        onOpenModelPicker = onOpenModelPicker,
+        thinkingLevel = thinkingLevel,
+        thinkingSupported = thinkingSupported,
+        onToggleThinkingSelector = { thinkingSelectorExpanded = !thinkingSelectorExpanded },
+        contextUsage = contextUsage,
+        modifier = Modifier.weight(1f),
+      )
     }
-
-    VoiceNoteRecorderError(voiceNoteState)
-    ChatDictationError(dictationState)
 
     if (!healthOk && gatewayOffline) {
       ChatOfflineNotice(
@@ -2757,22 +2742,10 @@ private fun ChatInputPill(
             )
           }
         }
-        ChatComposerMicButton(
-          dictationActive = dictationActive,
-          dictationEnabled = dictationEnabled,
-          voiceNoteEnabled = recordVoiceNoteEnabled,
-          onToggleDictation = onToggleDictation,
-          onStartVoiceNote = onStartVoiceNote,
-        )
         when (resolveChatComposerTrailingAction(talkActive = talkActive, runActive = runActive, sendEnabled = sendEnabled)) {
           ChatComposerTrailingAction.Send -> SendButton(enabled = true, onClick = onSend)
-          ChatComposerTrailingAction.StartTalk -> LiveTalkButton(active = false, onClick = onToggleTalk)
-          ChatComposerTrailingAction.StopTalk -> {
-            // Talk keeps the morph slot, but run abort must stay reachable while both overlap.
-            if (runActive) StopButton(onClick = onAbort)
-            LiveTalkButton(active = true, onClick = onToggleTalk)
-          }
           ChatComposerTrailingAction.Stop -> StopButton(onClick = onAbort)
+          else -> SendButton(enabled = sendEnabled, onClick = onSend)
         }
       }
       ChatComposerFooter(
@@ -2865,35 +2838,6 @@ private fun ChatComposerFooterChip(
   }
 }
 
-@Composable
-private fun LiveTalkButton(
-  active: Boolean,
-  onClick: () -> Unit,
-) {
-  val buttonDescription = if (active) nativeString("End Talk") else nativeString("Start Talk")
-  Surface(
-    onClick = onClick,
-    modifier =
-      Modifier
-        .size(DshTheme.spacing.touchTarget)
-        .semantics { contentDescription = buttonDescription },
-    shape = CircleShape,
-    color = if (active) DshTheme.colors.danger else DshTheme.colors.surfaceRaised,
-    contentColor = if (active) Color.White else DshTheme.colors.text,
-  ) {
-    Box(contentAlignment = Alignment.Center) {
-      if (active) {
-        LiveTalkWaveform(modifier = Modifier.size(22.dp))
-      } else {
-        Icon(
-          imageVector = Icons.Default.GraphicEq,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp),
-        )
-      }
-    }
-  }
-}
 
 @Composable
 private fun StopButton(onClick: () -> Unit) {
@@ -2910,32 +2854,6 @@ private fun StopButton(onClick: () -> Unit) {
   }
 }
 
-@Composable
-private fun LiveTalkWaveform(modifier: Modifier = Modifier) {
-  val transition = rememberInfiniteTransition()
-  val phase by
-    transition.animateFloat(
-      initialValue = 0f,
-      targetValue = (Math.PI * 2).toFloat(),
-      animationSpec = infiniteRepeatable(animation = tween(durationMillis = 720, easing = LinearEasing), repeatMode = RepeatMode.Restart),
-    )
-
-  Canvas(modifier = modifier) {
-    val barWidth = size.width / 7f
-    val gap = barWidth
-    val startX = (size.width - (barWidth * 3f + gap * 2f)) / 2f
-    repeat(3) { index ->
-      val normalizedHeight = 0.38f + 0.5f * ((sin(phase + index * 1.35f) + 1f) / 2f)
-      val barHeight = size.height * normalizedHeight
-      drawRoundRect(
-        color = Color.White,
-        topLeft = Offset(startX + index * (barWidth + gap), (size.height - barHeight) / 2f),
-        size = Size(barWidth, barHeight),
-        cornerRadius = CornerRadius(barWidth / 2f),
-      )
-    }
-  }
-}
 
 @Composable
 private fun AttachmentStrip(

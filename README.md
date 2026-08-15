@@ -21,7 +21,7 @@ DeepSeek Harness Android is the officially released Google Play app. It connects
 - [x] Foreground on-device Voice Wake with Gateway-synced wake words
 - [x] Screen tab full functionality
 - [x] Skill Workshop settings can filter proposals, inspect proposal content, and apply/reject/quarantine drafts through Gateway RPCs
-- [x] Skills settings can search installed skills, enable or disable them, and install Gateway-verified ClawHub releases
+- [x] Skills settings can search installed skills, enable or disable them, and install Gateway-verified DeepSeek Harness Hub releases
 - [x] Per-app language selection for translated resources follows Android system settings and persistence
 - [x] Cron job settings support details, run history, run now, edits, enable/disable, and deletion with admin-scoped Gateway access
 - [x] Wear OS companion proxies sessions, transcripts, replies, aborts, and realtime Talk through the paired phone without storing Gateway credentials on the watch
@@ -369,8 +369,7 @@ What it does:
 - Reads `node.describe` command list from the selected Android node.
 - Invokes advertised non-interactive commands.
 - Skips `screen.record` and `talk.ptt.*` in this suite because they require
-  interactive capture. Use `apps/android/scripts/voice-e2e.sh` for microphone
-  and voice-path proof.
+  interactive capture.
 - Asserts command contracts (success or expected deterministic error for safe-invalid calls like `sms.send` and `notifications.actions`).
 
 Common failure quick-fixes:

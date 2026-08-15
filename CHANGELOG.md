@@ -6,7 +6,7 @@
 
 Adds inline audio/video playback and uploads, session dashboards, run telemetry, chat rewind/fork, a Settings repair assistant, and Wear instant Talk.
 
-Improves the working claw, collapsible details, Skill Workshop flows, and generated images.
+Improves the working agent, collapsible details, Skill Workshop flows, and generated images.
 
 Fixes reconnect/session state, Talk transcripts, manual gateway ports, large-text onboarding, reduced motion, and Wear pairing/reply reliability.
 
@@ -24,7 +24,7 @@ Thanks @sibbl, @IWhatsskill, and @Leon-SK668.
 
 ## 2026.7.2 - 2026-07-13
 
-Adds Automations and Skills management with search, filters, editing, run tracking, install safety, and ClawHub risk review.
+Adds Automations and Skills management with search, filters, editing, run tracking, install safety, and DeepSeek Harness Hub risk review.
 
 Improves chat with per-device history, durable approval status, session search, sharing, and agent avatars.
 

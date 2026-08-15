@@ -38,7 +38,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Inventory2
-import androidx.compose.material.icons.outlined.MicNone
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -69,7 +68,6 @@ internal fun CommandPalette(
   viewModel: MainViewModel,
   onDismiss: () -> Unit,
   onOpenChat: () -> Unit,
-  onOpenVoice: () -> Unit,
   onOpenSessions: () -> Unit,
   onOpenProviders: () -> Unit,
   onOpenSettings: () -> Unit,
@@ -91,10 +89,7 @@ internal fun CommandPalette(
   val quickActions =
     listOf(
       CommandItem(CommandAction.Chat, nativeText("Open Chat"), nativeText("Start or continue a conversation"), Icons.Outlined.ChatBubbleOutline, onOpenChat),
-      CommandItem(CommandAction.Voice, nativeText("Start Voice"), nativeText("Talk or dictate with DeepSeekHarness"), Icons.Outlined.MicNone, onOpenVoice),
-      CommandItem(CommandAction.Sessions, nativeText("Browse Threads"), nativeText("Find previous conversations"), Icons.Outlined.AccessTime, onOpenSessions),
-      CommandItem(CommandAction.Providers, nativeText("Providers & Models"), verbatimText(providerCommandSubtitle(isConnected, providers, models)), Icons.Outlined.Inventory2, onOpenProviders),
-      CommandItem(CommandAction.Settings, nativeText("Settings"), nativeText("Gateway, voice, notifications, privacy"), Icons.Outlined.Settings, onOpenSettings),
+      CommandItem(CommandAction.Settings, nativeText("Settings"), nativeText("Gateway, notifications, privacy"), Icons.Outlined.Settings, onOpenSettings),
     )
   val actionRows = quickActions.filter { it.matches(normalizedQuery) }
   val sessionRows =
@@ -123,7 +118,7 @@ internal fun CommandPalette(
               modifier = Modifier.size(DshTheme.spacing.touchTarget),
               contentAlignment = Alignment.Center,
             ) {
-              CommandAvatar(text = "OC")
+              CommandAvatar(text = "DH")
             }
           }
         }
@@ -143,7 +138,7 @@ internal fun CommandPalette(
 
         if (actionRows.isEmpty()) {
           item {
-            DshEmptyState(title = nativeString("No actions found"), body = nativeString("Try Chat, Voice, Threads, Providers, or Settings."))
+            DshEmptyState(title = nativeString("No actions found"), body = nativeString("Try Chat, Threads, Providers, or Settings."))
           }
         } else {
           item {
@@ -189,7 +184,6 @@ internal fun CommandPalette(
 
 internal enum class CommandAction {
   Chat,
-  Voice,
   Sessions,
   Providers,
   Settings,
@@ -221,7 +215,6 @@ internal fun commandActionAccessibilityDescription(
 ): String =
   when (action) {
     CommandAction.Chat,
-    CommandAction.Voice,
     CommandAction.Sessions,
     -> title
     CommandAction.Providers,

@@ -75,7 +75,7 @@ class ShellScreenLogicTest {
   @Test
   fun settingsRouteOpenedCrossTabReturnsToOriginTab() {
     val nav = ShellNavigation()
-    nav.selectTab(Tab.Voice)
+    nav.selectTab(Tab.Chat)
     nav.openSettingsRoute(SettingsRoute.Gateway)
     assertEquals(Tab.Settings, nav.activeTab)
     assertEquals(SettingsRoute.Gateway, nav.settingsRoute)
@@ -100,8 +100,8 @@ class ShellScreenLogicTest {
   @Test
   fun tabBarSettingsSelectionOpensHomeAndBacksToOverview() {
     val nav = ShellNavigation()
-    nav.selectTab(Tab.Voice)
-    nav.openSettingsRoute(SettingsRoute.Voice)
+    nav.selectTab(Tab.Chat)
+    nav.openSettingsRoute(SettingsRoute.Gateway)
     nav.selectTab(Tab.Settings)
     assertEquals(SettingsRoute.Home, nav.settingsRoute)
 
@@ -112,7 +112,7 @@ class ShellScreenLogicTest {
   @Test
   fun settingsDetailOpenedFromHomeUnwindsToHomeBeforeLeavingSettings() {
     val nav = ShellNavigation()
-    nav.selectTab(Tab.Voice)
+    nav.selectTab(Tab.Chat)
     nav.openSettingsRoute(SettingsRoute.Home)
     nav.openSettingsRouteFromHome(SettingsRoute.Gateway)
 
@@ -132,10 +132,10 @@ class ShellScreenLogicTest {
     nav.back()
     assertEquals(Tab.Chat, nav.activeTab)
 
-    nav.selectTab(Tab.Voice)
+    nav.selectTab(Tab.Overview)
     nav.openDetailTab(Tab.ProvidersModels)
     nav.back()
-    assertEquals(Tab.Chat, nav.activeTab)
+    assertEquals(Tab.Overview, nav.activeTab)
   }
 
   @Test
@@ -156,7 +156,7 @@ class ShellScreenLogicTest {
     val nav = ShellNavigation()
     nav.selectTab(Tab.Chat)
     nav.openDetailTab(Tab.Sessions)
-    nav.selectTab(Tab.Voice)
+    nav.selectTab(Tab.Settings)
     nav.back()
     assertEquals(Tab.Overview, nav.activeTab)
   }
@@ -164,7 +164,7 @@ class ShellScreenLogicTest {
   @Test
   fun shellNavigationSaverRoundTripsCrossTabState() {
     val nav = ShellNavigation()
-    nav.selectTab(Tab.Voice)
+    nav.selectTab(Tab.Chat)
     nav.openSettingsRoute(SettingsRoute.Gateway)
 
     val saveAnything = SaverScope { true }
@@ -796,7 +796,6 @@ class ShellScreenLogicTest {
     val sections =
       settingsSections(
         listOf(
-          settingsRow(SettingsRoute.Voice),
           settingsRow(SettingsRoute.Agents),
           settingsRow(SettingsRoute.Gateway),
           settingsRow(SettingsRoute.Appearance),
@@ -808,7 +807,6 @@ class ShellScreenLogicTest {
       listOf(
         "Connection",
         "Agents & automation",
-        "Phone context & privacy",
         "Profile & device",
         "Diagnostics",
       ),

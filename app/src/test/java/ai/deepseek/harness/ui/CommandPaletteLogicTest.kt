@@ -59,16 +59,16 @@ class CommandPaletteLogicTest {
     val calls = mutableListOf<CommandAction>()
     val item =
       CommandItem(
-        action = CommandAction.Voice,
-        title = verbatimText("Démarrer la voix"),
-        subtitle = verbatimText("Parler avec DeepSeekHarness"),
+        action = CommandAction.Chat,
+        title = verbatimText("Démarrer le chat"),
+        subtitle = verbatimText("Discuter avec DeepSeekHarness"),
         icon = Icons.Outlined.ChatBubbleOutline,
-        onClick = { calls += CommandAction.Voice },
+        onClick = { calls += CommandAction.Chat },
       )
 
     item.onClick()
 
-    assertEquals(CommandAction.Voice, item.action)
-    assertEquals(listOf(CommandAction.Voice), calls)
+    assertEquals(CommandAction.Chat, item.action)
+    assertEquals(listOf(CommandAction.Chat), calls)
   }
 }

@@ -388,65 +388,6 @@ internal fun rememberChatDictationController(viewModel: MainViewModel): ChatDict
   return controller
 }
 
-@Composable
-internal fun ChatComposerMicButton(
-  dictationActive: Boolean,
-  dictationEnabled: Boolean,
-  voiceNoteEnabled: Boolean,
-  onToggleDictation: () -> Unit,
-  onStartVoiceNote: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  val hapticFeedback = LocalHapticFeedback.current
-  val interactionEnabled = dictationActive || dictationEnabled || voiceNoteEnabled
-  val longPressAction: (() -> Unit)? =
-    if (voiceNoteEnabled) {
-      {
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        onStartVoiceNote()
-      }
-    } else {
-      null
-    }
-  val dictationActionLabel =
-    if (dictationActive) {
-      nativeString("Stop Dictation")
-    } else {
-      nativeString("Dictation")
-    }
-
-  Surface(
-    modifier =
-      modifier
-        .size(DshTheme.spacing.touchTarget)
-        .combinedClickable(
-          enabled = interactionEnabled,
-          onClickLabel = dictationActionLabel,
-          role = Role.Button,
-          onLongClickLabel = if (voiceNoteEnabled) voiceNoteRecordLabel() else null,
-          onLongClick = longPressAction,
-          onClick = {
-            if (dictationActive || dictationEnabled) onToggleDictation()
-          },
-        ),
-    shape = CircleShape,
-    color = if (dictationActive) DshTheme.colors.primary else DshTheme.colors.surfaceRaised,
-    contentColor =
-      when {
-        dictationActive -> DshTheme.colors.primaryText
-        dictationEnabled || voiceNoteEnabled -> DshTheme.colors.text
-        else -> DshTheme.colors.textSubtle
-      },
-  ) {
-    Box(contentAlignment = Alignment.Center) {
-      Icon(
-        imageVector = if (dictationActive) Icons.Default.Stop else Icons.Default.Mic,
-        contentDescription = null,
-        modifier = Modifier.size(18.dp),
-      )
-    }
-  }
-}
 
 @Composable
 internal fun ChatDictationError(state: ChatDictationState) {

@@ -7982,7 +7982,7 @@ class NodeRuntime private constructor(
             nativeString("This phone stays dormant until the gateway needs it, then wakes, syncs, and goes back to sleep."),
           gatewayLabel = gatewayLabel,
           activeAgentName = resolveActiveAgentName(activeAgentId),
-          activeAgentBadge = agents.firstOrNull { it.isActive }?.badge ?: "OC",
+          activeAgentBadge = agents.firstOrNull { it.isActive }?.badge ?: "DH",
           activeAgentCaption = nativeString("Selected on this phone"),
           agentCount = agents.size,
           agents = agents.take(6),
@@ -7997,7 +7997,7 @@ class NodeRuntime private constructor(
             nativeString("The gateway session is coming back online. Agent shortcuts should settle automatically in a moment."),
           gatewayLabel = gatewayLabel,
           activeAgentName = resolveActiveAgentName(activeAgentId),
-          activeAgentBadge = "OC",
+          activeAgentBadge = "DH",
           activeAgentCaption = nativeString("Gateway session in progress"),
           agentCount = agents.size,
           agents = agents.take(4),
@@ -8012,7 +8012,7 @@ class NodeRuntime private constructor(
             nativeString("Pair this device to your gateway to wake it only for real work, keep a live agent overview handy, and avoid battery-draining background loops."),
           gatewayLabel = gatewayLabel,
           activeAgentName = nativeString("Main"),
-          activeAgentBadge = "OC",
+          activeAgentBadge = "DH",
           activeAgentCaption = nativeString("Connect to load your agents"),
           agentCount = agents.size,
           agents = agents.take(4),
@@ -8082,7 +8082,7 @@ class NodeRuntime private constructor(
         .take(2)
         .mapNotNull { token -> token.uppercaseFirstGraphemeOrNull() }
         .joinToString("")
-    return if (initials.isNotEmpty()) initials else "OC"
+    return if (initials.isNotEmpty()) initials else "DH"
   }
 
   private fun normalized(value: String?): String? {

@@ -14,14 +14,11 @@ import ai.deepseek.harness.GatewayCronJobSummary
 import ai.deepseek.harness.GatewayCronRunHistoryState
 import ai.deepseek.harness.GatewayExecApprovalNotice
 import ai.deepseek.harness.GatewayExecApprovalSummary
-import ai.deepseek.harness.GatewayTalkSetupReadiness
-import ai.deepseek.harness.GatewayTalkSetupState
 import ai.deepseek.harness.GatewayUsageProviderSummary
 import ai.deepseek.harness.LocationMode
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.NotificationPackageFilterMode
 import ai.deepseek.harness.SensitiveFeatureConfig
-import ai.deepseek.harness.VoiceCaptureMode
 import ai.deepseek.harness.appLanguageRowSubtitle
 import ai.deepseek.harness.chat.ChatPendingToolCall
 import ai.deepseek.harness.currentAppLanguage
@@ -29,8 +26,6 @@ import ai.deepseek.harness.currentSystemLanguageTag
 import ai.deepseek.harness.gateway.GatewayEndpoint
 import ai.deepseek.harness.gateway.GatewayRegistryEntryKind
 import ai.deepseek.harness.gatewayExecApprovalTextForDisplay
-import ai.deepseek.harness.gatewayTalkSetupDescription
-import ai.deepseek.harness.gatewayTalkSetupStatusText
 import ai.deepseek.harness.hasPhotoReadPermission
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.i18n.resolveNativeText
@@ -64,22 +59,13 @@ import ai.deepseek.harness.ui.design.TalkWaveform
 import ai.deepseek.harness.ui.design.TalkWaveformPhase
 import ai.deepseek.harness.ui.design.agentAvatarSource
 import ai.deepseek.harness.uppercaseFirstGraphemeOrNull
-import ai.deepseek.harness.voice.AudioInputDeviceOption
-import ai.deepseek.harness.voice.VoiceWakePreferences
-import ai.deepseek.harness.voice.audioInputDeviceOptionFromKey
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -177,7 +163,6 @@ import java.util.Date
 internal enum class SettingsRoute {
   Home,
   Profile,
-  Voice,
   Agents,
   ProvidersModels,
   Approvals,
@@ -213,7 +198,6 @@ internal fun SettingsDetailScreen(
   when (route) {
     SettingsRoute.Home -> Unit
     SettingsRoute.Profile -> ProfileSettingsScreen(viewModel = viewModel, onBack = onBack)
-    SettingsRoute.Voice -> VoiceSettingsScreen(viewModel = viewModel, onBack = onBack)
     SettingsRoute.Agents -> AgentsSettingsScreen(viewModel = viewModel, onBack = onBack)
     SettingsRoute.ProvidersModels -> ProvidersModelsScreen(viewModel = viewModel, onBack = onBack)
     SettingsRoute.Approvals -> ApprovalsSettingsScreen(viewModel = viewModel, onBack = onBack)
@@ -664,374 +648,6 @@ private fun ProfileSettingsScreen(
       }
     }
   }
-}
-
-@Composable
-private fun VoiceSettingsScreen(
-  viewModel: MainViewModel,
-  onBack: () -> Unit,
-) {
-  val context = LocalContext.current
-  val speakerEnabled by viewModel.speakerEnabled.collectAsState()
-  val preferredAudioInputDevice by viewModel.preferredAudioInputDevice.collectAsState()
-  val voiceCaptureMode by viewModel.voiceCaptureMode.collectAsState()
-  val activeAudioInputDevicePreference by viewModel.activeAudioInputDevicePreference.collectAsState()
-  val isConnected by viewModel.isConnected.collectAsState()
-  val talkSetupReadiness by viewModel.talkSetupReadiness.collectAsState()
-  val voiceWakeEnabled by viewModel.voiceWakeEnabled.collectAsState()
-  val voiceWakeAvailable by viewModel.voiceWakeAvailable.collectAsState()
-  val voiceWakeIsListening by viewModel.voiceWakeIsListening.collectAsState()
-  val voiceWakeStatusText by viewModel.voiceWakeStatusText.collectAsState()
-  val voiceWakeWords by viewModel.voiceWakeWords.collectAsState()
-  val voiceWakeLastCommand by viewModel.voiceWakeLastTriggeredCommand.collectAsState()
-  val voiceWakeWordsSaving by viewModel.voiceWakeWordsSaving.collectAsState()
-  val voiceWakeWordsNoticeText by viewModel.voiceWakeWordsNoticeText.collectAsState()
-  var wakeWordDrafts by remember(voiceWakeWords) {
-    mutableStateOf(voiceWakeWords)
-  }
-  var audioInputDevices by remember { mutableStateOf<List<AudioInputDeviceOption>>(emptyList()) }
-  val audioInputDevicePending =
-    voiceCaptureMode != VoiceCaptureMode.Off && preferredAudioInputDevice != activeAudioInputDevicePreference
-
-  val microphonePermissionLauncher =
-    rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-      viewModel.refreshVoiceWakePermission()
-      if (granted) viewModel.setVoiceWakeEnabled(true)
-    }
-
-  fun setVoiceWake(checked: Boolean) {
-    if (!checked) {
-      viewModel.setVoiceWakeEnabled(false)
-    } else if (hasPermission(context, Manifest.permission.RECORD_AUDIO)) {
-      viewModel.refreshVoiceWakePermission()
-      viewModel.setVoiceWakeEnabled(true)
-    } else {
-      microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-    }
-  }
-
-  LaunchedEffect(isConnected) {
-    if (isConnected) viewModel.refreshTalkSetupReadiness()
-  }
-
-  DisposableEffect(viewModel) {
-    val observer = viewModel.observeAudioInputDevices { devices -> audioInputDevices = devices }
-    onDispose { observer.close() }
-  }
-
-  SettingsDetailFrame(title = nativeString("Voice"), subtitle = nativeString("Configure wake words, talk, and playback."), icon = Icons.Default.Mic, onBack = onBack) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      Text(text = nativeString("Voice Wake"), style = DshTheme.type.section, color = DshTheme.colors.text)
-      SettingsTogglePanel(
-        rows =
-          listOf(
-            SettingsToggleRow(
-              title = nativeString("Listen for wake words"),
-              subtitle =
-                if (voiceWakeAvailable) {
-                  nativeString("Runs on-device while DeepSeekHarness is visible.")
-                } else {
-                  nativeString("On-device speech recognition is unavailable.")
-                },
-              icon = Icons.Default.Mic,
-              checked = voiceWakeEnabled,
-              onCheckedChange = ::setVoiceWake,
-              enabled = voiceWakeAvailable || voiceWakeEnabled,
-            ),
-          ),
-      )
-      VoiceSetupActionRow(
-        title = nativeString("Wake listener"),
-        subtitle =
-          voiceWakeLastCommand?.let { command -> nativeString("Last command: \$command", command) }
-            ?: nativeString("Pauses during other voice activity."),
-        icon = Icons.Default.GraphicEq,
-        statusText = voiceWakeStatusText,
-        ready = voiceWakeIsListening,
-      )
-      DshPanel {
-        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-          Text(text = nativeString("Wake words"), style = DshTheme.type.section, color = DshTheme.colors.text)
-          Text(
-            text = nativeString("Add one wake word or phrase per field. Then say one before your command."),
-            style = DshTheme.type.body,
-            color = DshTheme.colors.textMuted,
-          )
-          wakeWordDrafts.forEachIndexed { index, value ->
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              DshTextField(
-                value = value,
-                onValueChange = { updated ->
-                  wakeWordDrafts = wakeWordDrafts.toMutableList().also { it[index] = updated }
-                },
-                placeholder = nativeString("Wake word or phrase"),
-                enabled = voiceWakeAvailable && !voiceWakeWordsSaving,
-                modifier = Modifier.weight(1f),
-              )
-              if (voiceWakeAvailable && !voiceWakeWordsSaving && wakeWordDrafts.size > 1) {
-                DshPlainIconButton(
-                  icon = Icons.Default.Delete,
-                  contentDescription = nativeString("Remove wake phrase"),
-                  onClick = {
-                    wakeWordDrafts = wakeWordDrafts.filterIndexed { draftIndex, _ -> draftIndex != index }
-                  },
-                )
-              }
-            }
-          }
-          DshSecondaryButton(
-            text = nativeString("Add wake phrase"),
-            onClick = { wakeWordDrafts = wakeWordDrafts + "" },
-            enabled = voiceWakeAvailable && !voiceWakeWordsSaving && wakeWordDrafts.size < VoiceWakePreferences.maxWords,
-            icon = Icons.Default.Add,
-            modifier = Modifier.fillMaxWidth(),
-          )
-          DshSecondaryButton(
-            text = if (voiceWakeWordsSaving) nativeString("Saving…") else nativeString("Save wake words"),
-            onClick = { viewModel.setVoiceWakeWords(wakeWordDrafts) },
-            enabled = voiceWakeAvailable && isConnected && !voiceWakeWordsSaving && wakeWordDrafts.any(String::isNotBlank),
-            modifier = Modifier.fillMaxWidth(),
-          )
-          (voiceWakeWordsNoticeText ?: if (!isConnected) nativeString("Connect to a Gateway to save wake words") else null)?.let { notice ->
-            Text(text = notice, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
-          }
-        }
-      }
-      Text(text = nativeString("Talk Provider Setup"), style = DshTheme.type.section, color = DshTheme.colors.text)
-      VoiceSetupPanel(talkSetupReadiness)
-      Text(text = nativeString("Microphone"), style = DshTheme.type.section, color = DshTheme.colors.text)
-      AudioInputDevicePanel(
-        devices = audioInputDevices,
-        preferredDeviceKey = preferredAudioInputDevice,
-        preferencePending = audioInputDevicePending,
-        onSelect = viewModel::setPreferredAudioInputDevice,
-      )
-      Text(text = nativeString("Audio Test"), style = DshTheme.type.section, color = DshTheme.colors.text)
-      Text(text = nativeString("Check that DeepSeekHarness can speak clearly on this phone."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
-      SettingsWaveformPanel(active = speakerEnabled, onClick = ::playVoiceSetupTone)
-      VoiceSetupActionRow(
-        title = if (speakerEnabled) nativeString("Mute speaker") else nativeString("Enable speaker"),
-        subtitle = if (speakerEnabled) nativeString("Replies play aloud") else nativeString("Assistant speech muted"),
-        icon = Icons.AutoMirrored.Filled.VolumeUp,
-        statusText = if (speakerEnabled) nativeString("On") else nativeString("Muted"),
-        ready = speakerEnabled,
-        onClick = { viewModel.setSpeakerEnabled(!speakerEnabled) },
-      )
-      DshPrimaryButton(text = nativeString("Done"), onClick = onBack, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.GraphicEq)
-    }
-  }
-}
-
-@Composable
-private fun AudioInputDevicePanel(
-  devices: List<AudioInputDeviceOption>,
-  preferredDeviceKey: String?,
-  preferencePending: Boolean,
-  onSelect: (String?) -> Unit,
-) {
-  val preferredAvailable = devices.any { it.key == preferredDeviceKey }
-  val unavailablePreferredDevice =
-    preferredDeviceKey?.takeUnless { preferredAvailable }?.let(::audioInputDeviceOptionFromKey)
-  DshPanel {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      AudioInputDeviceRow(
-        title = nativeString("Automatic"),
-        subtitle =
-          if (preferredDeviceKey != null && !preferredAvailable) {
-            nativeString("Preferred microphone unavailable; using automatic routing.")
-          } else {
-            nativeString("Prioritizes connected Bluetooth microphones.")
-          },
-        selected = preferredDeviceKey == null || !preferredAvailable,
-        pending = preferencePending && preferredDeviceKey == null,
-        onClick = { onSelect(null) },
-      )
-      unavailablePreferredDevice?.let { device ->
-        HorizontalDivider(color = DshTheme.colors.border)
-        AudioInputDeviceRow(
-          title = device.productName.ifBlank { nativeString("Preferred microphone") },
-          subtitle = nativeString("Unavailable"),
-          selected = false,
-          pending = preferencePending,
-          onClick = null,
-        )
-      }
-      devices.forEach { device ->
-        HorizontalDivider(color = DshTheme.colors.border)
-        val typeLabel = audioInputDeviceTypeLabel(device.type)
-        AudioInputDeviceRow(
-          title = device.productName.ifBlank { typeLabel },
-          subtitle = typeLabel,
-          selected = device.key == preferredDeviceKey,
-          pending = preferencePending && device.key == preferredDeviceKey,
-          onClick = { onSelect(device.key) },
-        )
-      }
-    }
-  }
-}
-
-@Composable
-private fun AudioInputDeviceRow(
-  title: String,
-  subtitle: String,
-  selected: Boolean,
-  pending: Boolean,
-  onClick: (() -> Unit)?,
-) {
-  DshListItem(
-    title = title,
-    subtitle = subtitle,
-    metadata = nativeString("Next session").takeIf { pending },
-    leading = { DshIconBadge(Icons.Default.Mic) },
-    trailing =
-      if (selected) {
-        {
-          Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = nativeString("Selected"),
-            modifier = Modifier.size(18.dp),
-            tint = DshTheme.colors.primary,
-          )
-        }
-      } else {
-        null
-      },
-    onClick = onClick,
-  )
-}
-
-@Composable
-private fun audioInputDeviceTypeLabel(type: Int): String =
-  when (type) {
-    AudioDeviceInfo.TYPE_BUILTIN_MIC -> nativeString("Built-in microphone")
-    AudioDeviceInfo.TYPE_BLUETOOTH_SCO -> nativeString("Bluetooth microphone")
-    AudioDeviceInfo.TYPE_BLE_HEADSET -> nativeString("Bluetooth LE microphone")
-    AudioDeviceInfo.TYPE_WIRED_HEADSET -> nativeString("Wired headset microphone")
-    AudioDeviceInfo.TYPE_USB_DEVICE,
-    AudioDeviceInfo.TYPE_USB_ACCESSORY,
-    AudioDeviceInfo.TYPE_USB_HEADSET,
-    -> nativeString("USB microphone")
-    else -> nativeString("External microphone")
-  }
-
-@Composable
-private fun VoiceSetupPanel(
-  readiness: GatewayTalkSetupReadiness,
-) {
-  Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-    VoiceSetupReadinessRow(title = nativeString("Realtime Talk"), state = readiness.realtimeTalk, icon = Icons.Default.GraphicEq)
-    VoiceSetupReadinessRow(title = nativeString("Dictation"), state = readiness.dictation, icon = Icons.Default.Mic)
-  }
-}
-
-@Composable
-private fun VoiceSetupReadinessRow(
-  title: String,
-  state: GatewayTalkSetupState,
-  icon: ImageVector,
-) {
-  VoiceSetupActionRow(
-    title = title,
-    subtitle = gatewayTalkSetupDescription(state),
-    icon = icon,
-    statusText = gatewayTalkSetupStatusText(state),
-    ready = state.isReady,
-  )
-}
-
-@Composable
-private fun VoiceSetupActionRow(
-  title: String,
-  subtitle: String,
-  icon: ImageVector,
-  statusText: String,
-  ready: Boolean,
-  onClick: (() -> Unit)? = null,
-) {
-  val rowModifier = Modifier.fillMaxWidth().heightIn(min = 68.dp)
-  Surface(
-    onClick = onClick ?: {},
-    enabled = onClick != null,
-    modifier = rowModifier,
-    shape = RoundedCornerShape(DshTheme.radii.panel),
-    color = DshTheme.colors.surface,
-    contentColor = DshTheme.colors.text,
-    border = BorderStroke(1.dp, DshTheme.colors.border),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(11.dp),
-    ) {
-      Surface(
-        modifier = Modifier.size(38.dp),
-        shape = CircleShape,
-        color = DshTheme.colors.canvas,
-        contentColor = DshTheme.colors.text,
-        border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
-      ) {
-        Box(contentAlignment = Alignment.Center) {
-          Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(19.dp))
-        }
-      }
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = title, style = DshTheme.type.section, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = subtitle, style = DshTheme.type.body, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-      }
-      Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-        Box(
-          modifier =
-            Modifier
-              .size(7.dp)
-              .background(if (ready) DshTheme.colors.success else DshTheme.colors.textSubtle, CircleShape),
-        )
-        Text(text = statusText, style = DshTheme.type.body, color = DshTheme.colors.textMuted, maxLines = 1)
-        if (onClick != null) {
-          Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = DshTheme.colors.textMuted)
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun SettingsWaveformPanel(
-  active: Boolean,
-  onClick: () -> Unit,
-) {
-  Surface(
-    onClick = onClick,
-    modifier = Modifier.fillMaxWidth().height(76.dp),
-    shape = RoundedCornerShape(DshTheme.radii.panel),
-    color = DshTheme.colors.surface,
-    contentColor = DshTheme.colors.text,
-    border = BorderStroke(1.dp, DshTheme.colors.border),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-      Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp), tint = DshTheme.colors.text)
-      // Thinking is the preview phase: no capture runs on this screen, so the
-      // synthetic swell demonstrates the animation without touching the mic.
-      TalkWaveform(
-        phase = if (active) TalkWaveformPhase.Thinking else TalkWaveformPhase.Idle,
-        modifier = Modifier.weight(1f).height(48.dp),
-      )
-    }
-  }
-}
-
-private fun playVoiceSetupTone() {
-  val tone = ToneGenerator(AudioManager.STREAM_MUSIC, 80)
-  tone.startTone(ToneGenerator.TONE_PROP_BEEP, 250)
-  Handler(Looper.getMainLooper()).postDelayed({ tone.release() }, 300L)
 }
 
 private const val NOTIFICATION_PICKER_RESULT_LIMIT = 40

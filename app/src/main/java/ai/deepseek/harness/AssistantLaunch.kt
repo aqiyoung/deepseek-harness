@@ -9,9 +9,6 @@ import java.util.Locale
 /** Android Assistant entry point used by manifest-declared app actions. */
 const val actionAskDeepSeekHarness = "ai.deepseek.harness.action.ASK_DEEPSEEK_HARNESS"
 
-/** Debug action that opens the Voice tab directly for Android E2E automation. */
-const val actionOpenVoiceE2e = "ai.deepseek.harness.debug.OPEN_VOICE_E2E"
-
 /** Intent extra that carries an optional assistant prompt for app actions. */
 const val extraAssistantPrompt = "prompt"
 
@@ -21,7 +18,6 @@ const val extraAssistantPrompt = "prompt"
 enum class HomeDestination {
   Connect,
   Chat,
-  Voice,
   Screen,
   Settings,
 }
@@ -80,14 +76,7 @@ internal val SHARED_VIDEO_MIME_TYPES = arrayOf("video/*")
 /**
  * Parses app-owned navigation actions that should open a specific home tab.
  */
-fun parseHomeDestinationIntent(intent: Intent?): HomeDestination? {
-  val action = intent?.action ?: return null
-  return when {
-    // Debug-only shortcut keeps E2E navigation out of release builds.
-    BuildConfig.DEBUG && action == actionOpenVoiceE2e -> HomeDestination.Voice
-    else -> null
-  }
-}
+fun parseHomeDestinationIntent(intent: Intent?): HomeDestination? = null
 
 /**
  * Parse external assistant entry points without starting any UI side effects.

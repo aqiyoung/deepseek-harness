@@ -593,7 +593,7 @@ internal fun DshComponentShowcase(modifier: Modifier = Modifier) {
       DshTopBar(
         title = "DeepSeekHarness",
         subtitle = "Local command center",
-        navigation = { DshAvatarMark(text = "OC") },
+        navigation = { DshAvatarMark(text = "DH") },
         actions = {
           DshIconButton(icon = Icons.Default.Search, contentDescription = "Search", onClick = {})
         },
@@ -655,7 +655,6 @@ internal fun DshComponentShowcase(modifier: Modifier = Modifier) {
           listOf(
             DshNavItem(key = "overview", label = "Home", icon = Icons.Default.Home),
             DshNavItem(key = "chat", label = "Chat", icon = Icons.Default.ChatBubble),
-            DshNavItem(key = "voice", label = "Voice", icon = Icons.Default.Mic),
             DshNavItem(key = "settings", label = "Settings", icon = Icons.Default.Settings),
           ),
         selectedKey = "chat",
