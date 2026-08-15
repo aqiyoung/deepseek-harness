@@ -184,6 +184,7 @@ fun LoginScreen(
                     is LoginResult.Success -> {
                       result.cookie?.let { viewModel.setSessionCookie(it) }
                       viewModel.setLoggedIn(true, username)
+                      viewModel.registerGatewayFromServerUrl()
                       onLoginSuccess()
                     }
                     is LoginResult.Failure -> {

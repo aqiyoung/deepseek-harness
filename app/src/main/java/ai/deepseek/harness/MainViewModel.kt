@@ -31,6 +31,7 @@ import ai.deepseek.harness.node.CameraCaptureManager
 import ai.deepseek.harness.node.CanvasController
 import ai.deepseek.harness.node.SmsManager
 import ai.deepseek.harness.systemagent.SystemAgentChatState
+import ai.deepseek.harness.ui.GatewayConnectConfig
 import ai.deepseek.harness.ui.GatewayConnectPlan
 import ai.deepseek.harness.ui.GatewaySavedAuthAction
 import ai.deepseek.harness.ui.SettingsRoute
@@ -50,6 +51,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import java.net.URI
 import ai.deepseek.harness.update.GitHubUpdateResult
 import ai.deepseek.harness.update.UpdateManager
 import androidx.lifecycle.AndroidViewModel
@@ -939,6 +941,43 @@ class MainViewModel private constructor(
   /** Persists the DSH backend server address used by the login request. */
   fun setServerUrl(value: String) {
     prefs.setServerUrl(value)
+  }
+
+  /**
+   * Web 登录成功后调用：把登录所用的后端地址自动注册为 Gateway 端点，并附上 Web 会话
+   * Cookie 参与 WebSocket 鉴权，使 App 无需手动配置即可像浏览器一样连上同一实例。
+   * 仅在尚无 manual gateway 配置时生效，避免覆盖用户已显式设置的连接。
+   */
+  fun registerGatewayFromServerUrl() {
+    if (prefs.gatewayRegistry.entries.value.any { it.kind == GatewayRegistryEntryKind.MANUAL }) return
+    val cookie = prefs.getSessionCookie() ?: return
+    val sessionCookie = cookie.split(';').firstOrNull()?.trim() ?: return
+    if (sessionCookie.isEmpty()) return
+    val url = prefs.serverUrl.value.trim().removeSuffix("/")
+    if (url.isEmpty()) return
+    val uri = runCatching { URI(url) }.getOrNull() ?: return
+    val scheme = uri.scheme?.lowercase().orEmpty()
+    if (scheme != "http" && scheme != "https") return
+    val host = uri.host?.takeIf { it.isNotEmpty() } ?: return
+    val tls = scheme == "https"
+    val port = if (uri.port != -1) uri.port else if (tls) 443 else 80
+    val endpoint = GatewayEndpoint.manual(host, port, tlsEnabled = tls, contextPath = "")
+    prefs.saveGatewayCustomHeaders(endpoint.stableId, mapOf("Cookie" to sessionCookie))
+    saveGatewayConfigAndConnect(
+      GatewayConnectPlan(
+        config =
+          GatewayConnectConfig(
+            host = host,
+            port = port,
+            tls = tls,
+            bootstrapToken = "",
+            token = "",
+            password = "",
+            contextPath = "",
+          ),
+        savedAuthAction = GatewaySavedAuthAction.PRESERVE,
+      ),
+    )
   }
 
   // ── App 自身检查更新 ──
