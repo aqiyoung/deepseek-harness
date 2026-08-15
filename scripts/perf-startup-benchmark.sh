@@ -54,7 +54,7 @@ fi
 
 mkdir -p "$RESULTS_DIR"
 
-run_log="$(mktemp -t openclaw-android-bench.XXXXXX.log)"
+run_log="$(mktemp -t dsh-android-bench.XXXXXX.log)"
 trap 'rm -f "$run_log"' EXIT
 
 cd "$ANDROID_DIR"
