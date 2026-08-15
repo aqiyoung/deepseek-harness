@@ -2,10 +2,13 @@ package ai.deepseek.harness.ui
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.net.http.SslError
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
+import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -49,6 +52,8 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
   var canGoBack by remember { mutableStateOf(false) }
   var canGoForward by remember { mutableStateOf(false) }
   var isLoading by remember { mutableStateOf(true) }
+  var currentUrl by remember { mutableStateOf(DSH_WEB_URL) }
+  var lastError by remember { mutableStateOf<String?>(null) }
   val webViewRef = remember { mutableStateOf<WebView?>(null) }
 
   // Chat/file attachments from the web app surface here.
@@ -108,7 +113,7 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
           )
         }
         Text(
-          text = DSH_WEB_URL,
+          text = currentUrl,
           style = MaterialTheme.typography.labelMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.padding(start = 8.dp),
@@ -118,6 +123,15 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
 
     if (isLoading) {
       LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(2.dp))
+    }
+
+    lastError?.let { error ->
+      Text(
+        text = error,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+      )
     }
 
     androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize().weight(1f)) {
@@ -134,9 +148,13 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
               settings.databaseEnabled = true
               settings.loadWithOverviewMode = true
               settings.useWideViewPort = true
-              settings.builtInZoomControls = true
+              settings.builtInZoomControls = false
               settings.displayZoomControls = false
+              settings.setSupportZoom(false)
               settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+              settings.userAgentString =
+                "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36 DSH-Android/1.0"
+              CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
               webViewClient =
                 object : WebViewClient() {
                   override fun shouldOverrideUrlLoading(
@@ -150,6 +168,8 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     favicon: Bitmap?,
                   ) {
                     isLoading = true
+                    lastError = null
+                    url?.let { currentUrl = it }
                   }
 
                   override fun onPageFinished(
@@ -159,6 +179,33 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     isLoading = false
                     canGoBack = view?.canGoBack() == true
                     canGoForward = view?.canGoForward() == true
+                    url?.let { currentUrl = it }
+                    view?.requestFocus()
+                  }
+
+                  override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?,
+                  ) {
+                    if (request?.isForMainFrame == true) {
+                      lastError = "ERR_${error?.errorCode}: ${error?.description}"
+                    }
+                  }
+
+                  override fun onReceivedSslError(
+                    view: WebView?,
+                    handler: SslErrorHandler?,
+                    error: SslError?,
+                  ) {
+                    // DSH self-hosted instances may use private/CN-issued certs;
+                    // allow the user through on the same host we intended to load.
+                    val host = error?.url?.let { Uri.parse(it).host }
+                    if (host != null && (host == Uri.parse(DSH_WEB_URL).host || host.endsWith(".threel.site"))) {
+                      handler?.proceed()
+                    } else {
+                      handler?.cancel()
+                    }
                   }
                 }
               webChromeClient =
