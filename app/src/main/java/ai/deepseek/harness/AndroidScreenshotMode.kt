@@ -3,8 +3,8 @@ package ai.deepseek.harness
 import ai.deepseek.harness.ui.SettingsRoute
 import android.content.Intent
 
-const val extraAndroidScreenshotMode = "openclaw.screenshotMode"
-const val extraAndroidScreenshotScene = "openclaw.screenshotScene"
+const val extraAndroidScreenshotMode = "dsh.screenshotMode"
+const val extraAndroidScreenshotScene = "dsh.screenshotScene"
 
 enum class AndroidScreenshotScene(
   val rawValue: String,
@@ -16,7 +16,7 @@ enum class AndroidScreenshotScene(
   Swarm("swarm", HomeDestination.Chat),
   Settings("settings", HomeDestination.Settings),
   Gateway("gateway", HomeDestination.Settings, SettingsRoute.Gateway),
-  DeepSeekHarness("openclaw", HomeDestination.Settings, SettingsRoute.SystemAgent),
+  DeepSeekHarness("dsh", HomeDestination.Settings, SettingsRoute.SystemAgent),
   Desktop("desktop", HomeDestination.Settings, SettingsRoute.Desktop),
   VoiceWake("voice-wake", HomeDestination.Settings, SettingsRoute.Voice),
   ;

@@ -41,7 +41,7 @@ class RealtimeAgentCoordinatorTest {
 
       val consult = calls.single { it.method == "talk.client.toolCall" }
       assertEquals(15_000L, consult.timeoutMs)
-      assertTrue(consult.params.contains("\"name\":\"openclaw_agent_consult\""))
+      assertTrue(consult.params.contains("\"name\":\"dsh_agent_consult\""))
       val result = calls.single { it.method == "talk.session.submitToolResult" }
       assertTrue(result.params.contains("\"sessionId\":\"relay-1\""))
       assertTrue(result.params.contains("\"callId\":\"call-1\""))
@@ -88,7 +88,7 @@ class RealtimeAgentCoordinatorTest {
 
       coordinator.handleToolCall(
         callId = "control-1",
-        name = "openclaw_agent_control",
+        name = "dsh_agent_control",
         args = Json.parseToJsonElement("""{"text":"stop","mode":"cancel"}"""),
         forced = false,
       )
@@ -416,7 +416,7 @@ class RealtimeAgentCoordinatorTest {
   private fun RealtimeAgentCoordinator.consult(
     callId: String,
     forced: Boolean = false,
-  ): Boolean = handleToolCall(callId, "openclaw_agent_consult", null, forced)
+  ): Boolean = handleToolCall(callId, "dsh_agent_consult", null, forced)
 
   private fun RealtimeAgentCoordinator.complete(
     sessionKey: String,

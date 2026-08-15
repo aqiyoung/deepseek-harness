@@ -187,7 +187,7 @@ class SkillManagementTest {
         skillKey = "custom-frontmatter-key",
         name = "Custom display name",
         description = null,
-        source = "openclaw-managed",
+        source = "dsh-managed",
         emoji = null,
         disabled = false,
         eligible = true,

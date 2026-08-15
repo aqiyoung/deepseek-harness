@@ -24,30 +24,30 @@ class GatewaySessionInvokeTimeoutTest {
   @Test
   fun buildGatewayWebSocketUrl_preservesAndEncodesContextPath() {
     assertEquals(
-      "wss://gateway.example:443/openclaw%20gateway",
+      "wss://gateway.example:443/dsh%20gateway",
       buildGatewayWebSocketUrl(
         host = "gateway.example",
         port = 443,
         useTls = true,
-        contextPath = "/openclaw%20gateway",
+        contextPath = "/dsh%20gateway",
       ),
     )
     assertEquals(
-      "wss://gateway.example:443/openclaw%2Fgateway",
+      "wss://gateway.example:443/dsh%2Fgateway",
       buildGatewayWebSocketUrl(
         host = "gateway.example",
         port = 443,
         useTls = true,
-        contextPath = "/openclaw%2Fgateway",
+        contextPath = "/dsh%2Fgateway",
       ),
     )
     assertEquals(
-      "wss://gateway.example:443//openclaw",
+      "wss://gateway.example:443//dsh",
       buildGatewayWebSocketUrl(
         host = "gateway.example",
         port = 443,
         useTls = true,
-        contextPath = "//openclaw",
+        contextPath = "//dsh",
       ),
     )
   }

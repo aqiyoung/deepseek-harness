@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.IntSize
 
 /**
  * DeepSeek Harness brand mark — the DeepSeek whale — rendered as the in-app mascot.
- * Replaces the original OpenClaw lobster mascot geometry.
+ * Replaces the original lobster mascot geometry.
  */
 @Composable
 fun DeepSeekHarnessMascot(

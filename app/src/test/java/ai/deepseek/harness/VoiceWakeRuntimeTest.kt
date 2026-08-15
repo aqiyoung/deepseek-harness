@@ -27,7 +27,7 @@ class VoiceWakeRuntimeTest {
 
     runtime.setVoiceWakeWords(listOf("hey claw"))
 
-    assertEquals(listOf("openclaw", "claude", "computer"), runtime.voiceWakeWords.value)
+    assertEquals(listOf("dsh", "claude", "computer"), runtime.voiceWakeWords.value)
     assertEquals("Connect to a Gateway to save wake words", runtime.voiceWakeWordsNoticeText.value)
     assertFalse(runtime.voiceWakeWordsSaving.value)
   }
@@ -63,7 +63,7 @@ class VoiceWakeRuntimeTest {
         while (runtime.voiceWakeWordsSaving.value) delay(10)
       }
 
-      assertEquals(listOf("openclaw", "claude", "computer"), runtime.voiceWakeWords.value)
+      assertEquals(listOf("dsh", "claude", "computer"), runtime.voiceWakeWords.value)
       assertEquals("Could not save wake words", runtime.voiceWakeWordsNoticeText.value)
     }
 
@@ -85,7 +85,7 @@ class VoiceWakeRuntimeTest {
         while (runtime.voiceWakeWordsSaving.value) delay(10)
       }
 
-      assertEquals(listOf("openclaw", "claude", "computer"), runtime.voiceWakeWords.value)
+      assertEquals(listOf("dsh", "claude", "computer"), runtime.voiceWakeWords.value)
       assertEquals(null, runtime.voiceWakeWordsNoticeText.value)
     }
 
@@ -139,7 +139,7 @@ class VoiceWakeRuntimeTest {
       isCurrentConnection = { false },
     )
 
-    assertEquals(listOf("openclaw", "claude", "computer"), runtime.voiceWakeWords.value)
+    assertEquals(listOf("dsh", "claude", "computer"), runtime.voiceWakeWords.value)
   }
 
   @Test
@@ -158,7 +158,7 @@ class VoiceWakeRuntimeTest {
     invokeNoArg(runtime, "invalidateVoiceWakeWordsForGateway")
     runtime.setVoiceWakeWords(listOf("stale overwrite"))
 
-    assertEquals(listOf("openclaw", "claude", "computer"), runtime.voiceWakeWords.value)
+    assertEquals(listOf("dsh", "claude", "computer"), runtime.voiceWakeWords.value)
     assertEquals("Connect to a Gateway to save wake words", runtime.voiceWakeWordsNoticeText.value)
   }
 
@@ -168,7 +168,7 @@ class VoiceWakeRuntimeTest {
     shadowOf(app).grantPermissions(Manifest.permission.RECORD_AUDIO)
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.voicewake.runtime.test.${UUID.randomUUID()}",
+        "dsh.node.voicewake.runtime.test.${UUID.randomUUID()}",
         Context.MODE_PRIVATE,
       )
     val prefs = SecurePrefs(app, securePrefsOverride = securePrefs)
@@ -222,7 +222,7 @@ class VoiceWakeRuntimeTest {
     val app = RuntimeEnvironment.getApplication()
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.voicewake.runtime.test.${UUID.randomUUID()}",
+        "dsh.node.voicewake.runtime.test.${UUID.randomUUID()}",
         Context.MODE_PRIVATE,
       )
     return NodeRuntime(app, SecurePrefs(app, securePrefsOverride = securePrefs))
@@ -233,7 +233,7 @@ class VoiceWakeRuntimeTest {
     writeField(runtime, "connectedEndpoint", endpoint)
     runtime.applyNodeVoiceWakeWords(
       endpointStableId = endpoint.stableId,
-      payloadJson = """{"triggers":["openclaw","claude","computer"]}""",
+      payloadJson = """{"triggers":["dsh","claude","computer"]}""",
       isCurrentConnection = { true },
     )
     return endpoint

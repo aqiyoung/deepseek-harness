@@ -54,7 +54,7 @@ class DeviceNotificationListenerServiceTest {
 
   @Test
   fun recentPackages_migratesLegacyPreferenceKey() {
-    val prefs = context.getSharedPreferences("openclaw.secure", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences("dsh.secure", Context.MODE_PRIVATE)
     prefs
       .edit()
       .clear()
@@ -73,7 +73,7 @@ class DeviceNotificationListenerServiceTest {
 
   @Test
   fun recentPackages_cleansUpLegacyKeyWhenNewKeyAlreadyExists() {
-    val prefs = context.getSharedPreferences("openclaw.secure", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences("dsh.secure", Context.MODE_PRIVATE)
     prefs
       .edit()
       .clear()
@@ -89,7 +89,7 @@ class DeviceNotificationListenerServiceTest {
 
   @Test
   fun recentPackages_trimsDedupesAndPreservesRecencyOrder() {
-    val prefs = context.getSharedPreferences("openclaw.secure", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences("dsh.secure", Context.MODE_PRIVATE)
     prefs
       .edit()
       .clear()

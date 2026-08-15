@@ -149,12 +149,12 @@ class AndroidScreenshotFixtureTest {
     assertEquals("main_session_restart_recovery", restartRecovery?.get("sourceTool")?.jsonPrimitive?.content)
     val gatewayRestarted = messages[3].jsonObject["provenance"]?.jsonObject
     assertEquals("restart-sentinel", gatewayRestarted?.get("sourceTool")?.jsonPrimitive?.content)
-    val compaction = messages[6].jsonObject["__openclaw"]?.jsonObject
+    val compaction = messages[6].jsonObject["__dsh"]?.jsonObject
     assertEquals("compaction", compaction?.get("kind")?.jsonPrimitive?.content)
     assertEquals("android-screenshot-compaction", compaction?.get("id")?.jsonPrimitive?.content)
     assertEquals("900000", compaction?.get("tokensBefore")?.jsonPrimitive?.content)
     assertEquals("24700", compaction?.get("tokensAfter")?.jsonPrimitive?.content)
-    val reset = messages[7].jsonObject["__openclaw"]?.jsonObject
+    val reset = messages[7].jsonObject["__dsh"]?.jsonObject
     assertEquals("reset", reset?.get("kind")?.jsonPrimitive?.content)
     assertEquals("android-screenshot-reset", reset?.get("id")?.jsonPrimitive?.content)
   }
@@ -165,20 +165,20 @@ class AndroidScreenshotFixtureTest {
       json
         .parseToJsonElement(
           AndroidScreenshotFixture.request(
-            "openclaw.chat",
-            """{"sessionId":"android-settings-openclaw-test"}""",
+            "dsh.chat",
+            """{"sessionId":"android-settings-dsh-test"}""",
           ),
         ).jsonObject
     val response =
       json
         .parseToJsonElement(
           AndroidScreenshotFixture.request(
-            "openclaw.chat",
-            """{"sessionId":"android-settings-openclaw-test","message":"Check status"}""",
+            "dsh.chat",
+            """{"sessionId":"android-settings-dsh-test","message":"Check status"}""",
           ),
         ).jsonObject
 
-    assertEquals("android-screenshot-openclaw", greeting["sessionId"]?.jsonPrimitive?.content)
+    assertEquals("android-screenshot-dsh", greeting["sessionId"]?.jsonPrimitive?.content)
     assertEquals(
       "What should we look at first?",
       greeting["question"]

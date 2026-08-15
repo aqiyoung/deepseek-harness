@@ -20,7 +20,7 @@ import java.util.UUID
 @Config(sdk = [34])
 class DeviceIdentityStoreTest {
   private val app get() = RuntimeEnvironment.getApplication()
-  private val legacyFile get() = File(app.filesDir, "openclaw/identity/device.json")
+  private val legacyFile get() = File(app.filesDir, "dsh/identity/device.json")
 
   @Before
   fun setUp() {

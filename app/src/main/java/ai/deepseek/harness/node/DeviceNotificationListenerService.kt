@@ -341,7 +341,7 @@ class DeviceNotificationListenerService : NotificationListenerService() {
       nodeEventSink = sink
     }
 
-    private fun recentPackagesPrefs(context: Context) = context.applicationContext.getSharedPreferences("openclaw.secure", Context.MODE_PRIVATE)
+    private fun recentPackagesPrefs(context: Context) = context.applicationContext.getSharedPreferences("dsh.secure", Context.MODE_PRIVATE)
 
     private fun migrateLegacyRecentPackagesIfNeeded(context: Context) {
       val prefs = recentPackagesPrefs(context)

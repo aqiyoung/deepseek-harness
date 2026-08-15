@@ -42,7 +42,7 @@ class DeepSeekHarnessCanvasA2UIActionTest {
   fun jsDispatchA2uiStatusIsStable() {
     val js = DeepSeekHarnessCanvasA2UIAction.jsDispatchA2UIActionStatus(actionId = "a1", ok = true, error = null)
     assertEquals(
-      "window.dispatchEvent(new CustomEvent('openclaw:a2ui-action-status', { detail: { id: \"a1\", ok: true, error: \"\" } }));",
+      "window.dispatchEvent(new CustomEvent('dsh:a2ui-action-status', { detail: { id: \"a1\", ok: true, error: \"\" } }));",
       js,
     )
   }
@@ -56,7 +56,7 @@ class DeepSeekHarnessCanvasA2UIActionTest {
         error = "parse failed\n\t\u2029\\",
       )
     assertEquals(
-      "window.dispatchEvent(new CustomEvent('openclaw:a2ui-action-status', { detail: { id: \"a1\\n\\u2028\\\"\", ok: false, error: \"parse failed\\n\\t\\u2029\\\\\" } }));",
+      "window.dispatchEvent(new CustomEvent('dsh:a2ui-action-status', { detail: { id: \"a1\\n\\u2028\\\"\", ok: false, error: \"parse failed\\n\\t\\u2029\\\\\" } }));",
       js,
     )
   }

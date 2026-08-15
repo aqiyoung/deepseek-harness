@@ -39,7 +39,7 @@ class NodesDevicesSettingsScreenTest {
           displayName = "Pixel",
           platform = "android",
           deviceFamily = "phone",
-          clientId = "openclaw-android",
+          clientId = "dsh-android",
           clientMode = "ui",
           browserOrigin = "https://gateway.example",
           remoteIp = "192.0.2.10",
@@ -54,7 +54,7 @@ class NodesDevicesSettingsScreenTest {
     assertEquals("device-1", lines["Device ID"])
     assertEquals("public-key-1", lines["Public key"])
     assertEquals("android · phone", lines["Platform"])
-    assertEquals("openclaw-android · ui", lines["Client"])
+    assertEquals("dsh-android · ui", lines["Client"])
     assertEquals("https://gateway.example", lines["Origin"])
     assertEquals("192.0.2.10", lines["Remote IP"])
     assertEquals("operator", lines["Roles"])

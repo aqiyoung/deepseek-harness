@@ -172,7 +172,7 @@ class GatewaySessionInvokeTest {
       fingerprint,
       gatewayTlsFingerprintForCanvasSurface(
         fingerprint = fingerprint,
-        surfaceUrl = "https://gateway.example:7443/__openclaw__/cap/token",
+        surfaceUrl = "https://gateway.example:7443/__dsh__/cap/token",
         endpoint = endpoint,
         isTlsConnection = true,
       ),
@@ -180,7 +180,7 @@ class GatewaySessionInvokeTest {
     assertNull(
       gatewayTlsFingerprintForCanvasSurface(
         fingerprint = fingerprint,
-        surfaceUrl = "https://canvas.example:7443/__openclaw__/cap/token",
+        surfaceUrl = "https://canvas.example:7443/__dsh__/cap/token",
         endpoint = endpoint,
         isTlsConnection = true,
       ),
@@ -188,7 +188,7 @@ class GatewaySessionInvokeTest {
     assertNull(
       gatewayTlsFingerprintForCanvasSurface(
         fingerprint = fingerprint,
-        surfaceUrl = "https://gateway.example:9443/__openclaw__/cap/token",
+        surfaceUrl = "https://gateway.example:9443/__dsh__/cap/token",
         endpoint = endpoint,
         isTlsConnection = true,
       ),
@@ -223,7 +223,7 @@ class GatewaySessionInvokeTest {
               connectResponseFrame(
                 id,
                 pluginSurfaceUrls =
-                  mapOf("canvas" to "http://127.0.0.1:18789/__openclaw__/cap/old-token"),
+                  mapOf("canvas" to "http://127.0.0.1:18789/__dsh__/cap/old-token"),
               ),
             )
           expectedMethod -> {
@@ -245,7 +245,7 @@ class GatewaySessionInvokeTest {
                 ?.endsWith("/old-token") == true,
             )
             webSocket.send(
-              """{"type":"res","id":"$id","ok":true,"payload":{"surface":"canvas","pluginSurfaceUrls":{"canvas":"http://127.0.0.1:18789/__openclaw__/cap/new-token"}}}""",
+              """{"type":"res","id":"$id","ok":true,"payload":{"surface":"canvas","pluginSurfaceUrls":{"canvas":"http://127.0.0.1:18789/__dsh__/cap/new-token"}}}""",
             )
           }
         }
@@ -1465,7 +1465,7 @@ class GatewaySessionInvokeTest {
           permissions = emptyMap(),
           client =
             GatewayClientInfo(
-              id = "openclaw-android-test",
+              id = "dsh-android-test",
               displayName = "Android Test",
               version = "1.0.0-test",
               platform = "android",

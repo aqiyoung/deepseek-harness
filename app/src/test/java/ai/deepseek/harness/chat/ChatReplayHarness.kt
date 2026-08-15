@@ -268,7 +268,7 @@ internal fun historyResponse(
               put("idempotencyKey", JsonPrimitive(message.idempotencyKey))
             }
             if (message.entryId != null) {
-              put("__openclaw", buildJsonObject { put("id", JsonPrimitive(message.entryId)) })
+              put("__dsh", buildJsonObject { put("id", JsonPrimitive(message.entryId)) })
             }
           }
         },

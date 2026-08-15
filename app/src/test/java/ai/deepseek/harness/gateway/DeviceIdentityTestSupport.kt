@@ -6,7 +6,7 @@ import android.content.Context
 internal fun testDeviceIdentityStore(context: Context): DeviceIdentityStore {
   val backing =
     context.getSharedPreferences(
-      "openclaw.node.secure.test.device-identity",
+      "dsh.node.secure.test.device-identity",
       Context.MODE_PRIVATE,
     )
   return DeviceIdentityStore.withPrefs(

@@ -113,7 +113,7 @@ private fun installControlUiAuthScript(
     """
     (() => {
       try {
-        Object.defineProperty(window, "__OPENCLAW_NATIVE_CONTROL_AUTH__", {
+        Object.defineProperty(window, "__DSH_NATIVE_CONTROL_AUTH__", {
           value: $payload,
           configurable: true,
         });

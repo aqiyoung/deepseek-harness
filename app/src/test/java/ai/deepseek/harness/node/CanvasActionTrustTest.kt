@@ -19,7 +19,7 @@ class CanvasActionTrustTest {
   fun rejectsRemoteHttpA2uiPageEvenWhenGatewayAdvertised() {
     assertFalse(
       CanvasActionTrust.isTrustedCanvasActionUrl(
-        rawUrl = "http://canvas.example.com:9443/__openclaw__/cap/token/__openclaw__/a2ui/?platform=android",
+        rawUrl = "http://canvas.example.com:9443/__dsh__/cap/token/__dsh__/a2ui/?platform=android",
       ),
     )
   }
@@ -28,7 +28,7 @@ class CanvasActionTrustTest {
   fun rejectsRemoteHttpsA2uiPageEvenWhenGatewayAdvertised() {
     assertFalse(
       CanvasActionTrust.isTrustedCanvasActionUrl(
-        rawUrl = "https://canvas.example.com:9443/__openclaw__/cap/token/__openclaw__/a2ui/?platform=android",
+        rawUrl = "https://canvas.example.com:9443/__dsh__/cap/token/__dsh__/a2ui/?platform=android",
       ),
     )
   }
@@ -37,7 +37,7 @@ class CanvasActionTrustTest {
   fun rejectsRemoteCanvasPage() {
     assertFalse(
       CanvasActionTrust.isTrustedCanvasActionUrl(
-        rawUrl = "https://canvas.example.com:9443/__openclaw__/canvas/",
+        rawUrl = "https://canvas.example.com:9443/__dsh__/canvas/",
       ),
     )
   }

@@ -48,7 +48,7 @@ class ChatMessageContentParsingTest {
   fun parsesCapabilityGatedCanvasWidgets() {
     val content =
       Json.parseToJsonElement(
-        """{"type":"canvas","preview":{"kind":"canvas","surface":"assistant_message","render":"url","title":"Status","preferredHeight":240,"url":"/__openclaw__/canvas/documents/widget-1/index.html","sandbox":"scripts"}}""",
+        """{"type":"canvas","preview":{"kind":"canvas","surface":"assistant_message","render":"url","title":"Status","preferredHeight":240,"url":"/__dsh__/canvas/documents/widget-1/index.html","sandbox":"scripts"}}""",
       )
 
     assertEquals(
@@ -57,7 +57,7 @@ class ChatMessageContentParsingTest {
         widget =
           ChatWidgetPreview(
             title = "Status",
-            path = "/__openclaw__/canvas/documents/widget-1/index.html",
+            path = "/__dsh__/canvas/documents/widget-1/index.html",
             preferredHeight = 240,
             sandbox = "scripts",
           ),
@@ -70,7 +70,7 @@ class ChatMessageContentParsingTest {
   fun dropsCanvasBlocksWithoutWidgetSandbox() {
     val content =
       Json.parseToJsonElement(
-        """{"type":"canvas","preview":{"kind":"canvas","surface":"assistant_message","render":"url","url":"/__openclaw__/canvas/documents/widget-1/index.html"}}""",
+        """{"type":"canvas","preview":{"kind":"canvas","surface":"assistant_message","render":"url","url":"/__dsh__/canvas/documents/widget-1/index.html"}}""",
       )
 
     assertNull(parseChatMessageContent(content))
@@ -88,29 +88,29 @@ class ChatMessageContentParsingTest {
 
   @Test
   fun resolvesOnlyCapabilityScopedWidgetDocuments() {
-    val surface = "https://gateway.example/__openclaw__/cap/token"
+    val surface = "https://gateway.example/__dsh__/cap/token"
 
     assertEquals(
-      "https://gateway.example/__openclaw__/cap/token/__openclaw__/canvas/documents/widget-1/index.html",
-      ChatWidgetUrlResolver.resolve(surface, "/__openclaw__/canvas/documents/widget-1/index.html"),
+      "https://gateway.example/__dsh__/cap/token/__dsh__/canvas/documents/widget-1/index.html",
+      ChatWidgetUrlResolver.resolve(surface, "/__dsh__/canvas/documents/widget-1/index.html"),
     )
     assertEquals(
-      "https://gateway.example/__openclaw__/cap/token/__openclaw__/canvas/documents/widget-1/index.html",
+      "https://gateway.example/__dsh__/cap/token/__dsh__/canvas/documents/widget-1/index.html",
       ChatWidgetUrlResolver.resolve(
-        "HTTPS://gateway.example/__openclaw__/cap/token",
-        "/__openclaw__/canvas/documents/widget-1/index.html",
+        "HTTPS://gateway.example/__dsh__/cap/token",
+        "/__dsh__/canvas/documents/widget-1/index.html",
       ),
     )
-    assertNull(ChatWidgetUrlResolver.resolve("https://gateway.example", "/__openclaw__/canvas/documents/widget-1/index.html"))
+    assertNull(ChatWidgetUrlResolver.resolve("https://gateway.example", "/__dsh__/canvas/documents/widget-1/index.html"))
     assertNull(ChatWidgetUrlResolver.resolve(surface, "https://attacker.example/widget.html"))
-    assertNull(ChatWidgetUrlResolver.resolve(surface, "/__openclaw__/a2ui/index.html"))
-    assertNull(ChatWidgetUrlResolver.resolve(surface, "/__openclaw__/canvas/documents/%252e%252e/index.html"))
+    assertNull(ChatWidgetUrlResolver.resolve(surface, "/__dsh__/a2ui/index.html"))
+    assertNull(ChatWidgetUrlResolver.resolve(surface, "/__dsh__/canvas/documents/%252e%252e/index.html"))
   }
 
   @Test
   fun initialResolutionUsesOperatorFallbackWhenNodeUnavailable() {
-    val target = "/__openclaw__/canvas/documents/widget-1/index.html"
-    val fallbackSurface = "https://operator.example/__openclaw__/cap/fallback"
+    val target = "/__dsh__/canvas/documents/widget-1/index.html"
+    val fallbackSurface = "https://operator.example/__dsh__/cap/fallback"
     val surfaces =
       ChatWidgetSurfaceUrls(
         node = null,
@@ -125,9 +125,9 @@ class ChatMessageContentParsingTest {
   @Test
   fun usesReplacementRouteAfterCapabilityRefreshLosesItsLease() =
     runTest {
-      val target = "/__openclaw__/canvas/documents/widget-1/index.html"
-      val oldSurface = "https://gateway.example/__openclaw__/cap/old"
-      val newSurface = "https://gateway.example/__openclaw__/cap/new"
+      val target = "/__dsh__/canvas/documents/widget-1/index.html"
+      val oldSurface = "https://gateway.example/__dsh__/cap/old"
+      val newSurface = "https://gateway.example/__dsh__/cap/new"
       val oldPin = "aa".repeat(32)
       val newPin = "bb".repeat(32)
       val failedUrl = ChatWidgetUrlResolver.resolve(oldSurface, target)
@@ -161,8 +161,8 @@ class ChatMessageContentParsingTest {
   @Test
   fun acceptsSameUrlReplacementWhenTlsPinChanged() =
     runTest {
-      val target = "/__openclaw__/canvas/documents/widget-1/index.html"
-      val surface = "https://gateway.example/__openclaw__/cap/token"
+      val target = "/__dsh__/canvas/documents/widget-1/index.html"
+      val surface = "https://gateway.example/__dsh__/cap/token"
       val oldPin = "aa".repeat(32)
       val newPin = "bb".repeat(32)
       val url = requireNotNull(ChatWidgetUrlResolver.resolve(surface, target))
@@ -196,10 +196,10 @@ class ChatMessageContentParsingTest {
   @Test
   fun refreshesNodeOnceBeforeTryingOperatorFallback() =
     runTest {
-      val target = "/__openclaw__/canvas/documents/widget-1/index.html"
-      val oldSurface = "https://gateway.example/__openclaw__/cap/old"
-      val newSurface = "https://gateway.example/__openclaw__/cap/new"
-      val fallbackSurface = "https://operator.example/__openclaw__/cap/fallback"
+      val target = "/__dsh__/canvas/documents/widget-1/index.html"
+      val oldSurface = "https://gateway.example/__dsh__/cap/old"
+      val newSurface = "https://gateway.example/__dsh__/cap/new"
+      val fallbackSurface = "https://operator.example/__dsh__/cap/fallback"
       var refreshCount = 0
       var current =
         ChatWidgetSurfaceUrls(
@@ -242,9 +242,9 @@ class ChatMessageContentParsingTest {
   @Test
   fun refreshesOperatorCapabilityWhenNodeUnavailable() =
     runTest {
-      val target = "/__openclaw__/canvas/documents/widget-1/index.html"
-      val oldSurface = "https://operator.example/__openclaw__/cap/old"
-      val newSurface = "https://operator.example/__openclaw__/cap/new"
+      val target = "/__dsh__/canvas/documents/widget-1/index.html"
+      val oldSurface = "https://operator.example/__dsh__/cap/old"
+      val newSurface = "https://operator.example/__dsh__/cap/new"
       val failedResource =
         ChatWidgetResource(
           url = requireNotNull(ChatWidgetUrlResolver.resolve(oldSurface, target)),

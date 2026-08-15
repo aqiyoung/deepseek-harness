@@ -530,7 +530,7 @@ private fun nodeApprovalSubtitle(approvalState: GatewayNodeApprovalState): Strin
 
 internal fun devicePairingAdminUnavailableText(): String =
   nativeString(
-    "Device pairing actions are unavailable in this Gateway session. Run openclaw devices list on the Gateway host and manage the request there. Node capability approval is separate and still uses nodes approve <request id>.",
+    "Device pairing actions are unavailable in this Gateway session. Run dsh devices list on the Gateway host and manage the request there. Node capability approval is separate and still uses nodes approve <request id>.",
   )
 
 private fun pendingDeviceSubtitle(device: GatewayPendingDeviceSummary): String {

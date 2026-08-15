@@ -14,19 +14,19 @@ class VoiceWakePreferencesTest {
   @Test
   fun sanitizePreservesPhrasePunctuationAndNewlines() {
     assertEquals(
-      listOf("hey, openclaw", "line\nbreak"),
-      VoiceWakePreferences.sanitizeTriggerWords(listOf(" hey, openclaw ", "line\nbreak")),
+      listOf("hey, dsh", "line\nbreak"),
+      VoiceWakePreferences.sanitizeTriggerWords(listOf(" hey, dsh ", "line\nbreak")),
     )
   }
 
   @Test
   fun matcherRequiresWordBoundariesAndCommand() {
-    assertNull(VoiceWakePhraseMatcher.match("reopenclaw show status", listOf("openclaw")))
-    assertNull(VoiceWakePhraseMatcher.match("openclaw", listOf("openclaw")))
-    assertNull(VoiceWakePhraseMatcher.match("tell openclaw show status", listOf("openclaw")))
+    assertNull(VoiceWakePhraseMatcher.match("redsh show status", listOf("dsh")))
+    assertNull(VoiceWakePhraseMatcher.match("dsh", listOf("dsh")))
+    assertNull(VoiceWakePhraseMatcher.match("tell dsh show status", listOf("dsh")))
     assertEquals(
       VoiceWakeMatch(trigger = "DeepSeekHarness", command = "show status"),
-      VoiceWakePhraseMatcher.match("Hey DeepSeekHarness, show status", listOf("openclaw")),
+      VoiceWakePhraseMatcher.match("Hey DeepSeekHarness, show status", listOf("dsh")),
     )
   }
 
@@ -54,7 +54,7 @@ class VoiceWakePreferencesTest {
   fun matcherNormalizesSpokenPunctuationAndWhitespace() {
     assertEquals(
       VoiceWakeMatch(trigger = "Hey DeepSeekHarness", command = "show status"),
-      VoiceWakePhraseMatcher.match("Hey DeepSeekHarness show status", listOf("hey,\nopenclaw")),
+      VoiceWakePhraseMatcher.match("Hey DeepSeekHarness show status", listOf("hey,\ndsh")),
     )
   }
 }

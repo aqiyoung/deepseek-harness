@@ -26,7 +26,7 @@ class CronRuntimeGuardTest {
   fun clearPlainPrefs() {
     RuntimeEnvironment
       .getApplication()
-      .getSharedPreferences("openclaw.node", android.content.Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", android.content.Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()
@@ -300,7 +300,7 @@ class CronRuntimeGuardTest {
     val app = RuntimeEnvironment.getApplication()
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.cron.guard.test.${UUID.randomUUID()}",
+        "dsh.node.cron.guard.test.${UUID.randomUUID()}",
         android.content.Context.MODE_PRIVATE,
       )
     return NodeRuntime(app, SecurePrefs(app, securePrefsOverride = securePrefs))

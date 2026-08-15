@@ -15,7 +15,7 @@ import android.os.Build
 import android.widget.Toast
 
 /** App version label shared by diagnostics and gateway-facing Android metadata. */
-internal fun openClawAndroidVersionLabel(): String {
+internal fun dshAndroidVersionLabel(): String {
   val versionName = BuildConfig.VERSION_NAME.trim().ifEmpty { "dev" }
   return if (BuildConfig.DEBUG && !versionName.contains("dev", ignoreCase = true)) {
     "$versionName-dev"
@@ -124,8 +124,8 @@ internal fun gatewayNodeApprovalCommand(
   when (state) {
     GatewayNodeApprovalState.PendingApproval,
     GatewayNodeApprovalState.PendingReapproval,
-    -> normalizeGatewayApprovalRequestId(requestId)?.let { "openclaw nodes approve $it" } ?: "openclaw nodes status"
-    GatewayNodeApprovalState.Unapproved -> "openclaw nodes status"
+    -> normalizeGatewayApprovalRequestId(requestId)?.let { "dsh nodes approve $it" } ?: "dsh nodes status"
+    GatewayNodeApprovalState.Unapproved -> "dsh nodes status"
     GatewayNodeApprovalState.Loading,
     GatewayNodeApprovalState.Unsupported,
     GatewayNodeApprovalState.Approved,
@@ -171,8 +171,8 @@ internal fun buildGatewayDiagnosticsReport(
       "- classify this as pairing/auth, TLS trust, wrong advertised route, wrong address/port, or gateway down\n" +
       "- remember: public routes require wss:// or Tailscale Serve; ws:// is allowed for localhost, .local hosts, the Android emulator, and private LAN IPs\n" +
       "- quote the exact app status/error below\n" +
-      "- tell me whether `openclaw devices list` should show a pending pairing request\n" +
-      "- if more signal is needed, ask for `openclaw qr --json`, `openclaw devices list`, and `openclaw nodes status`\n" +
+      "- tell me whether `dsh devices list` should show a pending pairing request\n" +
+      "- if more signal is needed, ask for `dsh qr --json`, `dsh devices list`, and `dsh nodes status`\n" +
       "- give the next exact command or tap\n\n" +
       "Debug info:\n" +
       "- screen: \$screen\n" +
@@ -182,7 +182,7 @@ internal fun buildGatewayDiagnosticsReport(
       "- gateway address: \$endpoint\n" +
       "- status/error: \$status",
     screen,
-    openClawAndroidVersionLabel(),
+    dshAndroidVersionLabel(),
     device,
     androidVersion,
     Build.VERSION.SDK_INT,

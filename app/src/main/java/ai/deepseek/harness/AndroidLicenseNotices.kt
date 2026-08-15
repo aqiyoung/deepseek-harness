@@ -2,7 +2,7 @@ package ai.deepseek.harness
 
 import android.content.res.AssetManager
 
-internal const val ANDROID_LICENSE_ASSET_DIRECTORY = "openclaw/licenses"
+internal const val ANDROID_LICENSE_ASSET_DIRECTORY = "dsh/licenses"
 
 internal data class AndroidLicenseNotice(
   val title: String,

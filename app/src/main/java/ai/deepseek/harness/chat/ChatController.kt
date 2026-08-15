@@ -6358,9 +6358,9 @@ class ChatController internal constructor(
           content = content,
           timestampMs = ts,
           idempotencyKey = obj["idempotencyKey"].asStringOrNull(),
-          entryId = obj["__openclaw"].asObjectOrNull()?.get("id").asStringOrNull(),
+          entryId = obj["__dsh"].asObjectOrNull()?.get("id").asStringOrNull(),
           provenance = parseChatMessageProvenance(obj["provenance"]),
-          transcriptMarker = parseChatTranscriptMarker(obj["__openclaw"]),
+          transcriptMarker = parseChatTranscriptMarker(obj["__dsh"]),
         )
       }
 

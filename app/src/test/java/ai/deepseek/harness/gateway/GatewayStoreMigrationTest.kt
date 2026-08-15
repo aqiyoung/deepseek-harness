@@ -157,7 +157,7 @@ class GatewayStoreMigrationTest {
 
   private fun fixture(): Fixture {
     val context = RuntimeEnvironment.getApplication()
-    val plain = context.getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+    val plain = context.getSharedPreferences("dsh.node", Context.MODE_PRIVATE)
     plain.edit().clear().commit()
     val secure = context.getSharedPreferences("gateway-migration-${UUID.randomUUID()}", Context.MODE_PRIVATE)
     secure.edit().clear().commit()

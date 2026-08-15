@@ -2885,7 +2885,7 @@ class NodeRuntime private constructor(
       return
     }
 
-    val client = connectionManager.buildClientInfo(clientId = "openclaw-android", clientMode = "node")
+    val client = connectionManager.buildClientInfo(clientId = "dsh-android", clientMode = "node")
     val payloadJson =
       NodePresenceAliveBeacon.makePayloadJson(
         trigger = trigger,
@@ -7266,7 +7266,7 @@ class NodeRuntime private constructor(
       gatewayApprovalRpcFamily = selectGatewayApprovalRpcFamily(methods)
       _clawHubSkillMethodsAvailable.value = supportsClawHubSkillManagement(methods)
       _desktopObserveAvailable.value = GatewayMethod.DesktopObserve.rawValue in methods
-      systemAgentChatSupported.value = GatewayMethod.OpenclawChat.rawValue in methods
+      systemAgentChatSupported.value = GatewayMethod.DshChat.rawValue in methods
       gatewayMethodsEpoch += 1
     }
   }
@@ -7899,7 +7899,7 @@ class NodeRuntime private constructor(
   private fun parseDreamDiaryEntries(content: String?): List<GatewayDreamDiaryEntry> {
     val raw = content?.trim().orEmpty()
     if (raw.isEmpty()) return emptyList()
-    val body = raw.substringAfter("<!-- openclaw:dreaming:diary:start -->", raw).substringBefore("<!-- openclaw:dreaming:diary:end -->")
+    val body = raw.substringAfter("<!-- dsh:dreaming:diary:start -->", raw).substringBefore("<!-- dsh:dreaming:diary:end -->")
     return body
       .split(Regex("\\n---\\n"))
       .mapNotNull(::parseGatewayDreamDiaryEntry)

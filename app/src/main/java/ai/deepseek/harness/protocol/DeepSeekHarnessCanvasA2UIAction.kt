@@ -69,7 +69,7 @@ object DeepSeekHarnessCanvasA2UIAction {
     val err = jsonStringLiteral(error ?: "")
     val okLiteral = if (ok) "true" else "false"
     val idLiteral = jsonStringLiteral(actionId)
-    return "window.dispatchEvent(new CustomEvent('openclaw:a2ui-action-status', { detail: { id: $idLiteral, ok: $okLiteral, error: $err } }));"
+    return "window.dispatchEvent(new CustomEvent('dsh:a2ui-action-status', { detail: { id: $idLiteral, ok: $okLiteral, error: $err } }));"
   }
 
   private fun jsonStringLiteral(raw: String): String = JsonPrimitive(raw).toString().replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")

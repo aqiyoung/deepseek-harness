@@ -80,7 +80,7 @@ class GatewayRegistryStoreTest {
         host = "gateway.example",
         port = 443,
         tlsEnabled = true,
-        contextPath = "/openclaw-gw",
+        contextPath = "/dsh-gw",
       )
     prefs.gatewayRegistry.upsert(
       GatewayRegistryEntry(
@@ -97,7 +97,7 @@ class GatewayRegistryStoreTest {
     val restored = GatewayRegistryStore(SecurePrefs(RuntimeEnvironment.getApplication(), securePrefs))
 
     assertEquals(
-      "/openclaw-gw",
+      "/dsh-gw",
       restored.entries.value
         .single()
         .contextPath,
@@ -205,7 +205,7 @@ class GatewayRegistryStoreTest {
   private fun freshPrefs(): Pair<SecurePrefs, android.content.SharedPreferences> {
     val context = RuntimeEnvironment.getApplication()
     context
-      .getSharedPreferences("openclaw.node", Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()

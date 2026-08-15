@@ -37,7 +37,7 @@ class GatewayExecApprovalRuntimeTest {
   fun clearPlainPrefs() {
     RuntimeEnvironment
       .getApplication()
-      .getSharedPreferences("openclaw.node", android.content.Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", android.content.Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()
@@ -1039,7 +1039,7 @@ class GatewayExecApprovalRuntimeTest {
     val app = RuntimeEnvironment.getApplication()
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.approval.runtime.test.${UUID.randomUUID()}",
+        "dsh.node.approval.runtime.test.${UUID.randomUUID()}",
         android.content.Context.MODE_PRIVATE,
       )
     return NodeRuntime(app, SecurePrefs(app, securePrefsOverride = securePrefs))

@@ -145,7 +145,7 @@ class ChatControllerMessageIdentityTest {
                   {
                     "role": "system",
                     "content": "Compaction",
-                    "__openclaw": {
+                    "__dsh": {
                       "kind": "compaction",
                       "id": "checkpoint-1",
                       "tokensBefore": 900000.5,

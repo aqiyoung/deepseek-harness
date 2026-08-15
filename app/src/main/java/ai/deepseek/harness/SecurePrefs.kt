@@ -45,8 +45,8 @@ class SecurePrefs(
   companion object {
     private const val displayNameKey = "node.displayName"
     private const val locationModeKey = "location.enabledMode"
-    private const val plainPrefsName = "openclaw.node"
-    private const val securePrefsName = "openclaw.node.secure"
+    private const val plainPrefsName = "dsh.node"
+    private const val securePrefsName = "dsh.node.secure"
     private const val notificationsForwardingEnabledKey = "notifications.forwarding.enabled"
     private const val defaultNotificationForwardingEnabled = false
     private const val notificationsForwardingModeKey = "notifications.forwarding.mode"

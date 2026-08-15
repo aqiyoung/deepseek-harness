@@ -3,7 +3,7 @@ package ai.deepseek.harness.voice
 import ai.deepseek.harness.takeUtf16Safe
 
 internal object VoiceWakePreferences {
-  val defaultTriggerWords: List<String> = listOf("openclaw", "claude", "computer")
+  val defaultTriggerWords: List<String> = listOf("dsh", "claude", "computer")
   const val maxWords = 32
   const val maxWordLength = 64
 

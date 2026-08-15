@@ -218,7 +218,7 @@ class ConnectionManager internal constructor(
       caps = buildCapabilities(),
       commands = buildInvokeCommands(),
       permissions = buildPermissions(),
-      client = buildClientInfo(clientId = "openclaw-android", clientMode = "node"),
+      client = buildClientInfo(clientId = "dsh-android", clientMode = "node"),
       userAgent = buildUserAgent(),
     )
 
@@ -236,7 +236,7 @@ class ConnectionManager internal constructor(
         },
       commands = emptyList(),
       permissions = emptyMap(),
-      client = buildClientInfo(clientId = "openclaw-android", clientMode = "ui"),
+      client = buildClientInfo(clientId = "dsh-android", clientMode = "ui"),
       userAgent = buildUserAgent(),
     )
 

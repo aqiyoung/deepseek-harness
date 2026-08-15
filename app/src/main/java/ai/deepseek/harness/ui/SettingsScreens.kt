@@ -1835,7 +1835,7 @@ private fun GatewaySettingsScreen(
         }
         if (showSetupCodeHelp) {
           Text(
-            text = nativeString("Android can scan or paste an existing setup code, but this gateway does not expose setup-code generation to the app yet. Generate the QR/code on the gateway host with openclaw qr, then scan it here or paste the setup code below."),
+            text = nativeString("Android can scan or paste an existing setup code, but this gateway does not expose setup-code generation to the app yet. Generate the QR/code on the gateway host with dsh qr, then scan it here or paste the setup code below."),
             style = ClawTheme.type.caption,
             color = ClawTheme.colors.textMuted,
           )
@@ -1992,7 +1992,7 @@ internal fun gatewayAccessLabel(
 
 internal fun gatewayLimitedAccessUpgradeText(): String =
   nativeString(
-    "Use a secure wss:// or Tailscale Serve Gateway, generate a full-access setup code in the Control UI or with openclaw qr, then scan or paste it below and reconnect to enable settings and upgrades.",
+    "Use a secure wss:// or Tailscale Serve Gateway, generate a full-access setup code in the Control UI or with dsh qr, then scan or paste it below and reconnect to enable settings and upgrades.",
   )
 
 @Composable

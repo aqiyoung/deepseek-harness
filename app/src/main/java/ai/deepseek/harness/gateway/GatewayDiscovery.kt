@@ -84,8 +84,8 @@ class GatewayDiscovery(
   private val nsd = context.getSystemService(NsdManager::class.java)
   private val connectivity = context.getSystemService(ConnectivityManager::class.java)
   private val dns = createDnsResolver(context)
-  private val serviceType = "_openclaw-gw._tcp."
-  private val wideAreaDomain = System.getenv("OPENCLAW_WIDE_AREA_DOMAIN")
+  private val serviceType = "_dsh-gw._tcp."
+  private val wideAreaDomain = System.getenv("DSH_WIDE_AREA_DOMAIN")
   private val logTag = "DeepSeekHarness/GatewayDiscovery"
 
   private val localById = ConcurrentHashMap<String, GatewayEndpoint>()

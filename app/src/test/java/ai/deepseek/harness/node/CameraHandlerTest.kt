@@ -114,7 +114,7 @@ class CameraHandlerTest {
 
   @Test
   fun cameraClipSession_closesRecordingUnbindsAndDeletesOwnedFile() {
-    val tempFile = File.createTempFile("openclaw-clip-test-", ".mp4")
+    val tempFile = File.createTempFile("dsh-clip-test-", ".mp4")
     val cleanup = mutableListOf<String>()
     val session =
       CameraClipSession(
@@ -149,7 +149,7 @@ class CameraHandlerTest {
 
   @Test
   fun cameraClipSession_keepsFileTransferredToCaller() {
-    val tempFile = File.createTempFile("openclaw-clip-test-", ".mp4")
+    val tempFile = File.createTempFile("dsh-clip-test-", ".mp4")
     try {
       val cleanup = mutableListOf<String>()
       val session =

@@ -111,7 +111,7 @@ class A2UIHandler(
       """
       (() => {
         try {
-          const host = globalThis.openclawA2UI;
+          const host = globalThis.dshA2UI;
           return !!host && typeof host.applyMessages === 'function';
         } catch (_) {
           return false;
@@ -123,8 +123,8 @@ class A2UIHandler(
       """
       (() => {
         try {
-          const host = globalThis.openclawA2UI;
-          if (!host) return { ok: false, error: "missing openclawA2UI" };
+          const host = globalThis.dshA2UI;
+          if (!host) return { ok: false, error: "missing dshA2UI" };
           return host.reset();
         } catch (e) {
           return { ok: false, error: String(e?.message ?? e) };
@@ -136,8 +136,8 @@ class A2UIHandler(
       """
       (() => {
         try {
-          const host = globalThis.openclawA2UI;
-          if (!host) return { ok: false, error: "missing openclawA2UI" };
+          const host = globalThis.dshA2UI;
+          if (!host) return { ok: false, error: "missing dshA2UI" };
           const messages = $messagesJson;
           return host.applyMessages(messages);
         } catch (e) {

@@ -40,7 +40,7 @@ private data class CachedMessageContent(
 private data class CachedMessagePayload(
   val content: List<CachedMessageContent>,
   val provenance: CachedMessageProvenance? = null,
-  @SerialName("__openclaw") val transcriptMarker: CachedTranscriptMarker? = null,
+  @SerialName("__dsh") val transcriptMarker: CachedTranscriptMarker? = null,
 )
 
 @Serializable
