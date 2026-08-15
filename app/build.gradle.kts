@@ -327,6 +327,7 @@ dependencies {
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.browser)
   implementation(libs.androidx.webkit)
 
   implementation(libs.androidx.compose.ui)
