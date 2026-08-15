@@ -1584,7 +1584,7 @@ private fun SettingsShellScreen(
           SettingsRow(
             nativeText("Usage"),
             nativeText(usageSummaryText(usageSummary.providers.size)),
-            Icons.Default.Info,
+            Icons.Default.GraphicEq,
             route = SettingsRoute.Usage,
           ),
           SettingsRow(
@@ -1601,7 +1601,7 @@ private fun SettingsShellScreen(
             route = SettingsRoute.SkillWorkshop,
           ),
           SettingsRow(nativeText("Notifications"), if (notificationForwardingEnabled) nativeText("Smart delivery") else nativeText("Off"), Icons.Default.Notifications, route = SettingsRoute.Notifications),
-          SettingsRow(nativeText("Phone Capabilities"), nativeText("Camera, location, photos"), Icons.Default.LocationOn, route = SettingsRoute.PhoneCapabilities),
+          SettingsRow(nativeText("Phone Capabilities"), nativeText("Camera, location, photos"), Icons.Default.Security, route = SettingsRoute.PhoneCapabilities),
           SettingsRow(
             nativeText("Appearance"),
             joinedNativeText(
