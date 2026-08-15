@@ -1784,10 +1784,12 @@ private val settingsSectionOrder =
 internal fun settingsSectionTitleForRoute(route: SettingsRoute): NativeText =
   when (route) {
     SettingsRoute.Gateway,
-    SettingsRoute.SystemAgent,
+    SettingsRoute.NodesDevices,
+    SettingsRoute.Channels,
     -> nativeText("Connection")
 
     SettingsRoute.Agents,
+    SettingsRoute.SystemAgent,
     SettingsRoute.ProvidersModels,
     SettingsRoute.Approvals,
     SettingsRoute.CronJobs,
