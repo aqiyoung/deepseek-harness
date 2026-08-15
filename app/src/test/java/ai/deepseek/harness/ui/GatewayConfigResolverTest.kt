@@ -111,26 +111,26 @@ class GatewayConfigResolverTest {
 
   @Test
   fun parseGatewayEndpointPreservesDecodedContextPath() {
-    val parsed = parseGatewayEndpoint("wss://gateway.example/openclaw%20gateway")
+    val parsed = parseGatewayEndpoint("wss://gateway.example/dsh%20gateway")
 
-    assertEquals("/openclaw%20gateway", parsed?.contextPath)
-    assertEquals("https://gateway.example/openclaw%20gateway", parsed?.displayUrl)
+    assertEquals("/dsh%20gateway", parsed?.contextPath)
+    assertEquals("https://gateway.example/dsh%20gateway", parsed?.displayUrl)
   }
 
   @Test
   fun parseGatewayEndpointPreservesEscapedPathDelimiter() {
-    val parsed = parseGatewayEndpoint("wss://gateway.example/openclaw%2Fgateway")
+    val parsed = parseGatewayEndpoint("wss://gateway.example/dsh%2Fgateway")
 
-    assertEquals("/openclaw%2Fgateway", parsed?.contextPath)
-    assertEquals("https://gateway.example/openclaw%2Fgateway", parsed?.displayUrl)
+    assertEquals("/dsh%2Fgateway", parsed?.contextPath)
+    assertEquals("https://gateway.example/dsh%2Fgateway", parsed?.displayUrl)
   }
 
   @Test
   fun parseGatewayEndpointPreservesRepeatedLeadingPathSlashes() {
-    val parsed = parseGatewayEndpoint("wss://gateway.example//openclaw")
+    val parsed = parseGatewayEndpoint("wss://gateway.example//dsh")
 
-    assertEquals("//openclaw", parsed?.contextPath)
-    assertEquals("https://gateway.example//openclaw", parsed?.displayUrl)
+    assertEquals("//dsh", parsed?.contextPath)
+    assertEquals("https://gateway.example//dsh", parsed?.displayUrl)
   }
 
   @Test
@@ -385,9 +385,9 @@ class GatewayConfigResolverTest {
   fun parseGatewayEndpointResultRejectsCredentialsQueriesAndFragments() {
     val urls =
       listOf(
-        "wss://user@gateway.example/openclaw-gw",
-        "wss://gateway.example/openclaw-gw?mode=setup",
-        "wss://gateway.example/openclaw-gw#fragment",
+        "wss://user@gateway.example/dsh-gw",
+        "wss://gateway.example/dsh-gw?mode=setup",
+        "wss://gateway.example/dsh-gw#fragment",
       )
 
     for (url in urls) {
@@ -488,13 +488,13 @@ class GatewayConfigResolverTest {
     val resolved =
       resolveConnectConfigFixture(
         useSetupCode = true,
-        setupCode = setupCode("wss://gateway.example/openclaw-gw"),
+        setupCode = setupCode("wss://gateway.example/dsh-gw"),
       )
 
     assertEquals("gateway.example", resolved?.host)
     assertEquals(443, resolved?.port)
     assertEquals(true, resolved?.tls)
-    assertEquals("/openclaw-gw", resolved?.contextPath)
+    assertEquals("/dsh-gw", resolved?.contextPath)
   }
 
   @Test
@@ -810,9 +810,9 @@ class GatewayConfigResolverTest {
         "gateway.local:18789#evil.example",
         "[::1]:18789?redirect=evil.example",
         "[::1]:18789#evil.example",
-        "wss://user@gateway.example/openclaw-gw",
-        "wss://gateway.example/openclaw-gw?mode=manual",
-        "wss://gateway.example/openclaw-gw#fragment",
+        "wss://user@gateway.example/dsh-gw",
+        "wss://gateway.example/dsh-gw?mode=manual",
+        "wss://gateway.example/dsh-gw#fragment",
       )
 
     for (hostInput in hosts) {

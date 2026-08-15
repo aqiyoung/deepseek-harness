@@ -25,7 +25,7 @@ class DeviceIdentityStore private constructor(
   constructor(context: Context) : this(context, SecurePrefs(context))
 
   private val json = Json { ignoreUnknownKeys = true }
-  private val legacyIdentityFile = File(context.filesDir, "openclaw/identity/device.json")
+  private val legacyIdentityFile = File(context.filesDir, "dsh/identity/device.json")
 
   @Volatile private var cachedIdentity: DeviceIdentity? = null
 

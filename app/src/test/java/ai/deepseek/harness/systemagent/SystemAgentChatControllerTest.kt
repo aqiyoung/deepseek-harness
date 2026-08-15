@@ -43,14 +43,14 @@ class SystemAgentChatControllerTest {
       advanceUntilIdle()
 
       val request = harness.requests.single()
-      assertEquals("openclaw.chat", request.method)
+      assertEquals("dsh.chat", request.method)
       assertEquals(190_000, request.timeoutMs)
       val params = json.parseToJsonElement(request.paramsJson).jsonObject
       assertTrue(
         params
           .getValue("sessionId")
           .jsonPrimitive.content
-          .startsWith("android-settings-openclaw-"),
+          .startsWith("android-settings-dsh-"),
       )
       assertFalse("message" in params)
       assertFalse("welcomeVariant" in params)

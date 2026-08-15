@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 
-private const val NOTIFICATION_CHANNEL_BASE_ID = "openclaw.system.notify"
+private const val NOTIFICATION_CHANNEL_BASE_ID = "dsh.system.notify"
 private const val NOTIFICATION_CONTENT_REQUEST_CODE = 3
 
 /** Parsed payload for system.notify invocations. */

@@ -313,7 +313,7 @@ internal class CanvasA2UIActionBridge(
   }
 
   companion object {
-    const val interfaceName: String = "openclawCanvasA2UIAction"
+    const val interfaceName: String = "dshCanvasA2UIAction"
     val allowedOriginRules: Set<String> = setOf("*")
   }
 }

@@ -27,7 +27,7 @@ class SessionDashboardScreenTest {
   fun originRuleDropsBasePathAndKeepsPort() {
     assertEquals(
       "https://gateway.example.com:8443",
-      controlUiOriginRule("https://gateway.example.com:8443/openclaw"),
+      controlUiOriginRule("https://gateway.example.com:8443/dsh"),
     )
     assertEquals("http://[::1]:18789", controlUiOriginRule("http://[::1]:18789"))
   }
@@ -36,12 +36,12 @@ class SessionDashboardScreenTest {
   fun dashboardUrlKeepsConfiguredControlUiBasePath() {
     val url =
       sessionDashboardUrl(
-        baseUrl = "https://gateway.example.com:8443/openclaw",
+        baseUrl = "https://gateway.example.com:8443/dsh",
         sessionKey = "agent:main:qa",
       )
 
     assertEquals(
-      "https://gateway.example.com:8443/openclaw/chat?session=agent%3Amain%3Aqa&face=dashboard",
+      "https://gateway.example.com:8443/dsh/chat?session=agent%3Amain%3Aqa&face=dashboard",
       url,
     )
   }

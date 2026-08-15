@@ -67,8 +67,8 @@ class AndroidScreenshotModeTest {
   }
 
   @Test
-  fun openClawSceneTargetsSystemAgentSettings() {
-    val scene = AndroidScreenshotScene.fromRawValue("openclaw")
+  fun dshSceneTargetsSystemAgentSettings() {
+    val scene = AndroidScreenshotScene.fromRawValue("dsh")
 
     assertEquals(AndroidScreenshotScene.DeepSeekHarness, scene)
     assertEquals(HomeDestination.Settings, scene.homeDestination)

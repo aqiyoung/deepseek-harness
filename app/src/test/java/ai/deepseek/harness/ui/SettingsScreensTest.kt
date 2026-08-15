@@ -182,7 +182,7 @@ class SettingsScreensTest {
   fun devicePairingAdminCopySeparatesPairingFromNodeApproval() {
     val text = devicePairingAdminUnavailableText()
 
-    assertEquals(true, text.contains("openclaw devices list"))
+    assertEquals(true, text.contains("dsh devices list"))
     assertEquals(true, text.contains("Gateway host"))
     assertEquals(true, text.contains("Node capability approval is separate"))
     assertEquals(true, text.contains("nodes approve <request id>"))
@@ -191,11 +191,11 @@ class SettingsScreensTest {
   @Test
   fun nodeApprovalCommandUsesOnlyASafeExactRequestId() {
     assertEquals(
-      "openclaw nodes approve request-1",
+      "dsh nodes approve request-1",
       gatewayNodeApprovalCommand(GatewayNodeCapabilityApproval.PendingApproval("request-1")),
     )
     assertEquals(
-      "openclaw nodes status",
+      "dsh nodes status",
       gatewayNodeApprovalCommand(GatewayNodeCapabilityApproval.PendingReapproval("request-1; unsafe")),
     )
     assertEquals(null, gatewayNodeApprovalCommand(GatewayNodeCapabilityApproval.Approved))

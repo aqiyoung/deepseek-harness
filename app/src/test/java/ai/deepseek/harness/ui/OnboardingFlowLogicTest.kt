@@ -245,7 +245,7 @@ class OnboardingFlowLogicTest {
   fun nearbyGatewayManualPortUsesResolvedDiscoveryEndpointPort() {
     val endpoint =
       GatewayEndpoint(
-        stableId = "_openclaw-gw._tcp.|local.|Home",
+        stableId = "_dsh-gw._tcp.|local.|Home",
         name = "Home",
         host = "192.168.1.12",
         port = 53122,
@@ -389,9 +389,9 @@ class OnboardingFlowLogicTest {
   @Test
   fun recoveryNodeApprovalCommandUsesRequestIdWhenAvailable() {
     assertEqualsCases(
-      "openclaw nodes approve request-1" to recoveryNodeApprovalCommand(" request-1 "),
-      "openclaw nodes approve REQUEST_ID" to recoveryNodeApprovalCommand(null),
-      "openclaw nodes approve REQUEST_ID" to recoveryNodeApprovalCommand(" "),
+      "dsh nodes approve request-1" to recoveryNodeApprovalCommand(" request-1 "),
+      "dsh nodes approve REQUEST_ID" to recoveryNodeApprovalCommand(null),
+      "dsh nodes approve REQUEST_ID" to recoveryNodeApprovalCommand(" "),
     )
   }
 
@@ -702,7 +702,7 @@ class OnboardingFlowLogicTest {
       recoveryGatewayAuthDetail(protocolMismatchProblem(clientMin = 6, clientMax = 6, expected = 5)),
     )
     assertEquals(
-      "openclaw update",
+      "dsh update",
       recoveryGatewayProtocolMismatchCommand(protocolMismatchProblem(clientMin = 6, clientMax = 6, expected = 5)),
     )
   }
@@ -972,7 +972,7 @@ class OnboardingFlowLogicTest {
     tlsFingerprintSha256: String? = null,
   ): GatewayEndpoint =
     GatewayEndpoint(
-      stableId = "_openclaw-gw._tcp.|local.|$name",
+      stableId = "_dsh-gw._tcp.|local.|$name",
       name = name,
       host = host,
       port = port,

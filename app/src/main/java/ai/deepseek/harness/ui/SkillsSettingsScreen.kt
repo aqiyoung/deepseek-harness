@@ -883,10 +883,10 @@ internal fun skillMissingConfigurationText(count: Int): String =
 
 private fun skillSourceLabel(skill: GatewaySkillSummary): String =
   when (skill.source) {
-    "openclaw-bundled" -> if (skill.bundled) nativeString("Built-in") else nativeString("Bundled")
-    "openclaw-managed" -> nativeString("Installed")
-    "openclaw-workspace" -> nativeString("Workspace")
-    "openclaw-extra" -> nativeString("Extra")
+    "dsh-bundled" -> if (skill.bundled) nativeString("Built-in") else nativeString("Bundled")
+    "dsh-managed" -> nativeString("Installed")
+    "dsh-workspace" -> nativeString("Workspace")
+    "dsh-extra" -> nativeString("Extra")
     else -> nativeString("Skill")
   }
 

@@ -71,33 +71,33 @@ class ControlUiWebViewTest {
 
     assertTrue(
       shouldProceedForPinnedControlUiSslError(
-        pageBaseUrl = "https://gateway.example.com:8443/openclaw/",
+        pageBaseUrl = "https://gateway.example.com:8443/dsh/",
         expectedFingerprint = fingerprint,
-        errorUrl = "https://gateway.example.com:8443/openclaw/assets/app.js",
+        errorUrl = "https://gateway.example.com:8443/dsh/assets/app.js",
         encodedCertificate = certificate,
       ),
     )
     assertFalse(
       shouldProceedForPinnedControlUiSslError(
-        pageBaseUrl = "https://gateway.example.com:8443/openclaw/",
+        pageBaseUrl = "https://gateway.example.com:8443/dsh/",
         expectedFingerprint = "00".repeat(32),
-        errorUrl = "https://gateway.example.com:8443/openclaw/assets/app.js",
+        errorUrl = "https://gateway.example.com:8443/dsh/assets/app.js",
         encodedCertificate = certificate,
       ),
     )
     assertFalse(
       shouldProceedForPinnedControlUiSslError(
-        pageBaseUrl = "https://gateway.example.com:8443/openclaw/",
+        pageBaseUrl = "https://gateway.example.com:8443/dsh/",
         expectedFingerprint = fingerprint,
-        errorUrl = "https://attacker.example.com:8443/openclaw/assets/app.js",
+        errorUrl = "https://attacker.example.com:8443/dsh/assets/app.js",
         encodedCertificate = certificate,
       ),
     )
     assertFalse(
       shouldProceedForPinnedControlUiSslError(
-        pageBaseUrl = "https://gateway.example.com:8443/openclaw/",
+        pageBaseUrl = "https://gateway.example.com:8443/dsh/",
         expectedFingerprint = null,
-        errorUrl = "https://gateway.example.com:8443/openclaw/assets/app.js",
+        errorUrl = "https://gateway.example.com:8443/dsh/assets/app.js",
         encodedCertificate = certificate,
       ),
     )

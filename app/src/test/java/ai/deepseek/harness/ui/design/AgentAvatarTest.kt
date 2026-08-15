@@ -54,7 +54,7 @@ class AgentAvatarTest {
     assertNull(agentAvatarSource(agent(avatarUrl = "data:image/png,raw")))
     assertNull(agentAvatarSource(agent(avatarUrl = "data:text/plain;base64,dGV4dA==")))
     assertNull(agentAvatarSource(agent(avatarUrl = "data:image/png;base64,")))
-    assertNull(agentAvatarSource(agent(avatar = "avatars/openclaw.png")))
+    assertNull(agentAvatarSource(agent(avatar = "avatars/dsh.png")))
     assertNull(agentAvatarSource(agent(avatar = "🦞")))
   }
 

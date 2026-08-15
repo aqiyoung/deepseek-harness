@@ -17,7 +17,7 @@ class NodeRuntimeAgentSelectionTest {
     val app = RuntimeEnvironment.getApplication()
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.secure.test.${UUID.randomUUID()}",
+        "dsh.node.secure.test.${UUID.randomUUID()}",
         Context.MODE_PRIVATE,
       )
     val runtime = NodeRuntime(app, SecurePrefs(app, securePrefsOverride = securePrefs))

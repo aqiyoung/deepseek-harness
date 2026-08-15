@@ -62,7 +62,7 @@ class GatewayBootstrapAuthTest {
   fun clearPlainPrefs() {
     RuntimeEnvironment
       .getApplication()
-      .getSharedPreferences("openclaw.node", android.content.Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", android.content.Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()
@@ -1208,7 +1208,7 @@ class GatewayBootstrapAuthTest {
     SecurePrefs(
       app,
       app.getSharedPreferences(
-        "openclaw.node.secure.test.${UUID.randomUUID()}",
+        "dsh.node.secure.test.${UUID.randomUUID()}",
         android.content.Context.MODE_PRIVATE,
       ),
     )

@@ -112,7 +112,7 @@ internal object AndroidScreenshotFixture {
       "cron.list" -> cronList()
       "cron.get" -> cronJob().toString()
       "cron.runs" -> cronRuns()
-      "openclaw.chat" -> systemAgentChat(paramsJson)
+      "dsh.chat" -> systemAgentChat(paramsJson)
       else -> error("Screenshot fixture does not implement gateway method $method with params $paramsJson")
     }
 
@@ -123,7 +123,7 @@ internal object AndroidScreenshotFixture {
         ?.jsonPrimitive
         ?.contentOrNull
     return buildJsonObject {
-      put("sessionId", JsonPrimitive("android-screenshot-openclaw"))
+      put("sessionId", JsonPrimitive("android-screenshot-dsh"))
       put(
         "reply",
         JsonPrimitive(
@@ -364,7 +364,7 @@ internal object AndroidScreenshotFixture {
         },
       )
     }
-    marker?.let { put("__openclaw", it) }
+    marker?.let { put("__dsh", it) }
   }
 
   private fun sessionList(paramsJson: String?): String {

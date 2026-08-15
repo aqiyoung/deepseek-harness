@@ -211,7 +211,7 @@ class CanvasController {
         """
         (() => {
           try {
-            const api = globalThis.__openclaw;
+            const api = globalThis.__dsh;
             if (!api) return;
             if (typeof api.setDebugStatusEnabled === 'function') {
               api.setDebugStatusEnabled(${if (enabled) "true" else "false"});
@@ -234,7 +234,7 @@ class CanvasController {
         """
         (() => {
           try {
-            const api = globalThis.__openclaw;
+            const api = globalThis.__dsh;
             if (!api || typeof api.renderHome !== 'function') return;
             api.renderHome($payload);
           } catch (_) {}

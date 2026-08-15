@@ -511,8 +511,8 @@ internal class RealtimeAgentCoordinator(
 
   private companion object {
     const val TAG = "RealtimeAgent"
-    const val AGENT_CONSULT_TOOL = "openclaw_agent_consult"
-    const val AGENT_CONTROL_TOOL = "openclaw_agent_control"
+    const val AGENT_CONSULT_TOOL = "dsh_agent_consult"
+    const val AGENT_CONTROL_TOOL = "dsh_agent_control"
     const val TOOL_CALL_TIMEOUT_MILLIS = 15_000L
     const val MAX_CACHED_COMPLETIONS = 128
     val TERMINAL_STATES = setOf("final", "aborted", "error")

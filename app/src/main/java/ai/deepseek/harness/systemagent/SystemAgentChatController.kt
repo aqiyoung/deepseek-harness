@@ -84,7 +84,7 @@ data class SystemAgentChatState(
   val handoff: SystemAgentChatHandoff? = null,
 )
 
-private fun newSystemAgentSessionId(): String = "android-settings-openclaw-${UUID.randomUUID()}"
+private fun newSystemAgentSessionId(): String = "android-settings-dsh-${UUID.randomUUID()}"
 
 /**
  * Keeps the settings-only DeepSeekHarness conversation outside ordinary chat/session state.
@@ -278,7 +278,7 @@ internal class SystemAgentChatController(
               put("sessionId", JsonPrimitive(current.sessionId))
               message?.let { put("message", JsonPrimitive(it)) }
             }
-          val response = lease.request(GatewayMethod.OpenclawChat.rawValue, payload.toString(), 190_000)
+          val response = lease.request(GatewayMethod.DshChat.rawValue, payload.toString(), 190_000)
           if (!isCurrent(requestGeneration)) return@launch
           if (!lease.isCurrent()) {
             markRouteChanged(requestGeneration)

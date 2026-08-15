@@ -4,7 +4,7 @@ import java.net.URI
 import java.net.URLDecoder
 
 internal object ChatWidgetUrlResolver {
-  private const val DOCUMENTS_PATH = "/__openclaw__/canvas/documents"
+  private const val DOCUMENTS_PATH = "/__dsh__/canvas/documents"
 
   fun resolve(
     surfaceUrl: String?,
@@ -131,7 +131,7 @@ internal object ChatWidgetUrlResolver {
     if (scheme != "http" && scheme != "https") return null
     if (parsed.host.isNullOrBlank() || parsed.rawUserInfo != null || parsed.rawQuery != null || parsed.rawFragment != null) return null
     val segments = parsed.rawPath.split('/').filter(String::isNotEmpty)
-    if (segments.size < 3 || segments[segments.lastIndex - 2] != "__openclaw__" || segments[segments.lastIndex - 1] != "cap") return null
+    if (segments.size < 3 || segments[segments.lastIndex - 2] != "__dsh__" || segments[segments.lastIndex - 1] != "cap") return null
     if (decodeRepeatedly(segments.last())?.isEmpty() != false) return null
     return parsed
   }

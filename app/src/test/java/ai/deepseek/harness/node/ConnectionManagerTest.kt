@@ -352,7 +352,7 @@ class ConnectionManagerTest {
   ): GatewayTlsParams? =
     ConnectionManager.resolveTlsParamsForEndpoint(
       GatewayEndpoint(
-        stableId = "_openclaw-gw._tcp.|local.|Test",
+        stableId = "_dsh-gw._tcp.|local.|Test",
         name = "Test",
         host = host,
         port = 18789,
@@ -411,7 +411,7 @@ class ConnectionManagerTest {
   ): ConnectionManager {
     val context = RuntimeEnvironment.getApplication()
     context
-      .getSharedPreferences("openclaw.node", android.content.Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", android.content.Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()

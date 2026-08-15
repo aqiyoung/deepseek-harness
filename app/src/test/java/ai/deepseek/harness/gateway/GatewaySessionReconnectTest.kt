@@ -1075,7 +1075,7 @@ class GatewaySessionReconnectTest {
           permissions = emptyMap(),
           client =
             GatewayClientInfo(
-              id = "openclaw-android-test",
+              id = "dsh-android-test",
               displayName = "Android Test",
               version = "1.0.0-test",
               platform = "android",

@@ -28,7 +28,7 @@ class SkillWorkshopAgentScopeRuntimeTest {
   fun clearPlainPrefs() {
     RuntimeEnvironment
       .getApplication()
-      .getSharedPreferences("openclaw.node", android.content.Context.MODE_PRIVATE)
+      .getSharedPreferences("dsh.node", android.content.Context.MODE_PRIVATE)
       .edit()
       .clear()
       .commit()
@@ -193,7 +193,7 @@ class SkillWorkshopAgentScopeRuntimeTest {
     val app = RuntimeEnvironment.getApplication()
     val securePrefs =
       app.getSharedPreferences(
-        "openclaw.node.secure.test.${UUID.randomUUID()}",
+        "dsh.node.secure.test.${UUID.randomUUID()}",
         android.content.Context.MODE_PRIVATE,
       )
     return NodeRuntime(app, SecurePrefs(app, securePrefsOverride = securePrefs))

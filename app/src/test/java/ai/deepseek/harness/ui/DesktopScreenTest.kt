@@ -12,9 +12,9 @@ import org.robolectric.annotation.Config
 class DesktopScreenTest {
   @Test
   fun desktopUrlUsesDocumentModeWithoutSource() {
-    val url = desktopUrl(baseUrl = "https://gateway.example.com:8443/openclaw/")
+    val url = desktopUrl(baseUrl = "https://gateway.example.com:8443/dsh/")
 
-    assertEquals("https://gateway.example.com:8443/openclaw/?view=desktop", url)
+    assertEquals("https://gateway.example.com:8443/dsh/?view=desktop", url)
     assertFalse(url.contains("token="))
     assertFalse(url.contains("password="))
   }
@@ -39,12 +39,12 @@ class DesktopScreenTest {
   fun desktopUrlEncodesProvidedSession() {
     val url =
       desktopUrl(
-        baseUrl = "https://gateway.example.com:8443/openclaw/",
+        baseUrl = "https://gateway.example.com:8443/dsh/",
         session = "agent:main:mobile session",
       )
 
     assertEquals(
-      "https://gateway.example.com:8443/openclaw/?view=desktop&session=agent%3Amain%3Amobile%20session",
+      "https://gateway.example.com:8443/dsh/?view=desktop&session=agent%3Amain%3Amobile%20session",
       url,
     )
   }
