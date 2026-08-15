@@ -5,7 +5,6 @@ import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.ui.design.DshPlainIconButton
 import ai.deepseek.harness.ui.design.DshScaffold
 import ai.deepseek.harness.ui.design.DshTheme
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.DesktopWindows
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,15 +40,6 @@ internal fun SessionDashboardScreen(
 ) {
   val isConnected by viewModel.isConnected.collectAsState()
   val controlPage by viewModel.gatewayControlPage.collectAsState()
-  val desktopObserveAvailable by viewModel.desktopObserveAvailable.collectAsState()
-  var showingDesktop by rememberSaveable(sessionKey) { mutableStateOf(false) }
-  if (showingDesktop) {
-    // The viewer replaces this screen in place rather than pushing a shell tab, so it must
-    // claim System Back itself; the shell handler would otherwise pop the whole dashboard.
-    BackHandler { showingDesktop = false }
-    DesktopScreen(viewModel = viewModel, session = sessionKey, onBack = { showingDesktop = false })
-    return
-  }
   DshScaffold(
     contentPadding = PaddingValues(start = DshTheme.spacing.lg, top = 14.dp, end = DshTheme.spacing.lg, bottom = 6.dp),
   ) {
@@ -73,13 +62,6 @@ internal fun SessionDashboardScreen(
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
-        if (desktopObserveAvailable) {
-          DshPlainIconButton(
-            icon = Icons.Outlined.DesktopWindows,
-            contentDescription = nativeString("Open desktop"),
-            onClick = { showingDesktop = true },
-          )
-        }
         Icon(
           imageVector = Icons.Outlined.Dashboard,
           contentDescription = null,

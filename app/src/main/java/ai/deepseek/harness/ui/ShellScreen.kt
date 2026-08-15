@@ -1486,6 +1486,12 @@ private fun SettingsShellScreen(
   val systemAgentChatState by viewModel.systemAgentChatState.collectAsState()
   val notificationForwardingEnabled by viewModel.notificationForwardingEnabled.collectAsState()
   val appearanceThemeMode by viewModel.appearanceThemeMode.collectAsState()
+  val gatewayAgents by viewModel.gatewayAgents.collectAsState()
+  val modelAuthProviders by viewModel.modelAuthProviders.collectAsState()
+  val usageSummary by viewModel.usageSummary.collectAsState()
+  val skillsSummary by viewModel.skillsSummary.collectAsState()
+  val skillWorkshopSummary by viewModel.skillWorkshopSummary.collectAsState()
+  val nodesDevicesSummary by viewModel.nodesDevicesSummary.collectAsState()
 
   LaunchedEffect(isConnected) {
     if (isConnected) {
@@ -1538,6 +1544,26 @@ private fun SettingsShellScreen(
       val settingsRows =
         listOfNotNull(
           SettingsRow(
+            nativeText("Gateway"),
+            if (isConnected) nativeText("Connected") else nativeText("Not connected"),
+            Icons.Default.Cloud,
+            status = isConnected,
+            route = SettingsRoute.Gateway,
+          ),
+          SettingsRow(
+            nativeText("Nodes & Devices"),
+            nativeText(nodesDevicesSummaryText(nodesDevicesSummary)),
+            Icons.Default.Storage,
+            status = nodesDevicesStatus(nodesDevicesSummary),
+            route = SettingsRoute.NodesDevices,
+          ),
+          SettingsRow(
+            nativeText("Agents"),
+            nativeText(if (gatewayAgents.isEmpty()) "No agents" else "\$count agents", gatewayAgents.size),
+            Icons.Default.Person,
+            route = SettingsRoute.Agents,
+          ),
+          SettingsRow(
             nativeText("DeepSeekHarness"),
             nativeText("Setup, status, and repair"),
             Icons.Default.Bolt,
@@ -1549,7 +1575,33 @@ private fun SettingsShellScreen(
               },
             route = SettingsRoute.SystemAgent,
           ),
+          SettingsRow(
+            nativeText("Models"),
+            nativeText(if (modelAuthProviders.isEmpty()) "No providers" else "\$count providers", modelAuthProviders.size),
+            Icons.Default.Bolt,
+            route = SettingsRoute.ProvidersModels,
+          ),
+          SettingsRow(
+            nativeText("Usage"),
+            nativeText(usageSummaryText(usageSummary.providers.size)),
+            Icons.Default.Info,
+            route = SettingsRoute.Usage,
+          ),
+          SettingsRow(
+            nativeText("Skills"),
+            nativeText(skillsSummaryText(skillsSummary.skills)),
+            Icons.Default.Settings,
+            status = skillsStatus(skillsSummary.skills),
+            route = SettingsRoute.Skills,
+          ),
+          SettingsRow(
+            nativeText("Skill Workshop"),
+            nativeText(skillWorkshopSummaryText(skillWorkshopSummary)),
+            Icons.Default.Settings,
+            route = SettingsRoute.SkillWorkshop,
+          ),
           SettingsRow(nativeText("Notifications"), if (notificationForwardingEnabled) nativeText("Smart delivery") else nativeText("Off"), Icons.Default.Notifications, route = SettingsRoute.Notifications),
+          SettingsRow(nativeText("Phone Capabilities"), nativeText("Camera, location, photos"), Icons.Default.LocationOn, route = SettingsRoute.PhoneCapabilities),
           SettingsRow(
             nativeText("Appearance"),
             joinedNativeText(
@@ -1559,8 +1611,8 @@ private fun SettingsShellScreen(
             Icons.Default.Palette,
             route = SettingsRoute.Appearance,
           ),
-          SettingsRow(nativeText("About"), nativeText("Version and update"), Icons.Default.Storage, route = SettingsRoute.About),
           SettingsRow(nativeText("Health"), nativeText("Diagnostics"), Icons.Default.Settings, status = isConnected, route = SettingsRoute.Health),
+          SettingsRow(nativeText("About"), nativeText("Version and update"), Icons.Default.Storage, route = SettingsRoute.About),
         )
 
       settingsSections(settingsRows).forEach { section ->
@@ -1775,45 +1827,42 @@ internal fun settingsSections(rows: List<SettingsRow>): List<SettingsSection> =
 private val settingsSectionOrder =
   listOf(
     nativeText("Connection"),
-    nativeText("Agents & automation"),
-    nativeText("Phone context & privacy"),
-    nativeText("Profile & device"),
-    nativeText("Diagnostics"),
+    nativeText("Agent Presets"),
+    nativeText("Models"),
+    nativeText("Plugins"),
+    nativeText("General"),
   )
 
 internal fun settingsSectionTitleForRoute(route: SettingsRoute): NativeText =
   when (route) {
     SettingsRoute.Gateway,
     SettingsRoute.NodesDevices,
-    SettingsRoute.Channels,
     -> nativeText("Connection")
 
     SettingsRoute.Agents,
     SettingsRoute.SystemAgent,
-    SettingsRoute.ProvidersModels,
     SettingsRoute.Approvals,
     SettingsRoute.CronJobs,
+    -> nativeText("Agent Presets")
+
+    SettingsRoute.ProvidersModels,
     SettingsRoute.Usage,
+    -> nativeText("Models")
+
     SettingsRoute.Skills,
     SettingsRoute.SkillWorkshop,
-    SettingsRoute.Dreaming,
-    SettingsRoute.Terminal,
-    SettingsRoute.Desktop,
-    -> nativeText("Agents & automation")
-
-    SettingsRoute.Canvas,
-    SettingsRoute.Notifications,
-    SettingsRoute.PhoneCapabilities,
-    -> nativeText("Phone context & privacy")
+    -> nativeText("Plugins")
 
     SettingsRoute.Profile,
     SettingsRoute.Appearance,
+    SettingsRoute.Notifications,
+    SettingsRoute.PhoneCapabilities,
+    SettingsRoute.Health,
     SettingsRoute.About,
     SettingsRoute.Licenses,
-    -> nativeText("Profile & device")
+    -> nativeText("General")
 
-    SettingsRoute.Health -> nativeText("Diagnostics")
-    SettingsRoute.Home -> nativeText("Diagnostics")
+    SettingsRoute.Home -> nativeText("General")
   }
 
 @Composable

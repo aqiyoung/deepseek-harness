@@ -17,7 +17,6 @@ enum class AndroidScreenshotScene(
   Settings("settings", HomeDestination.Settings),
   Gateway("gateway", HomeDestination.Settings, SettingsRoute.Gateway),
   DeepSeekHarness("dsh", HomeDestination.Settings, SettingsRoute.SystemAgent),
-  Desktop("desktop", HomeDestination.Settings, SettingsRoute.Desktop),
   ;
 
   companion object {

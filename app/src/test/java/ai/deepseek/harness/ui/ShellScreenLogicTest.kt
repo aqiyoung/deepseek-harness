@@ -781,14 +781,14 @@ class ShellScreenLogicTest {
   fun settingsSectionTitlesGroupPowerSettingsByMeaning() {
     assertEquals("Connection", settingsSectionTitleForRoute(SettingsRoute.Gateway).resolveNativeText())
     assertEquals("Connection", settingsSectionTitleForRoute(SettingsRoute.NodesDevices).resolveNativeText())
-    assertEquals("Agents & automation", settingsSectionTitleForRoute(SettingsRoute.SystemAgent).resolveNativeText())
-    assertEquals("Agents & automation", settingsSectionTitleForRoute(SettingsRoute.ProvidersModels).resolveNativeText())
-    assertEquals("Agents & automation", settingsSectionTitleForRoute(SettingsRoute.Approvals).resolveNativeText())
-    assertEquals("Agents & automation", settingsSectionTitleForRoute(SettingsRoute.CronJobs).resolveNativeText())
-    assertEquals("Phone context & privacy", settingsSectionTitleForRoute(SettingsRoute.PhoneCapabilities).resolveNativeText())
-    assertEquals("Phone context & privacy", settingsSectionTitleForRoute(SettingsRoute.Notifications).resolveNativeText())
-    assertEquals("Profile & device", settingsSectionTitleForRoute(SettingsRoute.Appearance).resolveNativeText())
-    assertEquals("Diagnostics", settingsSectionTitleForRoute(SettingsRoute.Health).resolveNativeText())
+    assertEquals("Agent Presets", settingsSectionTitleForRoute(SettingsRoute.SystemAgent).resolveNativeText())
+    assertEquals("Models", settingsSectionTitleForRoute(SettingsRoute.ProvidersModels).resolveNativeText())
+    assertEquals("Agent Presets", settingsSectionTitleForRoute(SettingsRoute.Approvals).resolveNativeText())
+    assertEquals("Agent Presets", settingsSectionTitleForRoute(SettingsRoute.CronJobs).resolveNativeText())
+    assertEquals("General", settingsSectionTitleForRoute(SettingsRoute.PhoneCapabilities).resolveNativeText())
+    assertEquals("General", settingsSectionTitleForRoute(SettingsRoute.Notifications).resolveNativeText())
+    assertEquals("General", settingsSectionTitleForRoute(SettingsRoute.Appearance).resolveNativeText())
+    assertEquals("General", settingsSectionTitleForRoute(SettingsRoute.Health).resolveNativeText())
   }
 
   @Test
@@ -806,9 +806,8 @@ class ShellScreenLogicTest {
     assertEquals(
       listOf(
         "Connection",
-        "Agents & automation",
-        "Profile & device",
-        "Diagnostics",
+        "Agent Presets",
+        "General",
       ),
       sections.map { it.title.resolveNativeText() },
     )
