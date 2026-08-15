@@ -34,11 +34,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ai.deepseek.harness.ui.design.ClawDesignTheme
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawTextField
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshDesignTheme
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshTextField
+import ai.deepseek.harness.ui.design.DshTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -76,8 +76,8 @@ fun LoginScreen(
   val scope = rememberCoroutineScope()
 
   // 强制浅色，对齐 DeepSeek 官网/DSH 网页版清爽气质。
-  ClawDesignTheme(dark = false) {
-    ClawScaffold(modifier = modifier) {
+  DshDesignTheme(dark = false) {
+    DshScaffold(modifier = modifier) {
       Box(
         modifier = Modifier
           .fillMaxSize()
@@ -122,7 +122,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
-            ClawTextField(
+            DshTextField(
               value = serverUrl,
               onValueChange = { viewModel.setServerUrl(it) },
               placeholder = "https://dsh.threel.site",
@@ -136,7 +136,7 @@ fun LoginScreen(
                 ),
             )
 
-            ClawTextField(
+            DshTextField(
               value = username,
               onValueChange = { username = it },
               placeholder = "用户名",
@@ -150,7 +150,7 @@ fun LoginScreen(
                 ),
             )
 
-            ClawTextField(
+            DshTextField(
               value = password,
               onValueChange = { password = it },
               placeholder = "密码",
@@ -167,14 +167,14 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClawPrimaryButton(
+            DshPrimaryButton(
               text = if (isVerifying) "登录中…" else "登录",
               enabled = !isVerifying,
               modifier = Modifier.fillMaxWidth(),
               onClick = {
                 if (serverUrl.isBlank() || username.isBlank() || password.isBlank()) {
                   error = "请填写服务器地址、用户名和密码"
-                  return@ClawPrimaryButton
+                  return@DshPrimaryButton
                 }
                 error = null
                 isVerifying = true

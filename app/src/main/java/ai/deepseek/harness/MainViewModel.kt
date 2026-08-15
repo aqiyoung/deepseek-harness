@@ -566,11 +566,11 @@ class MainViewModel private constructor(
   val skillsSummary: StateFlow<GatewaySkillsSummary> = runtimeState(initial = GatewaySkillsSummary(skills = emptyList())) { it.skillsSummary }
   val skillsRefreshing: StateFlow<Boolean> = runtimeState(initial = false) { it.skillsRefreshing }
   val skillsErrorText: StateFlow<String?> = runtimeState(initial = null) { it.skillsErrorText }
-  val clawHubSkillMethodsAvailable: StateFlow<Boolean> =
-    runtimeState(initial = false) { it.clawHubSkillMethodsAvailable }
+  val dshHubSkillMethodsAvailable: StateFlow<Boolean> =
+    runtimeState(initial = false) { it.dshHubSkillMethodsAvailable }
   val skillMutationKeys: StateFlow<Set<String>> = runtimeState(initial = emptySet()) { it.skillMutationKeys }
-  val clawHubSkillSearchState: StateFlow<GatewayClawHubSkillSearchState> =
-    runtimeState(initial = GatewayClawHubSkillSearchState()) { it.clawHubSkillSearchState }
+  val dshHubSkillSearchState: StateFlow<GatewayDshHubSkillSearchState> =
+    runtimeState(initial = GatewayDshHubSkillSearchState()) { it.dshHubSkillSearchState }
   val skillWorkshopSummary: StateFlow<GatewaySkillWorkshopSummary> =
     runtimeState(initial = GatewaySkillWorkshopSummary(proposals = emptyList())) { it.skillWorkshopSummary }
   val skillWorkshopRefreshing: StateFlow<Boolean> = runtimeState(initial = false) { it.skillWorkshopRefreshing }
@@ -1619,28 +1619,28 @@ class MainViewModel private constructor(
     ensureRuntime().setSkillEnabled(skillKey, enabled)
   }
 
-  fun searchClawHubSkills(query: String) {
-    ensureRuntime().searchClawHubSkills(query)
+  fun searchDshHubSkills(query: String) {
+    ensureRuntime().searchDshHubSkills(query)
   }
 
-  fun reviewClawHubSkillInstall(skill: GatewayClawHubSkillSummary) {
-    ensureRuntime().reviewClawHubSkillInstall(skill)
+  fun reviewDshHubSkillInstall(skill: GatewayDshHubSkillSummary) {
+    ensureRuntime().reviewDshHubSkillInstall(skill)
   }
 
-  fun dismissClawHubSkillInstallReview() {
-    ensureRuntime().dismissClawHubSkillInstallReview()
+  fun dismissDshHubSkillInstallReview() {
+    ensureRuntime().dismissDshHubSkillInstallReview()
   }
 
-  fun installClawHubSkill(
+  fun installDshHubSkill(
     slug: String,
-    acknowledgeClawHubRisk: Boolean = false,
+    acknowledgeDshHubRisk: Boolean = false,
     version: String? = null,
   ) {
-    ensureRuntime().installClawHubSkill(slug, acknowledgeClawHubRisk, version)
+    ensureRuntime().installDshHubSkill(slug, acknowledgeDshHubRisk, version)
   }
 
-  fun clearClawHubSkillMessage() {
-    ensureRuntime().clearClawHubSkillMessage()
+  fun clearDshHubSkillMessage() {
+    ensureRuntime().clearDshHubSkillMessage()
   }
 
   fun refreshNodesDevices() {

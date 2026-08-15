@@ -10,13 +10,13 @@ import ai.deepseek.harness.i18n.nativeText
 import ai.deepseek.harness.i18n.resolveNativeText
 import ai.deepseek.harness.i18n.resolveNativeTextResource
 import ai.deepseek.harness.i18n.verbatimText
-import ai.deepseek.harness.ui.design.ClawEmptyState
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawSeparatedColumn
-import ai.deepseek.harness.ui.design.ClawTextField
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshEmptyState
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSeparatedColumn
+import ai.deepseek.harness.ui.design.DshTextField
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -104,8 +104,8 @@ internal fun CommandPalette(
         commandSessionMatches(title = title, query = normalizedQuery)
       }.take(5)
 
-  Surface(modifier = Modifier.fillMaxSize(), color = ClawTheme.colors.canvas, contentColor = ClawTheme.colors.text) {
-    ClawScaffold(contentPadding = PaddingValues(start = 20.dp, top = 14.dp, end = 20.dp, bottom = 20.dp)) {
+  Surface(modifier = Modifier.fillMaxSize(), color = DshTheme.colors.canvas, contentColor = DshTheme.colors.text) {
+    DshScaffold(contentPadding = PaddingValues(start = 20.dp, top = 14.dp, end = 20.dp, bottom = 20.dp)) {
       LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item {
           Row(
@@ -113,14 +113,14 @@ internal fun CommandPalette(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
           ) {
-            ClawPlainIconButton(
+            DshPlainIconButton(
               icon = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = nativeString("Close search"),
               onClick = onDismiss,
             )
-            Text(text = nativeString("Search"), style = ClawTheme.type.title, color = ClawTheme.colors.text, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text(text = nativeString("Search"), style = DshTheme.type.title, color = DshTheme.colors.text, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             Box(
-              modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+              modifier = Modifier.size(DshTheme.spacing.touchTarget),
               contentAlignment = Alignment.Center,
             ) {
               CommandAvatar(text = "OC")
@@ -129,7 +129,7 @@ internal fun CommandPalette(
         }
 
         item {
-          ClawTextField(
+          DshTextField(
             value = query,
             onValueChange = { query = it },
             placeholder = nativeString("Search DeepSeekHarness"),
@@ -143,7 +143,7 @@ internal fun CommandPalette(
 
         if (actionRows.isEmpty()) {
           item {
-            ClawEmptyState(title = nativeString("No actions found"), body = nativeString("Try Chat, Voice, Threads, Providers, or Settings."))
+            DshEmptyState(title = nativeString("No actions found"), body = nativeString("Try Chat, Voice, Threads, Providers, or Settings."))
           }
         } else {
           item {
@@ -157,11 +157,11 @@ internal fun CommandPalette(
 
         if (sessionRows.isEmpty()) {
           item {
-            ClawPanel {
+            DshPanel {
               Text(
                 text = if (isConnected) nativeString("No matching threads yet.") else nativeString("Connect the Gateway to search threads."),
-                style = ClawTheme.type.body,
-                color = ClawTheme.colors.textMuted,
+                style = DshTheme.type.body,
+                color = DshTheme.colors.textMuted,
               )
             }
           }
@@ -239,8 +239,8 @@ private data class CommandSessionRow(
 
 @Composable
 private fun CommandActionList(rows: List<CommandItem>) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
-    ClawSeparatedColumn(items = rows) { row ->
+  DshPanel(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
+    DshSeparatedColumn(items = rows) { row ->
       CommandActionRow(row = row)
     }
   }
@@ -250,13 +250,13 @@ private fun CommandActionList(rows: List<CommandItem>) {
 private fun CommandActionRow(row: CommandItem) {
   val title = row.title.resolveNativeTextResource()
   val subtitle = row.subtitle.resolveNativeTextResource()
-  Surface(color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier =
         Modifier
           .fillMaxWidth()
           .heightIn(min = 52.dp)
-          .clip(RoundedCornerShape(ClawTheme.radii.row))
+          .clip(RoundedCornerShape(DshTheme.radii.row))
           .clickable(onClickLabel = commandActionAccessibilityDescription(row.action, title), onClick = row.onClick)
           .padding(horizontal = 2.dp, vertical = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -264,8 +264,8 @@ private fun CommandActionRow(row: CommandItem) {
     ) {
       CommandRowIcon(icon = row.icon)
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-        Text(text = title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = subtitle, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = subtitle, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
       CommandRowChevron(contentDescription = null)
     }
@@ -277,8 +277,8 @@ private fun CommandSessionList(
   rows: List<CommandSessionRow>,
   onOpen: (String, String?) -> Unit,
 ) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
-    ClawSeparatedColumn(items = rows) { row ->
+  DshPanel(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
+    DshSeparatedColumn(items = rows) { row ->
       CommandSessionListRow(row = row, onClick = { onOpen(row.key, row.ownerAgentId) })
     }
   }
@@ -289,13 +289,13 @@ private fun CommandSessionListRow(
   row: CommandSessionRow,
   onClick: () -> Unit,
 ) {
-  Surface(color = ClawTheme.colors.canvas, contentColor = ClawTheme.colors.text) {
+  Surface(color = DshTheme.colors.canvas, contentColor = DshTheme.colors.text) {
     Row(
       modifier =
         Modifier
           .fillMaxWidth()
           .heightIn(min = 58.dp)
-          .clip(RoundedCornerShape(ClawTheme.radii.row))
+          .clip(RoundedCornerShape(DshTheme.radii.row))
           .clickable(onClick = onClick)
           .padding(horizontal = 2.dp, vertical = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -303,10 +303,10 @@ private fun CommandSessionListRow(
     ) {
       CommandRowIcon(icon = Icons.Outlined.ChatBubbleOutline)
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-        Text(text = row.title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = row.subtitle, style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = row.title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = row.subtitle, style = DshTheme.type.caption, color = DshTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
-      Text(text = row.metadata, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = row.metadata, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       CommandRowChevron(contentDescription = nativeString("Open thread"))
     }
   }
@@ -317,11 +317,11 @@ private fun CommandRowIcon(icon: ImageVector) {
   Surface(
     modifier = Modifier.size(30.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.canvas,
-    border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+    color = DshTheme.colors.canvas,
+    border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(15.dp), tint = ClawTheme.colors.text)
+      Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(15.dp), tint = DshTheme.colors.text)
     }
   }
 }
@@ -333,7 +333,7 @@ private fun CommandRowChevron(contentDescription: String?) {
       imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
       contentDescription = contentDescription,
       modifier = Modifier.size(17.dp),
-      tint = ClawTheme.colors.textMuted,
+      tint = DshTheme.colors.textMuted,
     )
   }
 }
@@ -343,12 +343,12 @@ private fun CommandAvatar(text: String) {
   Surface(
     modifier = Modifier.size(34.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Text(text = localizedUppercase(text.take(2), currentAppLanguage().languageTag), style = ClawTheme.type.label)
+      Text(text = localizedUppercase(text.take(2), currentAppLanguage().languageTag), style = DshTheme.type.label)
     }
   }
 }
@@ -356,7 +356,7 @@ private fun CommandAvatar(text: String) {
 @Composable
 private fun CommandSectionLabel(title: String) {
   Row(modifier = Modifier.fillMaxWidth()) {
-    Text(text = localizedUppercase(title, currentAppLanguage().languageTag), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+    Text(text = localizedUppercase(title, currentAppLanguage().languageTag), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
   }
 }
 

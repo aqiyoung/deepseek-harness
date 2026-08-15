@@ -42,23 +42,23 @@ import ai.deepseek.harness.node.DeviceNotificationListenerService
 import ai.deepseek.harness.photoReadPermissionsForRequest
 import ai.deepseek.harness.reconcileRestoredAction
 import ai.deepseek.harness.setAppLanguage
-import ai.deepseek.harness.ui.design.ClawAgentAvatar
-import ai.deepseek.harness.ui.design.ClawDetailRow
-import ai.deepseek.harness.ui.design.ClawIconBadge
-import ai.deepseek.harness.ui.design.ClawListItem
-import ai.deepseek.harness.ui.design.ClawListPanel
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawSegmentedControl
-import ai.deepseek.harness.ui.design.ClawSeparatedColumn
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTextBadge
-import ai.deepseek.harness.ui.design.ClawTextField
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshAgentAvatar
+import ai.deepseek.harness.ui.design.DshDetailRow
+import ai.deepseek.harness.ui.design.DshIconBadge
+import ai.deepseek.harness.ui.design.DshListItem
+import ai.deepseek.harness.ui.design.DshListPanel
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshSegmentedControl
+import ai.deepseek.harness.ui.design.DshSeparatedColumn
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTextBadge
+import ai.deepseek.harness.ui.design.DshTextField
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.DeepSeekHarnessMascot
 import ai.deepseek.harness.ui.design.TalkWaveform
 import ai.deepseek.harness.ui.design.TalkWaveformPhase
@@ -266,23 +266,23 @@ private fun UsageSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawSecondaryButton(text = if (usageRefreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = viewModel::refreshUsage, enabled = isConnected && !usageRefreshing, modifier = Modifier.weight(1f))
+      DshSecondaryButton(text = if (usageRefreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = viewModel::refreshUsage, enabled = isConnected && !usageRefreshing, modifier = Modifier.weight(1f))
     }
     usageErrorText?.let { errorText ->
-      ClawPanel {
-        Text(text = errorText, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = errorText, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load usage."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load usage."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       usageSummary.providers.isEmpty() ->
-        ClawPanel {
+        DshPanel {
           Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(text = nativeString("No usage data yet."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-            Text(text = nativeString("Provider limits will appear here when your gateway reports them."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("No usage data yet."), style = DshTheme.type.section, color = DshTheme.colors.text)
+            Text(text = nativeString("Provider limits will appear here when your gateway reports them."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       else -> UsageProvidersPanel(providers = usageSummary.providers)
@@ -330,8 +330,8 @@ private fun CronJobsSettingsScreen(
           SettingsMetric(nativeString("Next Wake"), formatCronWake(cronStatus.nextWakeAtMs)),
         ),
     )
-    ClawSecondaryButton(text = if (cronRefreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = viewModel::refreshCronJobs, enabled = isConnected && !cronRefreshing, modifier = Modifier.fillMaxWidth())
-    ClawTextField(
+    DshSecondaryButton(text = if (cronRefreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = viewModel::refreshCronJobs, enabled = isConnected && !cronRefreshing, modifier = Modifier.fillMaxWidth())
+    DshTextField(
       value = query,
       onValueChange = { query = it },
       placeholder = nativeString("Search automations"),
@@ -339,7 +339,7 @@ private fun CronJobsSettingsScreen(
       enabled = isConnected,
     )
     val filterOptions = CronJobsListFilter.entries.map(CronJobsListFilter::label)
-    ClawSegmentedControl(
+    DshSegmentedControl(
       options = filterOptions,
       selected = filter.label,
       onSelect = { selected ->
@@ -350,29 +350,29 @@ private fun CronJobsSettingsScreen(
       modifier = Modifier.fillMaxWidth(),
       enabledOptions = if (isConnected) filterOptions.toSet() else emptySet(),
     )
-    ClawPanel {
-      Text(text = nativeString("Open an automation to inspect its configuration and run history. Admin-scoped connections can also run, edit, enable, disable, or delete it."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+    DshPanel {
+      Text(text = nativeString("Open an automation to inspect its configuration and run history. Admin-scoped connections can also run, edit, enable, disable, or delete it."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
     cronErrorText?.let { errorText ->
-      ClawPanel {
-        Text(text = errorText, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = errorText, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load automations."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load automations."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       cronJobs.isEmpty() ->
-        ClawPanel {
+        DshPanel {
           Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(text = nativeString("No automations yet."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-            Text(text = nativeString("Scheduled work created on the gateway will appear here."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("No automations yet."), style = DshTheme.type.section, color = DshTheme.colors.text)
+            Text(text = nativeString("Scheduled work created on the gateway will appear here."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       visibleJobs.isEmpty() ->
-        ClawPanel {
-          Text(text = nativeString("No matching automations."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("No matching automations."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       else -> CronJobsPanel(jobs = visibleJobs, onJobClick = { selectedJobId = it.id })
     }
@@ -476,7 +476,7 @@ private fun CronJobDetailSettingsScreen(
     icon = Icons.Default.Bolt,
     onBack = ::leaveDetail,
   ) {
-    ClawSecondaryButton(
+    DshSecondaryButton(
       text = if (loading) nativeString("Refreshing") else nativeString("Refresh"),
       onClick = { viewModel.loadCronJobDetail(jobId) },
       enabled =
@@ -492,16 +492,16 @@ private fun CronJobDetailSettingsScreen(
 
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to inspect automations."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to inspect automations."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       errorText != null ->
-        ClawPanel {
-          Text(text = errorText.resolveNativeTextResource(), style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+        DshPanel {
+          Text(text = errorText.resolveNativeTextResource(), style = DshTheme.type.body, color = DshTheme.colors.warning)
         }
       current == null ->
-        ClawPanel {
-          Text(text = if (loading) nativeString("Loading automation…") else nativeString("Automation not loaded."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = if (loading) nativeString("Loading automation…") else nativeString("Automation not loaded."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       else ->
         CronJobDetailPanel(
@@ -562,12 +562,12 @@ private fun AgentsSettingsScreen(
     )
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load agents."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load agents."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       agents.isEmpty() ->
-        ClawPanel {
-          Text(text = nativeString("No agents loaded yet."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("No agents loaded yet."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       else -> AgentsPanel(agents = agents, defaultAgentId = defaultAgentId)
     }
@@ -604,15 +604,15 @@ private fun ApprovalsSettingsScreen(
           SettingsMetric(nativeString("Active Runs"), pendingRunCount.toString()),
         ),
     )
-    ClawSecondaryButton(
+    DshSecondaryButton(
       text = if (execApprovalsRefreshing) nativeString("Refreshing") else nativeString("Refresh"),
       onClick = viewModel::refreshExecApprovals,
       enabled = isConnected && !execApprovalsRefreshing,
       modifier = Modifier.fillMaxWidth(),
     )
     if (execApprovalsErrorText != null) {
-      ClawPanel {
-        Text(text = gatewayExecApprovalTextForDisplay(execApprovalsErrorText ?: ""), style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = gatewayExecApprovalTextForDisplay(execApprovalsErrorText ?: ""), style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     // Terminal outcomes always retire their card first, so the notice renders as a
@@ -621,17 +621,17 @@ private fun ApprovalsSettingsScreen(
       ExecApprovalNotice(notice = notice, onDismiss = { viewModel.dismissExecApprovalsNotice(notice) })
     }
     if (!isConnected) {
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-          Text(text = nativeString("Gateway disconnected."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-          Text(text = nativeString("Connect the gateway to load approval requests in the app."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("Gateway disconnected."), style = DshTheme.type.section, color = DshTheme.colors.text)
+          Text(text = nativeString("Connect the gateway to load approval requests in the app."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       }
     } else if (execApprovals.isEmpty()) {
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-          Text(text = nativeString("No gateway approvals."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-          Text(text = nativeString("Exec approval requests will appear here while this phone is connected."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("No gateway approvals."), style = DshTheme.type.section, color = DshTheme.colors.text)
+          Text(text = nativeString("Exec approval requests will appear here while this phone is connected."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       }
     } else {
@@ -641,8 +641,8 @@ private fun ApprovalsSettingsScreen(
       )
     }
     if (pendingToolCalls.isNotEmpty()) {
-      Text(text = nativeString("Thread activity"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-      Text(text = nativeString("Chat tool calls waiting in the active thread remain visible here."), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+      Text(text = nativeString("Thread activity"), style = DshTheme.type.section, color = DshTheme.colors.text)
+      Text(text = nativeString("Chat tool calls waiting in the active thread remain visible here."), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       SessionToolCallsPanel(toolCalls = pendingToolCalls)
     }
   }
@@ -657,10 +657,10 @@ private fun ProfileSettingsScreen(
   var draft by remember(displayName) { mutableStateOf(displayName.ifBlank { "DeepSeekHarness" }) }
 
   SettingsDetailFrame(title = nativeString("Profile"), subtitle = nativeString("How this phone appears to DeepSeekHarness."), icon = Icons.Default.Person, onBack = onBack) {
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-        ClawTextField(value = draft, onValueChange = { draft = it }, placeholder = nativeString("Device name"))
-        ClawPrimaryButton(text = nativeString("Save Profile"), onClick = { viewModel.setDisplayName(draft) }, enabled = draft.isNotBlank())
+        DshTextField(value = draft, onValueChange = { draft = it }, placeholder = nativeString("Device name"))
+        DshPrimaryButton(text = nativeString("Save Profile"), onClick = { viewModel.setDisplayName(draft) }, enabled = draft.isNotBlank())
       }
     }
   }
@@ -721,7 +721,7 @@ private fun VoiceSettingsScreen(
 
   SettingsDetailFrame(title = nativeString("Voice"), subtitle = nativeString("Configure wake words, talk, and playback."), icon = Icons.Default.Mic, onBack = onBack) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      Text(text = nativeString("Voice Wake"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      Text(text = nativeString("Voice Wake"), style = DshTheme.type.section, color = DshTheme.colors.text)
       SettingsTogglePanel(
         rows =
           listOf(
@@ -749,13 +749,13 @@ private fun VoiceSettingsScreen(
         statusText = voiceWakeStatusText,
         ready = voiceWakeIsListening,
       )
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-          Text(text = nativeString("Wake words"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+          Text(text = nativeString("Wake words"), style = DshTheme.type.section, color = DshTheme.colors.text)
           Text(
             text = nativeString("Add one wake word or phrase per field. Then say one before your command."),
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
           )
           wakeWordDrafts.forEachIndexed { index, value ->
             Row(
@@ -763,7 +763,7 @@ private fun VoiceSettingsScreen(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-              ClawTextField(
+              DshTextField(
                 value = value,
                 onValueChange = { updated ->
                   wakeWordDrafts = wakeWordDrafts.toMutableList().also { it[index] = updated }
@@ -773,7 +773,7 @@ private fun VoiceSettingsScreen(
                 modifier = Modifier.weight(1f),
               )
               if (voiceWakeAvailable && !voiceWakeWordsSaving && wakeWordDrafts.size > 1) {
-                ClawPlainIconButton(
+                DshPlainIconButton(
                   icon = Icons.Default.Delete,
                   contentDescription = nativeString("Remove wake phrase"),
                   onClick = {
@@ -783,35 +783,35 @@ private fun VoiceSettingsScreen(
               }
             }
           }
-          ClawSecondaryButton(
+          DshSecondaryButton(
             text = nativeString("Add wake phrase"),
             onClick = { wakeWordDrafts = wakeWordDrafts + "" },
             enabled = voiceWakeAvailable && !voiceWakeWordsSaving && wakeWordDrafts.size < VoiceWakePreferences.maxWords,
             icon = Icons.Default.Add,
             modifier = Modifier.fillMaxWidth(),
           )
-          ClawSecondaryButton(
+          DshSecondaryButton(
             text = if (voiceWakeWordsSaving) nativeString("Saving…") else nativeString("Save wake words"),
             onClick = { viewModel.setVoiceWakeWords(wakeWordDrafts) },
             enabled = voiceWakeAvailable && isConnected && !voiceWakeWordsSaving && wakeWordDrafts.any(String::isNotBlank),
             modifier = Modifier.fillMaxWidth(),
           )
           (voiceWakeWordsNoticeText ?: if (!isConnected) nativeString("Connect to a Gateway to save wake words") else null)?.let { notice ->
-            Text(text = notice, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+            Text(text = notice, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
           }
         }
       }
-      Text(text = nativeString("Talk Provider Setup"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      Text(text = nativeString("Talk Provider Setup"), style = DshTheme.type.section, color = DshTheme.colors.text)
       VoiceSetupPanel(talkSetupReadiness)
-      Text(text = nativeString("Microphone"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      Text(text = nativeString("Microphone"), style = DshTheme.type.section, color = DshTheme.colors.text)
       AudioInputDevicePanel(
         devices = audioInputDevices,
         preferredDeviceKey = preferredAudioInputDevice,
         preferencePending = audioInputDevicePending,
         onSelect = viewModel::setPreferredAudioInputDevice,
       )
-      Text(text = nativeString("Audio Test"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-      Text(text = nativeString("Check that DeepSeekHarness can speak clearly on this phone."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      Text(text = nativeString("Audio Test"), style = DshTheme.type.section, color = DshTheme.colors.text)
+      Text(text = nativeString("Check that DeepSeekHarness can speak clearly on this phone."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       SettingsWaveformPanel(active = speakerEnabled, onClick = ::playVoiceSetupTone)
       VoiceSetupActionRow(
         title = if (speakerEnabled) nativeString("Mute speaker") else nativeString("Enable speaker"),
@@ -821,7 +821,7 @@ private fun VoiceSettingsScreen(
         ready = speakerEnabled,
         onClick = { viewModel.setSpeakerEnabled(!speakerEnabled) },
       )
-      ClawPrimaryButton(text = nativeString("Done"), onClick = onBack, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.GraphicEq)
+      DshPrimaryButton(text = nativeString("Done"), onClick = onBack, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.GraphicEq)
     }
   }
 }
@@ -836,7 +836,7 @@ private fun AudioInputDevicePanel(
   val preferredAvailable = devices.any { it.key == preferredDeviceKey }
   val unavailablePreferredDevice =
     preferredDeviceKey?.takeUnless { preferredAvailable }?.let(::audioInputDeviceOptionFromKey)
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       AudioInputDeviceRow(
         title = nativeString("Automatic"),
@@ -851,7 +851,7 @@ private fun AudioInputDevicePanel(
         onClick = { onSelect(null) },
       )
       unavailablePreferredDevice?.let { device ->
-        HorizontalDivider(color = ClawTheme.colors.border)
+        HorizontalDivider(color = DshTheme.colors.border)
         AudioInputDeviceRow(
           title = device.productName.ifBlank { nativeString("Preferred microphone") },
           subtitle = nativeString("Unavailable"),
@@ -861,7 +861,7 @@ private fun AudioInputDevicePanel(
         )
       }
       devices.forEach { device ->
-        HorizontalDivider(color = ClawTheme.colors.border)
+        HorizontalDivider(color = DshTheme.colors.border)
         val typeLabel = audioInputDeviceTypeLabel(device.type)
         AudioInputDeviceRow(
           title = device.productName.ifBlank { typeLabel },
@@ -883,11 +883,11 @@ private fun AudioInputDeviceRow(
   pending: Boolean,
   onClick: (() -> Unit)?,
 ) {
-  ClawListItem(
+  DshListItem(
     title = title,
     subtitle = subtitle,
     metadata = nativeString("Next session").takeIf { pending },
-    leading = { ClawIconBadge(Icons.Default.Mic) },
+    leading = { DshIconBadge(Icons.Default.Mic) },
     trailing =
       if (selected) {
         {
@@ -895,7 +895,7 @@ private fun AudioInputDeviceRow(
             imageVector = Icons.Default.Check,
             contentDescription = nativeString("Selected"),
             modifier = Modifier.size(18.dp),
-            tint = ClawTheme.colors.primary,
+            tint = DshTheme.colors.primary,
           )
         }
       } else {
@@ -958,10 +958,10 @@ private fun VoiceSetupActionRow(
     onClick = onClick ?: {},
     enabled = onClick != null,
     modifier = rowModifier,
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
@@ -971,28 +971,28 @@ private fun VoiceSetupActionRow(
       Surface(
         modifier = Modifier.size(38.dp),
         shape = CircleShape,
-        color = ClawTheme.colors.canvas,
-        contentColor = ClawTheme.colors.text,
-        border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+        color = DshTheme.colors.canvas,
+        contentColor = DshTheme.colors.text,
+        border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(19.dp))
         }
       }
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = title, style = ClawTheme.type.section, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = subtitle, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = title, style = DshTheme.type.section, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = subtitle, style = DshTheme.type.body, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         Box(
           modifier =
             Modifier
               .size(7.dp)
-              .background(if (ready) ClawTheme.colors.success else ClawTheme.colors.textSubtle, CircleShape),
+              .background(if (ready) DshTheme.colors.success else DshTheme.colors.textSubtle, CircleShape),
         )
-        Text(text = statusText, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted, maxLines = 1)
+        Text(text = statusText, style = DshTheme.type.body, color = DshTheme.colors.textMuted, maxLines = 1)
         if (onClick != null) {
-          Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = ClawTheme.colors.textMuted)
+          Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = DshTheme.colors.textMuted)
         }
       }
     }
@@ -1007,17 +1007,17 @@ private fun SettingsWaveformPanel(
   Surface(
     onClick = onClick,
     modifier = Modifier.fillMaxWidth().height(76.dp),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-      Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp), tint = ClawTheme.colors.text)
+      Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp), tint = DshTheme.colors.text)
       // Thinking is the preview phase: no capture runs on this screen, so the
       // synthetic swell demonstrates the animation without touching the mic.
       TalkWaveform(
@@ -1121,7 +1121,7 @@ private fun NotificationSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (listenerEnabled) nativeString("Check Access") else nativeString("Open System Access"),
         onClick = {
           openNotificationListenerSettings(context)
@@ -1129,10 +1129,10 @@ private fun NotificationSettingsScreen(
         modifier = Modifier.weight(1f),
       )
     }
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = nativeString("Forwarding Mode"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        ClawSegmentedControl(
+        Text(text = nativeString("Forwarding Mode"), style = DshTheme.type.section, color = DshTheme.colors.text)
+        DshSegmentedControl(
           options = listOf(nativeString("Blocklist"), nativeString("Allowlist")),
           selected = nativeString(modeLabel),
           onSelect = { selected ->
@@ -1184,21 +1184,21 @@ private fun NotificationPackagePickerPanel(
   onPackageSelectionChange: (String, Boolean) -> Unit,
 ) {
   val visibleApps = apps.take(NOTIFICATION_PICKER_RESULT_LIMIT)
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      Text(text = nativeString("App Filter"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      Text(text = nativeString("App Filter"), style = DshTheme.type.section, color = DshTheme.colors.text)
       Text(
         text = notificationPackageSelectionSummary(mode = mode, selectedCount = selectedPackages.size),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
       )
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (expanded) nativeString("Close App Picker") else nativeString("Open App Picker"),
         onClick = { onExpandedChange(!expanded) },
         modifier = Modifier.fillMaxWidth(),
       )
       if (expanded) {
-        ClawTextField(value = search, onValueChange = onSearchChange, placeholder = nativeString("Search apps"))
+        DshTextField(value = search, onValueChange = onSearchChange, placeholder = nativeString("Search apps"))
         SettingsToggleListRow(
           SettingsToggleRow(
             title = nativeString("Show System Apps"),
@@ -1209,9 +1209,9 @@ private fun NotificationPackagePickerPanel(
           ),
         )
         if (visibleApps.isEmpty()) {
-          Text(text = nativeString("No matching apps."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("No matching apps."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         } else {
-          ClawSeparatedColumn(items = visibleApps) { app ->
+          DshSeparatedColumn(items = visibleApps) { app ->
             NotificationPackageAppRow(
               app = app,
               selected = selectedPackages.contains(app.packageName),
@@ -1221,8 +1221,8 @@ private fun NotificationPackagePickerPanel(
           if (apps.size > visibleApps.size) {
             Text(
               text = nativeString("Showing \${visibleApps.size} of \${apps.size}. Refine search for more.", visibleApps.size, apps.size),
-              style = ClawTheme.type.caption,
-              color = ClawTheme.colors.textMuted,
+              style = DshTheme.type.caption,
+              color = DshTheme.colors.textMuted,
             )
           }
         }
@@ -1247,19 +1247,19 @@ private fun NotificationPackageAppRow(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(9.dp),
   ) {
-    ClawTextBadge(text = notificationAppBadge(app.label))
+    DshTextBadge(text = notificationAppBadge(app.label))
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
       Text(
         text = app.label,
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       Text(
         text = app.packageName,
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -1498,10 +1498,10 @@ private fun PhoneCapabilitiesScreen(
     if (SensitiveFeatureConfig.accessibilityControlEnabled) {
       FlavorPhoneCapabilitiesSettings(viewModel)
     }
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = nativeString("Location"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        ClawSegmentedControl(
+        Text(text = nativeString("Location"), style = DshTheme.type.section, color = DshTheme.colors.text)
+        DshSegmentedControl(
           options = locationModeLabels(backgroundLocationAvailable),
           selected = locationMode.displayLabel,
           onSelect = { selected -> setLocationAccess(locationModeForLabel(selected)) },
@@ -1509,8 +1509,8 @@ private fun PhoneCapabilitiesScreen(
         if (backgroundLocationAvailable) {
           Text(
             text = nativeString("Always allows requested location checks while DeepSeekHarness is in the background; Android shows this in the persistent node notification."),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
@@ -1655,8 +1655,8 @@ private fun GatewaySettingsScreen(
       text = {
         Text(
           gatewaySettingsSetupResetConfirmationText(),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
         )
       },
       confirmButton = {
@@ -1674,7 +1674,7 @@ private fun GatewaySettingsScreen(
           Text(nativeString("Cancel"))
         }
       },
-      containerColor = ClawTheme.colors.surface,
+      containerColor = DshTheme.colors.surface,
     )
   }
 
@@ -1705,7 +1705,7 @@ private fun GatewaySettingsScreen(
       dismissButton = {
         TextButton(onClick = { pendingForgetStableId = null }) { Text(nativeString("Cancel")) }
       },
-      containerColor = ClawTheme.colors.surface,
+      containerColor = DshTheme.colors.surface,
     )
   }
 
@@ -1745,7 +1745,7 @@ private fun GatewaySettingsScreen(
     icon = Icons.Default.Cloud,
     onBack = onBack,
     trailingAction = {
-      ClawPlainIconButton(
+      DshPlainIconButton(
         icon = Icons.Default.QrCode2,
         contentDescription = nativeString("Scan QR"),
         onClick = viewModel::pairNewGateway,
@@ -1778,7 +1778,7 @@ private fun GatewaySettingsScreen(
     )
     // First-run hero: no paired gateways yet, so pairing is the primary action.
     if (gatewayShowsScanHero(pairedGateways.size)) {
-      ClawPrimaryButton(
+      DshPrimaryButton(
         text = nativeString("Scan QR to Pair"),
         onClick = viewModel::pairNewGateway,
         modifier = Modifier.fillMaxWidth(),
@@ -1786,26 +1786,26 @@ private fun GatewaySettingsScreen(
       )
     }
     if (gatewayConnectionDisplay.isConnected && !operatorAdminScopeAvailable) {
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
           Text(
             text = nativeString("Limited Gateway access"),
-            style = ClawTheme.type.section,
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.section,
+            color = DshTheme.colors.text,
           )
           Text(
             text = gatewayLimitedAccessUpgradeText(),
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawPrimaryButton(text = nativeString("Reconnect"), onClick = viewModel::refreshGatewayConnection, modifier = Modifier.weight(1f))
-      ClawSecondaryButton(text = nativeString("Disconnect"), onClick = viewModel::disconnect, modifier = Modifier.weight(1f))
+      DshPrimaryButton(text = nativeString("Reconnect"), onClick = viewModel::refreshGatewayConnection, modifier = Modifier.weight(1f))
+      DshSecondaryButton(text = nativeString("Disconnect"), onClick = viewModel::disconnect, modifier = Modifier.weight(1f))
     }
-    ClawSecondaryButton(
+    DshSecondaryButton(
       text = nativeString("Diagnose"),
       onClick = {
         copyGatewayDiagnosticsReport(
@@ -1817,42 +1817,42 @@ private fun GatewaySettingsScreen(
       },
       modifier = Modifier.fillMaxWidth(),
     )
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = nativeString("Add Gateway"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = nativeString("Add Gateway"), style = DshTheme.type.section, color = DshTheme.colors.text)
         Text(
           text = nativeString("Scan or paste a setup code to add another gateway."),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
-        ClawSecondaryButton(text = nativeString("Scan QR"), onClick = viewModel::pairNewGateway, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.QrCode2)
-        ClawTextField(value = setupCode, onValueChange = { setupCode = it }, placeholder = nativeString("Setup code"))
-        ClawSecondaryButton(text = nativeString("Connect"), onClick = ::connectSetupCode, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.Cloud)
+        DshSecondaryButton(text = nativeString("Scan QR"), onClick = viewModel::pairNewGateway, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.QrCode2)
+        DshTextField(value = setupCode, onValueChange = { setupCode = it }, placeholder = nativeString("Setup code"))
+        DshSecondaryButton(text = nativeString("Connect"), onClick = ::connectSetupCode, modifier = Modifier.fillMaxWidth(), icon = Icons.Default.Cloud)
         TextButton(onClick = { showSetupCodeHelp = !showSetupCodeHelp }) {
           Text(nativeString("Where do I get a setup code?"))
         }
         if (showSetupCodeHelp) {
           Text(
             text = nativeString("Android can scan or paste an existing setup code, but this gateway does not expose setup-code generation to the app yet. Generate the QR/code on the gateway host with dsh qr, then scan it here or paste the setup code below."),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
         if (discoveredGateways.isEmpty()) {
           Text(
             text = nativeString("No gateways found yet. Use manual setup if discovery is blocked."),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         } else {
           discoveredGateways.forEachIndexed { index, endpoint ->
-            if (index > 0) HorizontalDivider(color = ClawTheme.colors.border)
-            ClawListItem(
+            if (index > 0) HorizontalDivider(color = DshTheme.colors.border)
+            DshListItem(
               title = endpoint.name,
               subtitle = gatewayDiscoveredRowSubtitle(endpoint),
-              leading = { ClawIconBadge(Icons.Default.Cloud) },
+              leading = { DshIconBadge(Icons.Default.Cloud) },
               trailing = {
                 TextButton(onClick = { viewModel.connect(endpoint) }) {
                   Text(nativeString("Connect"))
@@ -1864,15 +1864,15 @@ private fun GatewaySettingsScreen(
         }
       }
     }
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = nativeString("Gateways"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = nativeString("Gateways"), style = DshTheme.type.section, color = DshTheme.colors.text)
         if (pairedGateways.isEmpty()) {
-          Text(text = nativeString("No paired gateways."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("No paired gateways."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         } else {
           pairedGateways.forEachIndexed { index, entry ->
-            if (index > 0) HorizontalDivider(color = ClawTheme.colors.border)
-            ClawListItem(
+            if (index > 0) HorizontalDivider(color = DshTheme.colors.border)
+            DshListItem(
               title = entry.name,
               subtitle =
                 when (entry.kind) {
@@ -1881,9 +1881,9 @@ private fun GatewaySettingsScreen(
                 },
               leading = {
                 if (entry.stableId == activeGatewayStableId) {
-                  ClawIconBadge(Icons.Default.Check)
+                  DshIconBadge(Icons.Default.Check)
                 } else {
-                  ClawIconBadge(Icons.Default.Cloud)
+                  DshIconBadge(Icons.Default.Cloud)
                 }
               },
               trailing = {
@@ -1911,16 +1911,16 @@ private fun GatewaySettingsScreen(
         }
       }
     }
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = nativeString("Manual Gateway"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = nativeString("Manual Gateway"), style = DshTheme.type.section, color = DshTheme.colors.text)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          ClawTextField(value = hostInput, onValueChange = { hostInput = it }, placeholder = nativeString("Host"), modifier = Modifier.weight(1f))
-          ClawTextField(value = portInput, onValueChange = { portInput = it }, placeholder = nativeString("Port"), modifier = Modifier.weight(0.62f))
+          DshTextField(value = hostInput, onValueChange = { hostInput = it }, placeholder = nativeString("Host"), modifier = Modifier.weight(1f))
+          DshTextField(value = portInput, onValueChange = { portInput = it }, placeholder = nativeString("Port"), modifier = Modifier.weight(0.62f))
         }
-        Text(text = nativeString("Connection security"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+        Text(text = nativeString("Connection security"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
         val securityOptions = listOf(nativeString("Unencrypted"), nativeString("Secure (TLS)"))
-        ClawSegmentedControl(
+        DshSegmentedControl(
           options = securityOptions,
           selected = if (transport.effectiveTls) nativeString("Secure (TLS)") else nativeString("Unencrypted"),
           onSelect = { selected -> tlsInput = selected == nativeString("Secure (TLS)") },
@@ -1934,19 +1934,19 @@ private fun GatewaySettingsScreen(
         transport.helperText?.let { helperText ->
           Text(
             text = helperText,
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          ClawTextField(value = tokenInput, onValueChange = { tokenInput = it }, placeholder = nativeString("Token"), modifier = Modifier.weight(1f))
-          ClawTextField(value = bootstrapTokenInput, onValueChange = { bootstrapTokenInput = it }, placeholder = nativeString("Bootstrap"), modifier = Modifier.weight(1.05f))
+          DshTextField(value = tokenInput, onValueChange = { tokenInput = it }, placeholder = nativeString("Token"), modifier = Modifier.weight(1f))
+          DshTextField(value = bootstrapTokenInput, onValueChange = { bootstrapTokenInput = it }, placeholder = nativeString("Bootstrap"), modifier = Modifier.weight(1.05f))
         }
-        ClawTextField(value = passwordInput, onValueChange = { passwordInput = it }, placeholder = nativeString("Password"))
+        DshTextField(value = passwordInput, onValueChange = { passwordInput = it }, placeholder = nativeString("Password"))
         validationText?.let {
-          Text(text = it, style = ClawTheme.type.caption, color = ClawTheme.colors.warning)
+          Text(text = it, style = DshTheme.type.caption, color = DshTheme.colors.warning)
         }
-        ClawPrimaryButton(
+        DshPrimaryButton(
           text = nativeString("Save & Connect"),
           onClick = {
             val plan =
@@ -1965,7 +1965,7 @@ private fun GatewaySettingsScreen(
               )
             if (plan == null) {
               validationText = nativeString("Enter a valid setup code or gateway address.")
-              return@ClawPrimaryButton
+              return@DshPrimaryButton
             }
             if (plan.savedAuthAction == GatewaySavedAuthAction.REPLACE_SETUP) {
               pendingSetupResetPlan = plan
@@ -2015,21 +2015,21 @@ private fun AppearanceSettingsScreen(
           SettingsMetric(nativeString("Typography"), nativeString("Readable")),
         ),
     )
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = nativeString("Theme"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        ClawSegmentedControl(
+        Text(text = nativeString("Theme"), style = DshTheme.type.section, color = DshTheme.colors.text)
+        DshSegmentedControl(
           options = appearanceThemeOptions(),
           selected = appearanceThemeSummary(themeMode),
           onSelect = { selected -> viewModel.setAppearanceThemeMode(appearanceThemeModeForLabel(selected)) },
         )
       }
     }
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = nativeString("App language"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = nativeString("App language"), style = DshTheme.type.section, color = DshTheme.colors.text)
         AppLanguage.entries.forEachIndexed { index, language ->
-          if (index > 0) HorizontalDivider(color = ClawTheme.colors.border)
+          if (index > 0) HorizontalDivider(color = DshTheme.colors.border)
           AppLanguageRow(
             language = language,
             selected = language == appLanguage,
@@ -2052,10 +2052,10 @@ private fun AppLanguageRow(
   systemLanguageTag: String,
   onClick: () -> Unit,
 ) {
-  ClawListItem(
+  DshListItem(
     title = appLanguageTitle(language),
     subtitle = appLanguageRowSubtitle(language = language, systemLanguageTag = systemLanguageTag),
-    leading = { ClawIconBadge(Icons.Default.Language) },
+    leading = { DshIconBadge(Icons.Default.Language) },
     trailing =
       if (selected) {
         {
@@ -2063,7 +2063,7 @@ private fun AppLanguageRow(
             imageVector = Icons.Default.Check,
             contentDescription = nativeString("Selected"),
             modifier = Modifier.size(18.dp),
-            tint = ClawTheme.colors.primary,
+            tint = DshTheme.colors.primary,
           )
         }
       } else {
@@ -2135,12 +2135,12 @@ private fun AboutSettingsScreen(
           SettingsMetric(nativeString("Gateway"), currentGatewayVersion ?: nativeString("Not connected")),
         ),
     )
-    ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
       Column {
         AboutStatusRow(title = nativeString("Gateway"), value = serverName?.takeIf { it.isNotBlank() } ?: nativeString("Home Gateway"), healthy = isConnected)
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
         AboutStatusRow(title = nativeString("Runtime"), value = currentGatewayVersion ?: nativeString("Waiting"), healthy = currentGatewayVersion != null)
-        HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+        HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
         AboutStatusRow(
           title = nativeString("Update"),
           value = latestVersion?.let { nativeString("v\$it available", it) } ?: nativeString("Up to date"),
@@ -2148,14 +2148,14 @@ private fun AboutSettingsScreen(
         )
       }
     }
-    ClawPanel {
-      Text(text = aboutUpdateText(latestVersion = latestVersion), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+    DshPanel {
+      Text(text = aboutUpdateText(latestVersion = latestVersion), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
     AboutLinksPanel()
     Text(
       text = nativeString("© 2026 DeepSeekHarness Foundation — MIT License."),
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.textSubtle,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.textSubtle,
       modifier = Modifier.fillMaxWidth(),
       textAlign = TextAlign.Center,
     )
@@ -2175,7 +2175,7 @@ private fun AppUpdateSettingsPanel(viewModel: MainViewModel) {
     autoCheck = viewModel.getAutoCheckUpdates()
   }
 
-  ClawPanel(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
     Column(
       modifier = Modifier.fillMaxWidth(),
       verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -2187,29 +2187,29 @@ private fun AppUpdateSettingsPanel(viewModel: MainViewModel) {
         Column(modifier = Modifier.weight(1f)) {
           Text(
             text = nativeString("App 更新"),
-            style = ClawTheme.type.label,
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.label,
+            color = DshTheme.colors.text,
           )
           Text(
             text = nativeString("当前版本 ${BuildConfig.VERSION_NAME}"),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
-        ClawPrimaryButton(
+        DshPrimaryButton(
           text = nativeString("检查更新"),
           onClick = { scope.launch { viewModel.checkForUpdateManually() } },
         )
       }
-      HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+      HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
       Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Text(
           text = nativeString("启动时自动检查更新"),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(1f),
         )
         Switch(
@@ -2226,7 +2226,7 @@ private fun AppUpdateSettingsPanel(viewModel: MainViewModel) {
 
 @Composable
 private fun AboutHeroPanel() {
-  ClawPanel {
+  DshPanel {
     Column(
       modifier = Modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -2234,8 +2234,8 @@ private fun AboutHeroPanel() {
     ) {
       DeepSeekHarnessMascot(contentDescription = nativeString("DeepSeekHarness logo"), modifier = Modifier.size(80.dp))
       Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = nativeString("DeepSeekHarness"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        Text(text = nativeString("Personal AI on your devices"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+        Text(text = nativeString("DeepSeekHarness"), style = DshTheme.type.section, color = DshTheme.colors.text)
+        Text(text = nativeString("Personal AI on your devices"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       }
     }
   }
@@ -2258,8 +2258,8 @@ private val aboutLinks =
 @Composable
 private fun AboutLinksPanel() {
   val uriHandler = LocalUriHandler.current
-  ClawListPanel(items = aboutLinks) { link ->
-    ClawListItem(
+  DshListPanel(items = aboutLinks) { link ->
+    DshListItem(
       title = aboutLinkTitle(link.title),
       subtitle = link.subtitle,
       onClick = { uriHandler.openUri(link.url) },
@@ -2267,7 +2267,7 @@ private fun AboutLinksPanel() {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.OpenInNew,
           contentDescription = null,
-          tint = ClawTheme.colors.textSubtle,
+          tint = DshTheme.colors.textSubtle,
           modifier = Modifier.size(16.dp),
         )
       },
@@ -2302,17 +2302,17 @@ private fun LicensesSettingsScreen(onBack: () -> Unit) {
     val selected = selectedLicense
     if (selected == null) {
       if (licenses.isEmpty()) {
-        ClawPanel {
-          Text(text = nativeString("No license notices are packaged in this build."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("No license notices are packaged in this build."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       } else {
-        ClawListPanel(items = licenses) { license ->
+        DshListPanel(items = licenses) { license ->
           LicenseListRow(license = license, onClick = { selectedLicense = license })
         }
       }
     } else {
-      ClawPanel {
-        Text(text = selected.text, style = ClawTheme.type.caption.copy(fontFamily = FontFamily.Monospace), color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = selected.text, style = DshTheme.type.caption.copy(fontFamily = FontFamily.Monospace), color = DshTheme.colors.textMuted)
       }
     }
   }
@@ -2323,7 +2323,7 @@ private fun LicenseListRow(
   license: AndroidLicenseNotice,
   onClick: () -> Unit,
 ) {
-  ClawListItem(
+  DshListItem(
     title = license.title,
     onClick = onClick,
     trailing = {
@@ -2331,7 +2331,7 @@ private fun LicenseListRow(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = nativeString("Open \${license.title}", license.title),
         modifier = Modifier.size(20.dp),
-        tint = ClawTheme.colors.text,
+        tint = DshTheme.colors.text,
       )
     },
   )
@@ -2371,10 +2371,10 @@ private fun AboutStatusRow(
     horizontalArrangement = Arrangement.spacedBy(9.dp),
   ) {
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-      Text(text = title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1)
-      Text(text = value, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1)
+      Text(text = value, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
-    ClawStatusPill(text = if (healthy) "OK" else nativeString("Check"), status = if (healthy) ClawStatus.Success else ClawStatus.Warning)
+    DshStatusPill(text = if (healthy) "OK" else nativeString("Check"), status = if (healthy) DshStatus.Success else DshStatus.Warning)
   }
 }
 
@@ -2399,19 +2399,19 @@ internal fun SettingsDetailFrame(
   trailingAction: (@Composable () -> Unit)? = null,
   content: @Composable () -> Unit,
 ) {
-  ClawScaffold(
-    contentPadding = PaddingValues(start = ClawTheme.spacing.lg, top = 14.dp, end = ClawTheme.spacing.lg, bottom = 6.dp),
+  DshScaffold(
+    contentPadding = PaddingValues(start = DshTheme.spacing.lg, top = 14.dp, end = DshTheme.spacing.lg, bottom = 6.dp),
     contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
   ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(bottom = 4.dp)) {
       item {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-          ClawPlainIconButton(
+          DshPlainIconButton(
             icon = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = nativeString("Back"),
             onClick = onBack,
           )
-          Text(text = title, style = ClawTheme.type.title, color = ClawTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
           trailingAction?.invoke()
           SettingsIconMark(icon = icon)
         }
@@ -2420,8 +2420,8 @@ internal fun SettingsDetailFrame(
         item {
           Text(
             text = subtitle,
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
             modifier = Modifier.fillMaxWidth(),
             textAlign = subtitleTextAlign,
           )
@@ -2478,36 +2478,36 @@ private fun ExecApprovalCard(
   onResolve: (String, String) -> Unit,
 ) {
   val resolving = approval.resolvingDecision != null
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-          Text(text = nativeString("Command approval"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+          Text(text = nativeString("Command approval"), style = DshTheme.type.section, color = DshTheme.colors.text)
           approval.commandPreview?.let { preview ->
-            Text(text = preview, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(text = preview, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
           }
         }
-        ClawStatusPill(text = if (resolving) nativeString("Sending") else nativeString("Review"), status = if (resolving) ClawStatus.Warning else ClawStatus.Success)
+        DshStatusPill(text = if (resolving) nativeString("Sending") else nativeString("Review"), status = if (resolving) DshStatus.Warning else DshStatus.Success)
       }
       ExecApprovalCommandReview(approval.commandText.resolveNativeTextResource())
       approval.warningText?.let { warningText ->
-        Text(text = warningText, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+        Text(text = warningText, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
-      Text(text = execApprovalMetadata(approval), style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
+      Text(text = execApprovalMetadata(approval), style = DshTheme.type.caption, color = DshTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
       approval.errorText?.let { errorText ->
-        Text(text = gatewayExecApprovalTextForDisplay(errorText), style = ClawTheme.type.caption, color = ClawTheme.colors.warning)
+        Text(text = gatewayExecApprovalTextForDisplay(errorText), style = DshTheme.type.caption, color = DshTheme.colors.warning)
       }
       Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         execApprovalActions(approval.allowedDecisions).forEach { action ->
           if (action.decision == "allow-once") {
-            ClawPrimaryButton(
+            DshPrimaryButton(
               text = action.label,
               onClick = { onResolve(approval.id, action.decision) },
               enabled = !resolving,
               modifier = Modifier.fillMaxWidth(),
             )
           } else {
-            ClawSecondaryButton(
+            DshSecondaryButton(
               text = action.label,
               onClick = { onResolve(approval.id, action.decision) },
               enabled = !resolving,
@@ -2525,15 +2525,15 @@ private fun ExecApprovalCommandReview(commandText: String) {
   Surface(
     modifier = Modifier.fillMaxWidth(),
     shape = RoundedCornerShape(8.dp),
-    color = ClawTheme.colors.surfacePressed,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    color = DshTheme.colors.surfacePressed,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     SelectionContainer {
       Text(
         text = commandText,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-        style = ClawTheme.type.body.copy(fontFamily = FontFamily.Monospace),
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.body.copy(fontFamily = FontFamily.Monospace),
+        color = DshTheme.colors.text,
       )
     }
   }
@@ -2559,32 +2559,32 @@ private fun ExecApprovalNotice(
   notice: GatewayExecApprovalNotice,
   onDismiss: () -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Text(
           text = gatewayExecApprovalTextForDisplay(notice.message),
-          style = ClawTheme.type.body,
-          color = if (notice.warning) ClawTheme.colors.warning else ClawTheme.colors.success,
+          style = DshTheme.type.body,
+          color = if (notice.warning) DshTheme.colors.warning else DshTheme.colors.success,
         )
         // The retired card is gone by the time this renders; keep the id association
         // so the outcome stays attributable while other approval cards remain visible.
         Text(
           text = nativeString("Approval \${notice.approvalId}", notice.approvalId),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
       }
-      ClawPlainIconButton(icon = Icons.Default.Close, contentDescription = nativeString("Dismiss approval notice"), onClick = onDismiss)
+      DshPlainIconButton(icon = Icons.Default.Close, contentDescription = nativeString("Dismiss approval notice"), onClick = onDismiss)
     }
   }
 }
 
 @Composable
 private fun SessionToolCallsPanel(toolCalls: List<ChatPendingToolCall>) {
-  ClawListPanel(items = toolCalls) { toolCall ->
+  DshListPanel(items = toolCalls) { toolCall ->
     ApprovalListRow(toolCall = toolCall)
   }
 }
@@ -2592,11 +2592,11 @@ private fun SessionToolCallsPanel(toolCalls: List<ChatPendingToolCall>) {
 @Composable
 private fun ApprovalListRow(toolCall: ChatPendingToolCall) {
   val hasIssue = toolCall.isError == true
-  ClawDetailRow(
+  DshDetailRow(
     title = approvalActionName(toolCall.name),
     subtitle = approvalSubtitle(toolCall, hasIssue),
-    leading = { ClawIconBadge(icon = Icons.Default.Lock) },
-    trailing = { ClawStatusPill(text = if (hasIssue) nativeString("Issue") else nativeString("Review"), status = if (hasIssue) ClawStatus.Warning else ClawStatus.Success) },
+    leading = { DshIconBadge(icon = Icons.Default.Lock) },
+    trailing = { DshStatusPill(text = if (hasIssue) nativeString("Issue") else nativeString("Review"), status = if (hasIssue) DshStatus.Warning else DshStatus.Success) },
   )
 }
 
@@ -2605,14 +2605,14 @@ private fun CronJobsPanel(
   jobs: List<GatewayCronJobSummary>,
   onJobClick: (GatewayCronJobSummary) -> Unit,
 ) {
-  ClawListPanel(items = jobs) { job ->
+  DshListPanel(items = jobs) { job ->
     CronJobListRow(job = job, onClick = { onJobClick(job) })
   }
 }
 
 @Composable
 private fun UsageProvidersPanel(providers: List<GatewayUsageProviderSummary>) {
-  ClawListPanel(items = providers) { provider ->
+  DshListPanel(items = providers) { provider ->
     UsageProviderListRow(provider = provider)
   }
 }
@@ -2620,11 +2620,11 @@ private fun UsageProvidersPanel(providers: List<GatewayUsageProviderSummary>) {
 @Composable
 private fun UsageProviderListRow(provider: GatewayUsageProviderSummary) {
   val hasIssue = provider.error != null
-  ClawDetailRow(
+  DshDetailRow(
     title = provider.displayName,
     subtitle = usageProviderSubtitle(provider),
-    leading = { ClawTextBadge(text = provider.displayName.uppercaseFirstGraphemeOrNull() ?: "U") },
-    trailing = { ClawStatusPill(text = if (hasIssue) nativeString("Issue") else "OK", status = if (hasIssue) ClawStatus.Warning else ClawStatus.Success) },
+    leading = { DshTextBadge(text = provider.displayName.uppercaseFirstGraphemeOrNull() ?: "U") },
+    trailing = { DshStatusPill(text = if (hasIssue) nativeString("Issue") else "OK", status = if (hasIssue) DshStatus.Warning else DshStatus.Success) },
   )
 }
 
@@ -2633,15 +2633,15 @@ private fun CronJobListRow(
   job: GatewayCronJobSummary,
   onClick: () -> Unit,
 ) {
-  ClawDetailRow(
+  DshDetailRow(
     title = job.name,
     subtitle = cronJobSubtitle(job),
     modifier = Modifier.clickable(onClickLabel = nativeString("Open automation detail"), onClick = onClick),
-    leading = { ClawIconBadge(icon = Icons.Default.Bolt) },
+    leading = { DshIconBadge(icon = Icons.Default.Bolt) },
     trailing = {
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        ClawStatusPill(text = cronJobStatusText(job), status = cronJobStatus(job))
-        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(17.dp), tint = ClawTheme.colors.textSubtle)
+        DshStatusPill(text = cronJobStatusText(job), status = cronJobStatus(job))
+        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(17.dp), tint = DshTheme.colors.textSubtle)
       }
     },
   )
@@ -2726,8 +2726,8 @@ internal fun cronJobDeliveryStatusText(status: String?): String = status?.let(::
 @Composable
 private fun CronJobFieldsPanel(rows: List<SettingsMetric>) {
   val context = LocalContext.current
-  ClawPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
-    ClawSeparatedColumn(items = rows) { row ->
+  DshPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
+    DshSeparatedColumn(items = rows) { row ->
       val rowModifier =
         if (row.copyable) {
           Modifier
@@ -2742,23 +2742,23 @@ private fun CronJobFieldsPanel(rows: List<SettingsMetric>) {
             .padding(vertical = 6.dp)
         }
       Row(modifier = rowModifier, horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-        Text(text = row.title, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, modifier = Modifier.weight(0.42f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(text = row.title, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, modifier = Modifier.weight(0.42f), maxLines = 2, overflow = TextOverflow.Ellipsis)
         Column(modifier = Modifier.weight(0.58f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
           Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = row.value,
-              style = ClawTheme.type.caption,
-              color = if (row.copyable) ClawTheme.colors.primary else ClawTheme.colors.text,
+              style = DshTheme.type.caption,
+              color = if (row.copyable) DshTheme.colors.primary else DshTheme.colors.text,
               modifier = Modifier.weight(1f),
               maxLines = 3,
               overflow = TextOverflow.Ellipsis,
             )
             if (row.copyable) {
-              Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp), tint = ClawTheme.colors.primary)
+              Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp), tint = DshTheme.colors.primary)
             }
           }
           if (row.copyable) {
-            Text(text = nativeString("Tap to copy"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("Tap to copy"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
           }
         }
       }
@@ -2782,13 +2782,13 @@ private fun CronJobTextPanel(
   text: String,
   warning: Boolean = false,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-      Text(text = title, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+      Text(text = title, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       Text(
         text = text,
-        style = ClawTheme.type.body,
-        color = if (warning) ClawTheme.colors.warning else ClawTheme.colors.text,
+        style = DshTheme.type.body,
+        color = if (warning) DshTheme.colors.warning else DshTheme.colors.text,
       )
     }
   }
@@ -2799,7 +2799,7 @@ private fun AgentsPanel(
   agents: List<GatewayAgentSummary>,
   defaultAgentId: String?,
 ) {
-  ClawListPanel(items = agents) { agent ->
+  DshListPanel(items = agents) { agent ->
     AgentListRow(agent = agent, isDefault = agent.id == defaultAgentId)
   }
 }
@@ -2809,15 +2809,15 @@ private fun AgentListRow(
   agent: GatewayAgentSummary,
   isDefault: Boolean,
 ) {
-  ClawDetailRow(
+  DshDetailRow(
     title = agent.name?.takeIf { it.isNotBlank() } ?: agent.id,
     subtitle = if (isDefault) nativeString("Default assistant") else nativeString("Ready"),
     leading = {
-      ClawAgentAvatar(source = agentAvatarSource(agent), size = 30.dp) {
-        ClawTextBadge(text = agentBadge(agent))
+      DshAgentAvatar(source = agentAvatarSource(agent), size = 30.dp) {
+        DshTextBadge(text = agentBadge(agent))
       }
     },
-    trailing = { ClawStatusPill(text = if (isDefault) nativeString("Default") else nativeString("Ready"), status = ClawStatus.Success) },
+    trailing = { DshStatusPill(text = if (isDefault) nativeString("Default") else nativeString("Ready"), status = DshStatus.Success) },
   )
 }
 
@@ -3041,12 +3041,12 @@ private fun cronJobStatusText(job: GatewayCronJobDetail): String {
 }
 
 /** Maps gateway cron status text to app status colors. */
-private fun cronJobStatus(job: GatewayCronJobSummary): ClawStatus {
-  if (!job.enabled) return ClawStatus.Neutral
+private fun cronJobStatus(job: GatewayCronJobSummary): DshStatus {
+  if (!job.enabled) return DshStatus.Neutral
   return when (job.lastRunStatus?.lowercase()) {
-    "error" -> ClawStatus.Danger
-    "skipped" -> ClawStatus.Warning
-    else -> ClawStatus.Success
+    "error" -> DshStatus.Danger
+    "skipped" -> DshStatus.Warning
+    else -> DshStatus.Success
   }
 }
 
@@ -3143,8 +3143,8 @@ internal fun formatCronTimestamp(timeMs: Long?): String {
 
 @Composable
 internal fun SettingsTogglePanel(rows: List<SettingsToggleRow>) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
-    ClawSeparatedColumn(items = rows) { row ->
+  DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+    DshSeparatedColumn(items = rows) { row ->
       SettingsToggleListRow(row)
     }
   }
@@ -3162,10 +3162,10 @@ private fun SettingsToggleListRow(row: SettingsToggleRow) {
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(9.dp),
   ) {
-    Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(19.dp), tint = ClawTheme.colors.text)
+    Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(19.dp), tint = DshTheme.colors.text)
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-      Text(text = row.title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1)
-      Text(text = row.subtitle, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+      Text(text = row.title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1)
+      Text(text = row.subtitle, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
     Switch(checked = row.checked, onCheckedChange = row.onCheckedChange, enabled = row.enabled)
   }
@@ -3176,21 +3176,21 @@ private fun SettingsToggleListRow(row: SettingsToggleRow) {
  */
 @Composable
 internal fun SettingsMetricPanel(rows: List<SettingsMetric>) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
-    ClawSeparatedColumn(items = rows) { row ->
+  DshPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
+    DshSeparatedColumn(items = rows) { row ->
       Row(modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).padding(horizontal = 0.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
           text = row.title,
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
           modifier = Modifier.weight(0.9f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = row.value,
-          style = ClawTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp),
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp),
+          color = DshTheme.colors.textMuted,
           modifier = Modifier.weight(1.1f),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
@@ -3206,9 +3206,9 @@ private fun SettingsIconMark(icon: ImageVector) {
   Surface(
     modifier = Modifier.size(30.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.surfaceRaised,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
-    contentColor = ClawTheme.colors.text,
+    color = DshTheme.colors.surfaceRaised,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
+    contentColor = DshTheme.colors.text,
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(15.dp))

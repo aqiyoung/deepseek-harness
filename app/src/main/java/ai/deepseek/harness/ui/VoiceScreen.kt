@@ -8,13 +8,13 @@ import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.isReady
 import ai.deepseek.harness.requiresSetup
 import ai.deepseek.harness.takeUtf16Safe
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.DeepSeekHarnessMascot
 import ai.deepseek.harness.ui.design.TalkWaveform
 import ai.deepseek.harness.ui.design.TalkWaveformPalette
@@ -342,25 +342,25 @@ private fun DictationScreen(
     verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-      ClawPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back to voice"), onClick = onCancel)
+      DshPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back to voice"), onClick = onCancel)
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = nativeString("Dictation"), style = ClawTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp), color = ClawTheme.colors.text)
-        Text(text = nativeString("Transcribe then send"), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        Text(text = nativeString("Dictation"), style = DshTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp), color = DshTheme.colors.text)
+        Text(text = nativeString("Transcribe then send"), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
-      ClawPlainIconButton(icon = Icons.Default.Settings, contentDescription = nativeString("Dictation settings"), onClick = onOpenVoiceSettings)
+      DshPlainIconButton(icon = Icons.Default.Settings, contentDescription = nativeString("Dictation settings"), onClick = onOpenVoiceSettings)
     }
 
     Surface(
       modifier = Modifier.fillMaxWidth().aspectRatio(0.82f),
-      shape = RoundedCornerShape(ClawTheme.radii.panel),
-      color = ClawTheme.colors.canvas,
-      border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+      shape = RoundedCornerShape(DshTheme.radii.panel),
+      color = DshTheme.colors.canvas,
+      border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
     ) {
       Column(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 12.dp), verticalArrangement = Arrangement.SpaceBetween) {
         Text(
           text = draftText.ifBlank { if (sending) nativeString("Sending to chat...") else nativeString("Start speaking...") },
-          style = ClawTheme.type.title.copy(fontSize = 15.sp, lineHeight = 19.sp),
-          color = if (draftText.isBlank()) ClawTheme.colors.textSubtle else ClawTheme.colors.text,
+          style = DshTheme.type.title.copy(fontSize = 15.sp, lineHeight = 19.sp),
+          color = if (draftText.isBlank()) DshTheme.colors.textSubtle else DshTheme.colors.text,
           maxLines = 7,
           overflow = TextOverflow.Ellipsis,
         )
@@ -370,31 +370,31 @@ private fun DictationScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
           )
           Row(horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(15.dp), tint = if (listening) ClawTheme.colors.success else ClawTheme.colors.textMuted)
-            Text(text = displayStatusText, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Icon(imageVector = Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(15.dp), tint = if (listening) DshTheme.colors.success else DshTheme.colors.textMuted)
+            Text(text = displayStatusText, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       }
     }
 
-    ClawPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Surface(
           modifier = Modifier.size(30.dp),
           shape = CircleShape,
-          color = ClawTheme.colors.surfacePressed,
-          border = BorderStroke(1.dp, ClawTheme.colors.border),
+          color = DshTheme.colors.surfacePressed,
+          border = BorderStroke(1.dp, DshTheme.colors.border),
         ) {
           Box(contentAlignment = Alignment.Center) {
-            Icon(imageVector = Icons.Default.GraphicEq, contentDescription = null, modifier = Modifier.size(16.dp), tint = ClawTheme.colors.text)
+            Icon(imageVector = Icons.Default.GraphicEq, contentDescription = null, modifier = Modifier.size(16.dp), tint = DshTheme.colors.text)
           }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(text = nativeString("Speech provider"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+          Text(text = nativeString("Speech provider"), style = DshTheme.type.section, color = DshTheme.colors.text)
           Text(
             text = providerAttentionStatus ?: gatewayStatus.voiceGatewayLabel(),
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
@@ -408,13 +408,13 @@ private fun DictationScreen(
                 speechProviderReady -> nativeString("Ready")
                 else -> nativeString("Offline")
               },
-            style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+            style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
             color =
               when {
-                sending -> ClawTheme.colors.warning
-                providerAttentionStatus != null -> ClawTheme.colors.warning
-                speechProviderReady -> ClawTheme.colors.success
-                else -> ClawTheme.colors.textMuted
+                sending -> DshTheme.colors.warning
+                providerAttentionStatus != null -> DshTheme.colors.warning
+                speechProviderReady -> DshTheme.colors.success
+                else -> DshTheme.colors.textMuted
               },
           )
           Box(
@@ -424,10 +424,10 @@ private fun DictationScreen(
                 .clip(CircleShape)
                 .background(
                   when {
-                    sending -> ClawTheme.colors.warning
-                    providerAttentionStatus != null -> ClawTheme.colors.warning
-                    speechProviderReady -> ClawTheme.colors.success
-                    else -> ClawTheme.colors.textSubtle
+                    sending -> DshTheme.colors.warning
+                    providerAttentionStatus != null -> DshTheme.colors.warning
+                    speechProviderReady -> DshTheme.colors.success
+                    else -> DshTheme.colors.textSubtle
                   },
                 ),
           )
@@ -440,20 +440,20 @@ private fun DictationScreen(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Icon(imageVector = Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = ClawTheme.colors.textMuted)
+      Icon(imageVector = Icons.Default.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = DshTheme.colors.textMuted)
       Text(
         text = nativeString("Tip: stop listening to send the captured turn."),
         modifier = Modifier.weight(1f),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
     }
 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      ClawSecondaryButton(text = nativeString("Cancel"), icon = Icons.Default.Close, onClick = onCancel, modifier = Modifier.weight(0.95f))
-      ClawPrimaryButton(text = if (sending) nativeString("Sending") else nativeString("Send to Chat"), icon = Icons.AutoMirrored.Filled.Send, onClick = onSend, enabled = !sending, modifier = Modifier.weight(1.25f))
+      DshSecondaryButton(text = nativeString("Cancel"), icon = Icons.Default.Close, onClick = onCancel, modifier = Modifier.weight(0.95f))
+      DshPrimaryButton(text = if (sending) nativeString("Sending") else nativeString("Send to Chat"), icon = Icons.AutoMirrored.Filled.Send, onClick = onSend, enabled = !sending, modifier = Modifier.weight(1.25f))
     }
   }
 }
@@ -487,12 +487,12 @@ internal fun TalkSessionScreen(
   ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
       if (!embeddedInChat) {
-        ClawPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back to voice"), onClick = onEndTalk)
+        DshPlainIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back to voice"), onClick = onEndTalk)
       }
       Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text(text = nativeString("Realtime Talk"), style = ClawTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp), color = ClawTheme.colors.text)
+        Text(text = nativeString("Realtime Talk"), style = DshTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp), color = DshTheme.colors.text)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-          Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (speaking || listening) ClawTheme.colors.success else ClawTheme.colors.textSubtle))
+          Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (speaking || listening) DshTheme.colors.success else DshTheme.colors.textSubtle))
           Text(
             text =
               if (speaking) {
@@ -502,19 +502,19 @@ internal fun TalkSessionScreen(
               } else {
                 nativeString("Connected")
               },
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
-      ClawPlainIconButton(icon = Icons.Default.Info, contentDescription = nativeString("Talk settings"), onClick = onOpenVoiceSettings)
+      DshPlainIconButton(icon = Icons.Default.Info, contentDescription = nativeString("Talk settings"), onClick = onOpenVoiceSettings)
     }
 
     Surface(
       modifier = Modifier.fillMaxWidth().height(52.dp),
-      shape = RoundedCornerShape(ClawTheme.radii.panel),
-      color = ClawTheme.colors.canvas,
-      border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+      shape = RoundedCornerShape(DshTheme.radii.panel),
+      color = DshTheme.colors.canvas,
+      border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
     ) {
       TalkWaveform(
         phase =
@@ -531,7 +531,7 @@ internal fun TalkSessionScreen(
     }
 
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      Text(text = nativeString("Live transcript"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+      Text(text = nativeString("Live transcript"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       TalkTranscript(entries = entries, modifier = Modifier.weight(1f))
     }
 
@@ -606,13 +606,13 @@ private fun TalkTranscriptCard(
 ) {
   Surface(
     modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-      Text(text = label, style = ClawTheme.type.section, color = ClawTheme.colors.text)
-      Text(text = text, style = ClawTheme.type.body, color = if (muted) ClawTheme.colors.textMuted else ClawTheme.colors.text)
+      Text(text = label, style = DshTheme.type.section, color = DshTheme.colors.text)
+      Text(text = text, style = DshTheme.type.body, color = if (muted) DshTheme.colors.textMuted else DshTheme.colors.text)
     }
   }
 }
@@ -632,11 +632,11 @@ private fun TalkControl(
   ) {
     Surface(
       onClick = onClick,
-      modifier = Modifier.size(ClawTheme.spacing.touchTarget),
-      shape = RoundedCornerShape(ClawTheme.radii.button),
-      color = if (primary) ClawTheme.colors.primary else ClawTheme.colors.canvas,
-      contentColor = if (primary) ClawTheme.colors.primaryText else ClawTheme.colors.text,
-      border = BorderStroke(1.dp, if (primary) ClawTheme.colors.primary else ClawTheme.colors.border),
+      modifier = Modifier.size(DshTheme.spacing.touchTarget),
+      shape = RoundedCornerShape(DshTheme.radii.button),
+      color = if (primary) DshTheme.colors.primary else DshTheme.colors.canvas,
+      contentColor = if (primary) DshTheme.colors.primaryText else DshTheme.colors.text,
+      border = BorderStroke(1.dp, if (primary) DshTheme.colors.primary else DshTheme.colors.border),
     ) {
       Box(contentAlignment = Alignment.Center) {
         Icon(imageVector = icon, contentDescription = label, modifier = Modifier.size(if (primary) 20.dp else 18.dp))
@@ -645,8 +645,8 @@ private fun TalkControl(
     Text(
       text = label,
       modifier = Modifier.fillMaxWidth(),
-      style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+      color = DshTheme.colors.textMuted,
       textAlign = TextAlign.Center,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
@@ -670,11 +670,11 @@ private fun VoiceHeader(
       DeepSeekHarnessMascot(modifier = Modifier.size(25.dp))
       Text(
         text = nativeString("DeepSeekHarness"),
-        style = ClawTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
+        color = DshTheme.colors.text,
         modifier = Modifier.weight(1f),
       )
-      ClawPlainIconButton(icon = Icons.Default.Search, contentDescription = nativeString("Search voice"), onClick = onOpenCommand)
+      DshPlainIconButton(icon = Icons.Default.Search, contentDescription = nativeString("Search voice"), onClick = onOpenCommand)
     }
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -682,16 +682,16 @@ private fun VoiceHeader(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text(text = nativeString("Voice"), style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = ClawTheme.colors.text)
+        Text(text = nativeString("Voice"), style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = DshTheme.colors.text)
         Text(
           text = statusText,
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
       }
-      ClawPlainIconButton(
+      DshPlainIconButton(
         icon = if (speakerEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
         contentDescription = if (speakerEnabled) nativeString("Mute speaker") else nativeString("Unmute speaker"),
         onClick = onToggleSpeaker,
@@ -732,7 +732,7 @@ private fun VoiceHero(
           Modifier
             .size(7.dp)
             .clip(CircleShape)
-            .background(if (micEnabled || talkModeEnabled) ClawTheme.colors.success else ClawTheme.colors.textSubtle),
+            .background(if (micEnabled || talkModeEnabled) DshTheme.colors.success else DshTheme.colors.textSubtle),
       )
       Text(
         text =
@@ -745,8 +745,8 @@ private fun VoiceHero(
             !gatewayReady -> nativeString("Gateway offline")
             else -> nativeString("Ready to talk")
           },
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
         modifier = Modifier.weight(1f, fill = false),
         textAlign = TextAlign.Center,
         maxLines = 1,
@@ -757,20 +757,20 @@ private fun VoiceHero(
     if (!micLiveTranscript.isNullOrBlank()) {
       Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(ClawTheme.radii.panel),
-        color = ClawTheme.colors.surface,
-        border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+        shape = RoundedCornerShape(DshTheme.radii.panel),
+        color = DshTheme.colors.surface,
+        border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
       ) {
         Text(
           text = micLiveTranscript.trim(),
           modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
         )
       }
     }
 
-    ClawPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
       VoiceModeRow(
         title = if (talkModeEnabled) nativeString("End Talk") else nativeString("Realtime Talk"),
         subtitle =
@@ -836,7 +836,7 @@ private fun VoiceModeRow(
   onClick: () -> Unit,
   enabled: Boolean = true,
 ) {
-  Surface(onClick = onClick, enabled = enabled, color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(onClick = onClick, enabled = enabled, color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp).padding(horizontal = 0.dp, vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -844,10 +844,10 @@ private fun VoiceModeRow(
     ) {
       Surface(
         modifier = Modifier.size(30.dp),
-        shape = RoundedCornerShape(ClawTheme.radii.control),
-        color = if (enabled) ClawTheme.colors.surface else ClawTheme.colors.canvas,
-        contentColor = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textSubtle,
-        border = BorderStroke(1.dp, ClawTheme.colors.border),
+        shape = RoundedCornerShape(DshTheme.radii.control),
+        color = if (enabled) DshTheme.colors.surface else DshTheme.colors.canvas,
+        contentColor = if (enabled) DshTheme.colors.text else DshTheme.colors.textSubtle,
+        border = BorderStroke(1.dp, DshTheme.colors.border),
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(15.dp))
@@ -856,15 +856,15 @@ private fun VoiceModeRow(
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
           text = title,
-          style = ClawTheme.type.body,
-          color = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textMuted,
+          style = DshTheme.type.body,
+          color = if (enabled) DshTheme.colors.text else DshTheme.colors.textMuted,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = subtitle,
-          style = ClawTheme.type.caption.copy(lineHeight = 16.sp),
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption.copy(lineHeight = 16.sp),
+          color = DshTheme.colors.textMuted,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
@@ -874,7 +874,7 @@ private fun VoiceModeRow(
           imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
           contentDescription = null,
           modifier = Modifier.size(18.dp),
-          tint = ClawTheme.colors.textMuted,
+          tint = DshTheme.colors.textMuted,
         )
       }
     }
@@ -898,10 +898,10 @@ private fun VoiceProviderCard(
       (talkSetupReadiness.realtimeTalk.requiresSetup || talkSetupReadiness.dictation.requiresSetup)
   Surface(
     modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 9.dp),
@@ -910,10 +910,10 @@ private fun VoiceProviderCard(
     ) {
       Surface(
         modifier = Modifier.size(30.dp),
-        shape = RoundedCornerShape(ClawTheme.radii.control),
-        color = ClawTheme.colors.canvas,
-        contentColor = ClawTheme.colors.text,
-        border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+        shape = RoundedCornerShape(DshTheme.radii.control),
+        color = DshTheme.colors.canvas,
+        contentColor = DshTheme.colors.text,
+        border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = Icons.Default.GraphicEq, contentDescription = null, modifier = Modifier.size(15.dp))
@@ -922,15 +922,15 @@ private fun VoiceProviderCard(
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
           text = nativeString("Voice setup"),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Text(
           text = voiceAttentionStatus ?: voiceSetupSummary(gatewayStatus, talkSetupReadiness),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
@@ -943,10 +943,10 @@ private fun VoiceProviderCard(
               .clip(CircleShape)
               .background(
                 when {
-                  ready -> ClawTheme.colors.success
-                  needsSetup -> ClawTheme.colors.warning
-                  voiceAttentionStatus != null -> ClawTheme.colors.warning
-                  else -> ClawTheme.colors.textSubtle
+                  ready -> DshTheme.colors.success
+                  needsSetup -> DshTheme.colors.warning
+                  voiceAttentionStatus != null -> DshTheme.colors.warning
+                  else -> DshTheme.colors.textSubtle
                 },
               ),
         )
@@ -959,8 +959,8 @@ private fun VoiceProviderCard(
               gatewayStatus.isVoiceGatewayReady() -> nativeString("Unverified")
               else -> nativeString("Offline")
             },
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -988,10 +988,10 @@ private fun VoicePrimaryAction(
 ) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.fillMaxWidth().height(ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
-    color = ClawTheme.colors.primary,
-    contentColor = ClawTheme.colors.primaryText,
+    modifier = Modifier.fillMaxWidth().height(DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = DshTheme.colors.primary,
+    contentColor = DshTheme.colors.primaryText,
   ) {
     Row(
       modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
@@ -1002,7 +1002,7 @@ private fun VoicePrimaryAction(
       Text(
         text = text,
         modifier = Modifier.padding(start = 8.dp),
-        style = ClawTheme.type.label,
+        style = DshTheme.type.label,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -1075,16 +1075,16 @@ private fun VoiceTurnCard(entry: VoiceConversationEntry) {
   Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start) {
     Surface(
       modifier = Modifier.fillMaxWidth(if (isUser) 0.82f else 0.92f),
-      shape = RoundedCornerShape(ClawTheme.radii.panel),
-      color = if (isUser) ClawTheme.colors.surfacePressed else ClawTheme.colors.surfaceRaised,
-      contentColor = ClawTheme.colors.text,
-      border = BorderStroke(1.dp, if (entry.isStreaming) ClawTheme.colors.borderStrong else ClawTheme.colors.border),
+      shape = RoundedCornerShape(DshTheme.radii.panel),
+      color = if (isUser) DshTheme.colors.surfacePressed else DshTheme.colors.surfaceRaised,
+      contentColor = DshTheme.colors.text,
+      border = BorderStroke(1.dp, if (entry.isStreaming) DshTheme.colors.borderStrong else DshTheme.colors.border),
     ) {
       Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(
           text = if (isUser) nativeString("You") else nativeString("DeepSeekHarness"),
-          style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold),
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold),
+          color = DshTheme.colors.textSubtle,
         )
         Text(
           text =
@@ -1093,8 +1093,8 @@ private fun VoiceTurnCard(entry: VoiceConversationEntry) {
             } else {
               entry.localizedSource?.let(::nativeString) ?: entry.text
             },
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
         )
       }
     }
@@ -1103,14 +1103,14 @@ private fun VoiceTurnCard(entry: VoiceConversationEntry) {
 
 @Composable
 private fun VoiceThinkingCard() {
-  ClawPanel {
+  DshPanel {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      ClawStatusPill(text = nativeString("Sending"), status = ClawStatus.Warning)
+      DshStatusPill(text = nativeString("Sending"), status = DshStatus.Warning)
       Text(
         text = nativeString("DeepSeekHarness is preparing a response."),
         modifier = Modifier.weight(1f),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
       )
@@ -1120,16 +1120,16 @@ private fun VoiceThinkingCard() {
 
 @Composable
 private fun VoicePermissionPanel(onRequestPermission: () -> Unit) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawStatusPill(text = nativeString("Permission needed"), status = ClawStatus.Warning)
-      Text(text = nativeString("Microphone access is needed."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      DshStatusPill(text = nativeString("Permission needed"), status = DshStatus.Warning)
+      Text(text = nativeString("Microphone access is needed."), style = DshTheme.type.section, color = DshTheme.colors.text)
       Text(
         text = nativeString("DeepSeekHarness only listens when you start Talk or Dictation."),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
       )
-      ClawSecondaryButton(text = nativeString("Enable Microphone"), icon = Icons.Default.Mic, onClick = onRequestPermission)
+      DshSecondaryButton(text = nativeString("Enable Microphone"), icon = Icons.Default.Mic, onClick = onRequestPermission)
     }
   }
 }

@@ -7,7 +7,7 @@ import ai.deepseek.harness.chat.ChatMessageContent
 import ai.deepseek.harness.chat.VoiceNoteRecorderController
 import ai.deepseek.harness.chat.VoiceNoteRecorderState
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.TalkWaveform
 import ai.deepseek.harness.ui.design.TalkWaveformPhase
 import androidx.compose.foundation.BorderStroke
@@ -123,11 +123,11 @@ internal class VoiceNoteRecorderOwnerTracker(
 @Composable
 internal fun VoiceNotePreparing(modifier: Modifier = Modifier) {
   Surface(
-    modifier = modifier.fillMaxWidth().heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.textSubtle,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    modifier = modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.control),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.textSubtle,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -135,7 +135,7 @@ internal fun VoiceNotePreparing(modifier: Modifier = Modifier) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Icon(imageVector = Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(18.dp))
-      Text(text = nativeString("Preparing voice note…"), style = ClawTheme.type.label)
+      Text(text = nativeString("Preparing voice note…"), style = DshTheme.type.label)
     }
   }
 }
@@ -152,21 +152,21 @@ internal fun VoiceNoteRecordingControls(
   modifier: Modifier = Modifier,
 ) {
   Surface(
-    modifier = modifier.fillMaxWidth().heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    modifier = modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.control),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Box(modifier = Modifier.size(8.dp).background(ClawTheme.colors.danger, CircleShape))
+      Box(modifier = Modifier.size(8.dp).background(DshTheme.colors.danger, CircleShape))
       Text(
         text = formatVoiceNoteDuration(elapsedMs),
-        style = ClawTheme.type.label.copy(fontWeight = FontWeight.SemiBold),
+        style = DshTheme.type.label.copy(fontWeight = FontWeight.SemiBold),
       )
       TalkWaveform(
         phase = TalkWaveformPhase.Listening(level = level, speechActive = false),
@@ -174,10 +174,10 @@ internal fun VoiceNoteRecordingControls(
       )
       Surface(
         onClick = onCancel,
-        modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+        modifier = Modifier.size(DshTheme.spacing.touchTarget),
         shape = CircleShape,
-        color = ClawTheme.colors.canvas,
-        contentColor = ClawTheme.colors.text,
+        color = DshTheme.colors.canvas,
+        contentColor = DshTheme.colors.text,
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = Icons.Default.Close, contentDescription = nativeString("Cancel voice note"), modifier = Modifier.size(17.dp))
@@ -185,10 +185,10 @@ internal fun VoiceNoteRecordingControls(
       }
       Surface(
         onClick = onDone,
-        modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+        modifier = Modifier.size(DshTheme.spacing.touchTarget),
         shape = CircleShape,
-        color = ClawTheme.colors.primary,
-        contentColor = ClawTheme.colors.primaryText,
+        color = DshTheme.colors.primary,
+        contentColor = DshTheme.colors.primaryText,
       ) {
         Box(contentAlignment = Alignment.Center) {
           Icon(imageVector = Icons.Default.Check, contentDescription = nativeString("Finish voice note"), modifier = Modifier.size(17.dp))
@@ -201,7 +201,7 @@ internal fun VoiceNoteRecordingControls(
 @Composable
 internal fun VoiceNoteRecorderError(state: VoiceNoteRecorderState) {
   val message = (state as? VoiceNoteRecorderState.Failure)?.message ?: return
-  Text(text = message, style = ClawTheme.type.caption, color = ClawTheme.colors.danger)
+  Text(text = message, style = DshTheme.type.caption, color = DshTheme.colors.danger)
 }
 
 internal fun ChatMessageContent.isAudioAttachment(): Boolean = type == "audio" || mimeType?.startsWith("audio/") == true

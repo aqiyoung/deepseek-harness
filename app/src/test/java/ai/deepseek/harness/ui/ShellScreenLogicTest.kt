@@ -16,7 +16,7 @@ import ai.deepseek.harness.chat.ChatSessionEntry
 import ai.deepseek.harness.i18n.resolveNativeText
 import ai.deepseek.harness.i18n.verbatimText
 import ai.deepseek.harness.normalizeOperatorScopes
-import ai.deepseek.harness.ui.design.ClawStatus
+import ai.deepseek.harness.ui.design.DshStatus
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.saveable.SaverScope
@@ -433,9 +433,9 @@ class ShellScreenLogicTest {
 
   @Test
   fun overviewHeaderStateReflectsGatewayConnectionAndAttention() {
-    assertEquals(OverviewHeaderState("Offline", ClawStatus.Neutral), overviewHeaderState(isConnected = false, hasAttention = true))
-    assertEquals(OverviewHeaderState("Needs attention", ClawStatus.Warning), overviewHeaderState(isConnected = true, hasAttention = true))
-    assertEquals(OverviewHeaderState("Online", ClawStatus.Success), overviewHeaderState(isConnected = true, hasAttention = false))
+    assertEquals(OverviewHeaderState("Offline", DshStatus.Neutral), overviewHeaderState(isConnected = false, hasAttention = true))
+    assertEquals(OverviewHeaderState("Needs attention", DshStatus.Warning), overviewHeaderState(isConnected = true, hasAttention = true))
+    assertEquals(OverviewHeaderState("Online", DshStatus.Success), overviewHeaderState(isConnected = true, hasAttention = false))
   }
 
   @Test
@@ -488,7 +488,7 @@ class ShellScreenLogicTest {
     assertEquals("Review highlighted items", cards.single { it.title == "Gateway" }.subtitle)
     assertEquals("1/1", cards.single { it.title == "Nodes" }.value)
     assertEquals("Review node access", cards.single { it.title == "Nodes" }.subtitle)
-    assertEquals(ClawStatus.Warning, cards.single { it.title == "Nodes" }.status)
+    assertEquals(DshStatus.Warning, cards.single { it.title == "Nodes" }.status)
     assertEquals(1f, cards.single { it.title == "Nodes" }.progressFraction ?: 0f, 0.001f)
     assertEquals("2", cards.single { it.title == "Approvals" }.value)
     assertEquals("4", cards.single { it.title == "Threads" }.value)
@@ -658,7 +658,7 @@ class ShellScreenLogicTest {
     val gateway = cards.single { it.title == "Gateway" }
     assertEquals("Healthy", gateway.value)
     assertEquals("All systems nominal", gateway.subtitle)
-    assertEquals(ClawStatus.Success, gateway.status)
+    assertEquals(DshStatus.Success, gateway.status)
   }
 
   @Test

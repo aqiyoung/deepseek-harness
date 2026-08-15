@@ -18,16 +18,16 @@ import androidx.compose.ui.unit.dp
  * Standard inset panel for grouped Android app content.
  */
 @Composable
-internal fun ClawPanel(
+internal fun DshPanel(
   modifier: Modifier = Modifier,
   contentPadding: PaddingValues = PaddingValues(12.dp),
   content: @Composable () -> Unit,
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.82f),
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surfaceRaised.copy(alpha = 0.82f),
+    contentColor = DshTheme.colors.text,
     border = null,
     tonalElevation = 2.dp,
     shadowElevation = 4.dp,
@@ -42,20 +42,20 @@ internal fun ClawPanel(
  * Shared empty state used when a screen has no records but can still offer an action.
  */
 @Composable
-internal fun ClawEmptyState(
+internal fun DshEmptyState(
   title: String,
   body: String,
   modifier: Modifier = Modifier,
   action: (@Composable () -> Unit)? = null,
 ) {
-  ClawPanel(modifier = modifier) {
+  DshPanel(modifier = modifier) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(text = title, style = ClawTheme.type.section, color = ClawTheme.colors.text)
-      Text(text = body, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      Text(text = title, style = DshTheme.type.section, color = DshTheme.colors.text)
+      Text(text = body, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       action?.invoke()
     }
   }
@@ -65,18 +65,18 @@ internal fun ClawEmptyState(
  * Shared loading placeholder that keeps async screen states visually consistent.
  */
 @Composable
-internal fun ClawLoadingState(
+internal fun DshLoadingState(
   title: String,
   modifier: Modifier = Modifier,
 ) {
-  ClawPanel(modifier = modifier) {
+  DshPanel(modifier = modifier) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      CircularProgressIndicator(color = ClawTheme.colors.primary, strokeWidth = 2.dp)
-      Text(text = title, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      CircularProgressIndicator(color = DshTheme.colors.primary, strokeWidth = 2.dp)
+      Text(text = title, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
   }
 }

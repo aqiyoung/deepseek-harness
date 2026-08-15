@@ -3,8 +3,8 @@ package ai.deepseek.harness.ui
 import ai.deepseek.harness.GatewayAgentSummary
 import ai.deepseek.harness.chat.ChatSessionEntry
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawAgentAvatar
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshAgentAvatar
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.agentAvatarSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -87,10 +87,10 @@ internal fun SidebarSearchField(
         unfocusedTextColor = palette.text,
         focusedContainerColor = palette.elevated,
         unfocusedContainerColor = palette.elevated,
-        cursorColor = ClawTheme.colors.primary,
-        focusedBorderColor = ClawTheme.colors.primary,
+        cursorColor = DshTheme.colors.primary,
+        focusedBorderColor = DshTheme.colors.primary,
         unfocusedBorderColor = palette.hairline,
-        focusedLabelColor = ClawTheme.colors.primary,
+        focusedLabelColor = DshTheme.colors.primary,
         unfocusedLabelColor = palette.muted,
         focusedLeadingIconColor = palette.text,
         unfocusedLeadingIconColor = palette.muted,
@@ -108,7 +108,7 @@ internal fun SidebarSectionTitle(
 ) {
   Text(
     text = label,
-    style = ClawTheme.type.caption.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+    style = DshTheme.type.caption.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
     color = palette.muted,
     modifier = modifier.semantics { heading() }.padding(horizontal = 12.dp, vertical = 6.dp),
     maxLines = 1,
@@ -128,21 +128,21 @@ internal fun SidebarAgentRow(
     palette = palette,
     onClick = onClick,
   ) {
-    ClawAgentAvatar(source = agentAvatarSource(agent), size = 28.dp) {
+    DshAgentAvatar(source = agentAvatarSource(agent), size = 28.dp) {
       Box(
         modifier = Modifier.size(28.dp).clip(CircleShape).background(palette.elevated),
         contentAlignment = Alignment.Center,
       ) {
         Text(
           text = agent.emoji?.takeIf(String::isNotBlank) ?: sidebarAgentName(agent).take(1).uppercase(),
-          style = ClawTheme.type.caption,
+          style = DshTheme.type.caption,
           color = palette.text,
         )
       }
     }
     Text(
       text = sidebarAgentName(agent),
-      style = ClawTheme.type.body,
+      style = DshTheme.type.body,
       color = palette.text,
       modifier = Modifier.weight(1f),
       maxLines = 1,
@@ -151,7 +151,7 @@ internal fun SidebarAgentRow(
     if (selected) {
       Text(
         text = nativeString("Selected"),
-        style = ClawTheme.type.caption.copy(fontSize = 11.sp),
+        style = DshTheme.type.caption.copy(fontSize = 11.sp),
         color = palette.muted,
       )
     }
@@ -169,7 +169,7 @@ internal fun SidebarActionRow(
     Spacer(modifier = Modifier.size(28.dp))
     Text(
       text = label,
-      style = ClawTheme.type.body,
+      style = DshTheme.type.body,
       color = palette.muted,
       modifier = Modifier.weight(1f),
       maxLines = 1,
@@ -189,7 +189,7 @@ internal fun SidebarNavigationRow(
     label = {
       Text(
         text = destination.localizedLabel(),
-        style = ClawTheme.type.body,
+        style = DshTheme.type.body,
         maxLines = 1,
       )
     },
@@ -243,8 +243,8 @@ internal fun SidebarSessionRow(
           .clip(CircleShape)
           .background(
             when {
-              session.hasActiveRun == true -> ClawTheme.colors.warning
-              session.unread == true -> ClawTheme.colors.primary
+              session.hasActiveRun == true -> DshTheme.colors.warning
+              session.unread == true -> DshTheme.colors.primary
               else -> palette.muted.copy(alpha = 0.45f)
             },
           ).clearAndSetSemantics {},
@@ -252,14 +252,14 @@ internal fun SidebarSessionRow(
     Column(modifier = Modifier.weight(1f)) {
       Text(
         text = sidebarSessionTitle(session),
-        style = ClawTheme.type.body.copy(fontSize = 13.sp),
+        style = DshTheme.type.body.copy(fontSize = 13.sp),
         color = palette.text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       Text(
         text = sidebarSessionSubtitle(session, sessionStateDescription),
-        style = ClawTheme.type.caption.copy(fontSize = 11.sp),
+        style = DshTheme.type.caption.copy(fontSize = 11.sp),
         color = palette.muted,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,

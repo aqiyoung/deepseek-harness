@@ -3,7 +3,7 @@ package ai.deepseek.harness.ui.design
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class ClawComponentsTest {
+class DshComponentsTest {
   @Test
   fun emptySegmentedOptionsProduceNoRows() {
     assertEquals(emptyList<List<String>>(), segmentedControlRows(emptyList()))

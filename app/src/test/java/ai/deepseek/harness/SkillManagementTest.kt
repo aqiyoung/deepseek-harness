@@ -19,14 +19,14 @@ class SkillManagementTest {
   @Test
   fun searchResultsKeepOnlyIdentifiedSkills() {
     val results =
-      parseClawHubSearchResults(
+      parseDshHubSearchResults(
         """{"results":[{"slug":" alpha ","installRef":"@alice/alpha","displayName":"Alpha","summary":"Useful","version":"1.2.3"},{"slug":"missing-name"},{"displayName":"Missing slug"}]}""",
         json,
       )
 
     assertEquals(
       listOf(
-        GatewayClawHubSkillSummary(
+        GatewayDshHubSkillSummary(
           slug = "alpha",
           installRef = "@alice/alpha",
           displayName = "Alpha",
@@ -41,7 +41,7 @@ class SkillManagementTest {
   @Test
   fun sameSlugResultsKeepSeparatePublisherReferences() {
     val results =
-      parseClawHubSearchResults(
+      parseDshHubSearchResults(
         """{"results":[{"slug":"email","installRef":"@alice/email","displayName":"Email"},{"slug":"email","installRef":"@bob/email","displayName":"Email"},{"slug":"orphan","displayName":"Orphan"}]}""",
         json,
       )
@@ -52,14 +52,14 @@ class SkillManagementTest {
   @Test
   fun detailBindsExactVersionAndPublisherIdentity() {
     val review =
-      parseClawHubInstallReview(
+      parseDshHubInstallReview(
         """{"skill":{"displayName":"Alpha Skill","summary":"Reviewed metadata"},"latestVersion":{"version":"2.0.0"},"owner":{"displayName":"Alice","handle":"alice"}}""",
-        GatewayClawHubSkillSummary("alpha", null, "Alpha", null, null),
+        GatewayDshHubSkillSummary("alpha", null, "Alpha", null, null),
         json,
       )
 
     assertEquals(
-      GatewayClawHubInstallReview(
+      GatewayDshHubInstallReview(
         slug = "@alice/alpha",
         displayName = "Alpha Skill",
         summary = "Reviewed metadata",
@@ -73,9 +73,9 @@ class SkillManagementTest {
   @Test
   fun detailVersionWinsWhenSearchResultIsStale() {
     val review =
-      parseClawHubInstallReview(
+      parseDshHubInstallReview(
         """{"skill":{"displayName":"Alpha"},"latestVersion":{"version":"2.0.0"},"owner":{"handle":"alice"}}""",
-        GatewayClawHubSkillSummary("alpha", null, "Alpha", null, "1.9.0"),
+        GatewayDshHubSkillSummary("alpha", null, "Alpha", null, "1.9.0"),
         json,
       )
 
@@ -85,9 +85,9 @@ class SkillManagementTest {
   @Test
   fun detailFailsClosedWithoutAnInstallableVersion() {
     val review =
-      parseClawHubInstallReview(
+      parseDshHubInstallReview(
         """{"skill":{"displayName":"Alpha"},"owner":{"handle":"alice"}}""",
-        GatewayClawHubSkillSummary("alpha", null, "Alpha", null, null),
+        GatewayDshHubSkillSummary("alpha", null, "Alpha", null, null),
         json,
       )
 
@@ -96,20 +96,20 @@ class SkillManagementTest {
 
   @Test
   fun installParamsKeepRegistryAndTrustPolicyOnGateway() {
-    val params = json.parseToJsonElement(clawHubInstallParams("alpha", "1.2.3", acknowledgeRisk = true)).jsonObject
+    val params = json.parseToJsonElement(dshHubInstallParams("alpha", "1.2.3", acknowledgeRisk = true)).jsonObject
 
-    assertEquals(setOf("source", "slug", "version", "acknowledgeClawHubRisk", "timeoutMs"), params.keys)
-    assertEquals("clawhub", params.getValue("source").jsonPrimitive.content)
+    assertEquals(setOf("source", "slug", "version", "acknowledgeDshHubRisk", "timeoutMs"), params.keys)
+    assertEquals("dshhub", params.getValue("source").jsonPrimitive.content)
     assertEquals("alpha", params.getValue("slug").jsonPrimitive.content)
     assertEquals("1.2.3", params.getValue("version").jsonPrimitive.content)
-    assertTrue(params.getValue("acknowledgeClawHubRisk").jsonPrimitive.boolean)
+    assertTrue(params.getValue("acknowledgeDshHubRisk").jsonPrimitive.boolean)
     assertEquals(120_000, params.getValue("timeoutMs").jsonPrimitive.int)
   }
 
   @Test
   fun onlyStructuredReviewRequiredFailureOffersAcknowledgement() {
     val rejection =
-      clawHubInstallRejection(
+      dshHubInstallRejection(
         GatewaySession.ErrorShape(
           code = "UNAVAILABLE",
           message = "review required",
@@ -118,9 +118,9 @@ class SkillManagementTest {
               code = null,
               canRetryWithDeviceToken = false,
               recommendedNextStep = null,
-              clawhubTrustCode = "clawhub_risk_acknowledgement_required",
-              clawhubWarning = "Scanner found elevated permissions.",
-              clawhubVersion = "1.2.3",
+              dshhubTrustCode = "dshhub_risk_acknowledgement_required",
+              dshhubWarning = "Scanner found elevated permissions.",
+              dshhubVersion = "1.2.3",
             ),
         ),
         attemptedVersion = "1.2.3",
@@ -134,7 +134,7 @@ class SkillManagementTest {
   @Test
   fun changedGatewayVersionRequiresFreshReview() {
     val rejection =
-      clawHubInstallRejection(
+      dshHubInstallRejection(
         GatewaySession.ErrorShape(
           code = "UNAVAILABLE",
           message = "review required",
@@ -143,9 +143,9 @@ class SkillManagementTest {
               code = null,
               canRetryWithDeviceToken = false,
               recommendedNextStep = null,
-              clawhubTrustCode = "clawhub_risk_acknowledgement_required",
-              clawhubWarning = "Scanner found elevated permissions.",
-              clawhubVersion = "1.2.4",
+              dshhubTrustCode = "dshhub_risk_acknowledgement_required",
+              dshhubWarning = "Scanner found elevated permissions.",
+              dshhubVersion = "1.2.4",
             ),
         ),
         attemptedVersion = "1.2.3",
@@ -153,13 +153,13 @@ class SkillManagementTest {
 
     assertFalse(rejection.requiresAcknowledgement)
     assertNull(rejection.acknowledgeVersion)
-    assertTrue(rejection.message.contains("different ClawHub release"))
+    assertTrue(rejection.message.contains("different DshHub release"))
   }
 
   @Test
   fun blockedFailureNeverOffersAcknowledgement() {
     val rejection =
-      clawHubInstallRejection(
+      dshHubInstallRejection(
         GatewaySession.ErrorShape(
           code = "UNAVAILABLE",
           message = "download blocked",
@@ -168,9 +168,9 @@ class SkillManagementTest {
               code = null,
               canRetryWithDeviceToken = false,
               recommendedNextStep = null,
-              clawhubTrustCode = "clawhub_download_blocked",
-              clawhubWarning = "ClawHub marked this release malicious.",
-              clawhubVersion = "1.2.3",
+              dshhubTrustCode = "dshhub_download_blocked",
+              dshhubWarning = "DshHub marked this release malicious.",
+              dshhubVersion = "1.2.3",
             ),
         ),
         attemptedVersion = "1.2.3",
@@ -181,7 +181,7 @@ class SkillManagementTest {
   }
 
   @Test
-  fun unknownInstallReadbackUsesClawHubProvenanceSlug() {
+  fun unknownInstallReadbackUsesDshHubProvenanceSlug() {
     val skill =
       GatewaySkillSummary(
         skillKey = "custom-frontmatter-key",
@@ -196,32 +196,32 @@ class SkillManagementTest {
         bundled = false,
         missingCount = 0,
         installCount = 0,
-        clawHubSlug = "registry-slug",
-        clawHubValid = true,
-        clawHubOwnerHandle = "registry-owner",
-        clawHubInstalledVersion = "1.2.3",
+        dshHubSlug = "registry-slug",
+        dshHubValid = true,
+        dshHubOwnerHandle = "registry-owner",
+        dshHubInstalledVersion = "1.2.3",
       )
 
-    assertTrue(isClawHubSkillInstalled(listOf(skill), "registry-slug", "1.2.3"))
-    assertTrue(isClawHubSkillInstalled(listOf(skill), "registry-slug"))
-    assertTrue(isClawHubSkillInstalled(listOf(skill), "@registry-owner/registry-slug", "1.2.3"))
-    assertFalse(isClawHubSkillInstalled(listOf(skill), "@other-owner/registry-slug", "1.2.3"))
-    assertFalse(isClawHubSkillInstalled(listOf(skill), "registry-slug", "1.2.4"))
-    assertFalse(isClawHubSkillInstalled(listOf(skill.copy(clawHubValid = false)), "registry-slug", "1.2.3"))
-    assertFalse(isClawHubSkillInstalled(listOf(skill), "custom-frontmatter-key", "1.2.3"))
+    assertTrue(isDshHubSkillInstalled(listOf(skill), "registry-slug", "1.2.3"))
+    assertTrue(isDshHubSkillInstalled(listOf(skill), "registry-slug"))
+    assertTrue(isDshHubSkillInstalled(listOf(skill), "@registry-owner/registry-slug", "1.2.3"))
+    assertFalse(isDshHubSkillInstalled(listOf(skill), "@other-owner/registry-slug", "1.2.3"))
+    assertFalse(isDshHubSkillInstalled(listOf(skill), "registry-slug", "1.2.4"))
+    assertFalse(isDshHubSkillInstalled(listOf(skill.copy(dshHubValid = false)), "registry-slug", "1.2.3"))
+    assertFalse(isDshHubSkillInstalled(listOf(skill), "custom-frontmatter-key", "1.2.3"))
   }
 
   @Test
   fun ownerQualifiedInstallStaysActiveForBrowseSlug() {
-    assertTrue(isClawHubSkillOperationActive(setOf("@registry-owner/registry-slug"), "registry-slug"))
+    assertTrue(isDshHubSkillOperationActive(setOf("@registry-owner/registry-slug"), "registry-slug"))
     assertTrue(
-      isClawHubSkillOperationActive(
+      isDshHubSkillOperationActive(
         setOf("@registry-owner/registry-slug"),
         "@registry-owner/registry-slug",
       ),
     )
     assertFalse(
-      isClawHubSkillOperationActive(
+      isDshHubSkillOperationActive(
         setOf("@other-owner/registry-slug"),
         "@registry-owner/registry-slug",
       ),
@@ -229,8 +229,8 @@ class SkillManagementTest {
   }
 
   @Test
-  fun clawHubManagementRequiresEveryAdvertisedMethod() {
-    assertTrue(supportsClawHubSkillManagement(CLAWHUB_SKILL_GATEWAY_METHODS))
-    assertFalse(supportsClawHubSkillManagement(CLAWHUB_SKILL_GATEWAY_METHODS - "skills.detail"))
+  fun dshHubManagementRequiresEveryAdvertisedMethod() {
+    assertTrue(supportsDshHubSkillManagement(DSHHUB_SKILL_GATEWAY_METHODS))
+    assertFalse(supportsDshHubSkillManagement(DSHHUB_SKILL_GATEWAY_METHODS - "skills.detail"))
   }
 }

@@ -6,11 +6,11 @@ import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.currentAppLanguage
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.providerDisplayName
-import ai.deepseek.harness.ui.design.ClawEmptyState
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshEmptyState
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.uppercaseFirstGraphemeOrNull
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -69,7 +69,7 @@ internal fun ProvidersModelsScreen(
     }
   }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 20.dp, top = 13.dp, end = 20.dp, bottom = 6.dp),
     contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
   ) {
@@ -89,11 +89,11 @@ internal fun ProvidersModelsScreen(
               ProviderHeaderIconButton(icon = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = nativeString("Back"), outlined = true, onClick = onBack)
             }
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-              Text(text = nativeString("Providers & Models"), style = ClawTheme.type.display.copy(fontSize = 14.8.sp, lineHeight = 18.sp), color = ClawTheme.colors.text, maxLines = 1)
+              Text(text = nativeString("Providers & Models"), style = DshTheme.type.display.copy(fontSize = 14.8.sp, lineHeight = 18.sp), color = DshTheme.colors.text, maxLines = 1)
               Text(
                 text = nativeString("Review provider readiness\nand configured models."),
-                style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-                color = ClawTheme.colors.textMuted,
+                style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+                color = DshTheme.colors.textMuted,
               )
             }
           }
@@ -115,7 +115,7 @@ internal fun ProvidersModelsScreen(
 
         if (!isConnected && providerRows.isEmpty()) {
           item {
-            ClawEmptyState(title = nativeString("Gateway offline"), body = nativeString("Connect your Gateway to load provider readiness."))
+            DshEmptyState(title = nativeString("Gateway offline"), body = nativeString("Connect your Gateway to load provider readiness."))
           }
         } else {
           providerListItems(rows = providerRows, refreshing = refreshing)
@@ -123,8 +123,8 @@ internal fun ProvidersModelsScreen(
 
         errorText?.let { message ->
           item {
-            ClawPanel {
-              Text(text = message, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            DshPanel {
+              Text(text = message, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
             }
           }
         }
@@ -274,7 +274,7 @@ private fun ProviderOverviewPanel(
   val readyCount = providerRows.count { it.ready }
   val needsSetupCount = providerRows.count { it.availability == ProviderAvailability.Unavailable }
   val unknownCount = providerRows.count { it.availability == ProviderAvailability.Unknown }
-  ClawPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         ProviderMetricTile(label = nativeString("Ready"), value = readyCount.toString(), modifier = Modifier.weight(1f))
@@ -283,10 +283,10 @@ private fun ProviderOverviewPanel(
       }
       Text(
         text = if (isConnected) configuredModelsOverviewText(modelCount) else nativeString("Connect your Gateway to view provider readiness."),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
       )
-      ClawSecondaryButton(text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = onRefresh, enabled = isConnected && !refreshing, modifier = Modifier.fillMaxWidth())
+      DshSecondaryButton(text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"), onClick = onRefresh, enabled = isConnected && !refreshing, modifier = Modifier.fillMaxWidth())
     }
   }
 }
@@ -299,26 +299,26 @@ private fun ProviderMetricTile(
 ) {
   Surface(
     modifier = modifier,
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
-    color = ClawTheme.colors.surface,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.panel),
+    color = DshTheme.colors.surface,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
+    contentColor = DshTheme.colors.text,
   ) {
     Column(modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-      Text(text = value, style = ClawTheme.type.title, color = ClawTheme.colors.text, maxLines = 1)
-      Text(text = label, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1)
+      Text(text = value, style = DshTheme.type.title, color = DshTheme.colors.text, maxLines = 1)
+      Text(text = label, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1)
     }
   }
 }
 
 @Composable
 private fun ProviderListRow(row: ProviderRow) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
       ProviderBadge(text = row.name)
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-        Text(text = row.name, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = configuredModelsCountText(row.modelCount), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+        Text(text = row.name, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = configuredModelsCountText(row.modelCount), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted, maxLines = 1)
       }
       AvailabilityPill(availability = row.availability, label = row.status)
     }
@@ -341,18 +341,18 @@ internal fun configuredModelsCountText(count: Int): String =
 
 @Composable
 private fun ProviderModelRow(model: GatewayModelSummary) {
-  Surface(shape = RoundedCornerShape(ClawTheme.radii.row), color = ClawTheme.colors.surface, border = BorderStroke(1.dp, ClawTheme.colors.border)) {
+  Surface(shape = RoundedCornerShape(DshTheme.radii.row), color = DshTheme.colors.surface, border = BorderStroke(1.dp, DshTheme.colors.border)) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(text = model.name, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-          Text(text = model.id, style = ClawTheme.type.caption.copy(fontSize = 12.2.sp, lineHeight = 15.sp), color = ClawTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+          Text(text = model.name, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Text(text = model.id, style = DshTheme.type.caption.copy(fontSize = 12.2.sp, lineHeight = 15.sp), color = DshTheme.colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         val availability = model.available.toProviderAvailability()
         AvailabilityPill(availability = availability, label = availability.modelLabel)
       }
       modelCapabilities(model).takeIf { it.isNotEmpty() }?.let { capabilities ->
-        Text(text = capabilities, style = ClawTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = ClawTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(text = capabilities, style = DshTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = DshTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
       }
     }
   }
@@ -365,16 +365,16 @@ private fun AvailabilityPill(
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
     Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(availability.color()))
-    Text(text = label, style = ClawTheme.type.caption.copy(fontSize = 12.2.sp, lineHeight = 15.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+    Text(text = label, style = DshTheme.type.caption.copy(fontSize = 12.2.sp, lineHeight = 15.sp), color = DshTheme.colors.textMuted, maxLines = 1)
   }
 }
 
 @Composable
 private fun ProviderAvailability.color(): Color =
   when (this) {
-    ProviderAvailability.Available -> ClawTheme.colors.success
-    ProviderAvailability.Unavailable -> ClawTheme.colors.warning
-    ProviderAvailability.Unknown -> ClawTheme.colors.textSubtle
+    ProviderAvailability.Available -> DshTheme.colors.success
+    ProviderAvailability.Unavailable -> DshTheme.colors.warning
+    ProviderAvailability.Unknown -> DshTheme.colors.textSubtle
   }
 
 private val ProviderAvailability.modelLabel: String
@@ -406,9 +406,9 @@ private fun formatContextTokens(tokens: Long): String = if (tokens >= 1_000) "${
 
 @Composable
 private fun ProviderBadge(text: String) {
-  Surface(modifier = Modifier.size(30.dp), shape = RoundedCornerShape(ClawTheme.radii.row), color = ClawTheme.colors.surfacePressed, border = BorderStroke(1.dp, ClawTheme.colors.border)) {
+  Surface(modifier = Modifier.size(30.dp), shape = RoundedCornerShape(DshTheme.radii.row), color = DshTheme.colors.surfacePressed, border = BorderStroke(1.dp, DshTheme.colors.border)) {
     Box(contentAlignment = Alignment.Center) {
-      Text(text = providerInitials(text), style = ClawTheme.type.label, color = ClawTheme.colors.text, textAlign = TextAlign.Center)
+      Text(text = providerInitials(text), style = DshTheme.type.label, color = DshTheme.colors.text, textAlign = TextAlign.Center)
     }
   }
 }
@@ -427,8 +427,8 @@ private fun ProviderSectionLabel(title: String) {
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
     Text(
       text = localizedUppercase(title, currentAppLanguage().languageTag),
-      style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+      color = DshTheme.colors.textMuted,
     )
   }
 }
@@ -442,11 +442,11 @@ private fun ProviderHeaderIconButton(
 ) {
   Surface(
     onClick = onClick,
-    modifier = Modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = Modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
     color = Color.Transparent,
-    contentColor = ClawTheme.colors.text,
-    border = if (outlined) BorderStroke(1.dp, ClawTheme.colors.borderStrong) else null,
+    contentColor = DshTheme.colors.text,
+    border = if (outlined) BorderStroke(1.dp, DshTheme.colors.borderStrong) else null,
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(if (outlined) 17.dp else 20.dp))

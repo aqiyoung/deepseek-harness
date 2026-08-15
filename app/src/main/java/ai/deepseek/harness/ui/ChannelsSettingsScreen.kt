@@ -4,14 +4,14 @@ import ai.deepseek.harness.GatewayChannelSummary
 import ai.deepseek.harness.GatewayChannelsSummary
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawDetailRow
-import ai.deepseek.harness.ui.design.ClawListPanel
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTextBadge
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshDetailRow
+import ai.deepseek.harness.ui.design.DshListPanel
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTextBadge
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.uppercaseFirstGraphemeOrNull
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,7 +61,7 @@ internal fun ChannelsSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"),
         onClick = viewModel::refreshChannels,
         enabled = isConnected && !refreshing,
@@ -69,27 +69,27 @@ internal fun ChannelsSettingsScreen(
       )
     }
     errorText?.let { error ->
-      ClawPanel {
-        Text(text = error, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = error, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     if (summary.partial || summary.warnings.isNotEmpty()) {
       // Partial channel scans still include useful rows; surface the warning
       // without hiding successful channel status.
-      ClawPanel {
-        Text(text = channelsWarningText(summary), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = channelsWarningText(summary), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
     }
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load channels."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load channels."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       channels.isEmpty() ->
-        ClawPanel {
+        DshPanel {
           Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(text = nativeString("No channels found."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-            Text(text = nativeString("Telegram, WhatsApp, email, and other channels appear here after setup."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("No channels found."), style = DshTheme.type.section, color = DshTheme.colors.text)
+            Text(text = nativeString("Telegram, WhatsApp, email, and other channels appear here after setup."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       else -> ChannelsPanel(channels = channels)
@@ -99,18 +99,18 @@ internal fun ChannelsSettingsScreen(
 
 @Composable
 private fun ChannelsPanel(channels: List<GatewayChannelSummary>) {
-  ClawListPanel(items = channels) { channel ->
+  DshListPanel(items = channels) { channel ->
     ChannelRow(channel = channel)
   }
 }
 
 @Composable
 private fun ChannelRow(channel: GatewayChannelSummary) {
-  ClawDetailRow(
+  DshDetailRow(
     title = channel.label,
     subtitle = channelSubtitle(channel),
-    leading = { ClawTextBadge(text = channelBadge(channel.label)) },
-    trailing = { ClawStatusPill(text = channelStatusText(channel), status = channelStatus(channel)) },
+    leading = { DshTextBadge(text = channelBadge(channel.label)) },
+    trailing = { DshStatusPill(text = channelStatusText(channel), status = channelStatus(channel)) },
   )
 }
 
@@ -143,13 +143,13 @@ private fun channelStatusText(channel: GatewayChannelSummary): String =
     else -> nativeString("Off")
   }
 
-private fun channelStatus(channel: GatewayChannelSummary): ClawStatus =
+private fun channelStatus(channel: GatewayChannelSummary): DshStatus =
   when {
-    channel.error != null -> ClawStatus.Danger
-    channel.connected || channel.running -> ClawStatus.Success
-    channel.linked || channel.configured -> ClawStatus.Neutral
-    channel.enabled -> ClawStatus.Warning
-    else -> ClawStatus.Neutral
+    channel.error != null -> DshStatus.Danger
+    channel.connected || channel.running -> DshStatus.Success
+    channel.linked || channel.configured -> DshStatus.Neutral
+    channel.enabled -> DshStatus.Warning
+    else -> DshStatus.Neutral
   }
 
 private fun channelBadge(label: String): String =

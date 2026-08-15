@@ -2,7 +2,7 @@ package ai.deepseek.harness.ui.chat
 
 import ai.deepseek.harness.chat.CHAT_IMAGE_MAX_BASE64_CHARS
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.mobileAccent
 import ai.deepseek.harness.ui.mobileCallout
 import ai.deepseek.harness.ui.mobileCaption1
@@ -315,9 +315,9 @@ private fun RenderMarkdownDisclosure(
     Surface(
       onClick = { isExpanded = !isExpanded },
       shape = RoundedCornerShape(8.dp),
-      color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.72f),
-      contentColor = ClawTheme.colors.textMuted,
-      border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.6f)),
+      color = DshTheme.colors.surfaceRaised.copy(alpha = 0.72f),
+      contentColor = DshTheme.colors.textMuted,
+      border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.6f)),
     ) {
       Row(
         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),

@@ -3,7 +3,7 @@ package ai.deepseek.harness.ui
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.ui.chat.ChatScreen
 import ai.deepseek.harness.ui.chat.rememberChatRealtimeTalkLauncher
-import ai.deepseek.harness.ui.design.ClawScaffold
+import ai.deepseek.harness.ui.design.DshScaffold
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
@@ -26,7 +26,7 @@ internal fun UnifiedChatShellScreen(
   val startTalk = rememberChatRealtimeTalkLauncher(viewModel)
   LaunchedEffect(viewModel) { viewModel.refreshTalkSetupReadiness() }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
     contentWindowInsets = WindowInsets.safeDrawing,
   ) {

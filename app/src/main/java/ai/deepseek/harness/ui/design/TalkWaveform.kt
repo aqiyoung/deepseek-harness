@@ -122,9 +122,9 @@ internal fun TalkWaveform(
 
   val power = TalkWaveformMath.power(phase, timeSeconds)
   val colors = if (idle) palette.inactive else palette.active
-  // The applied Claw theme (not the system setting) decides dark rendering.
-  val dark = ClawTheme.colors.canvas.luminance() < 0.5f
-  val midlineColor = ClawTheme.colors.textMuted.copy(alpha = 0.30f)
+  // The applied Dsh theme (not the system setting) decides dark rendering.
+  val dark = DshTheme.colors.canvas.luminance() < 0.5f
+  val midlineColor = DshTheme.colors.textMuted.copy(alpha = 0.30f)
   Canvas(
     modifier =
       modifier.graphicsLayer {

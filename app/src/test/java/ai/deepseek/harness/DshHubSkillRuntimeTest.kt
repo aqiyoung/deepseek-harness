@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class ClawHubSkillRuntimeTest {
+class DshHubSkillRuntimeTest {
   @Before
   fun clearPlainPrefs() {
     RuntimeEnvironment
@@ -55,34 +55,34 @@ class ClawHubSkillRuntimeTest {
     }
 
     val firstInstall =
-      runtime.installClawHubSkill("registry-slug", version = "1.2.3")
+      runtime.installDshHubSkill("registry-slug", version = "1.2.3")
         ?: error("install job missing")
     runBlocking { firstInstall.join() }
 
-    assertEquals(CLAWHUB_INSTALL_REQUEST_TIMEOUT_MS, installTimeoutMs)
+    assertEquals(DSHHUB_INSTALL_REQUEST_TIMEOUT_MS, installTimeoutMs)
     assertTrue(
-      runtime.clawHubSkillSearchState.value.errorText
+      runtime.dshHubSkillSearchState.value.errorText
         .orEmpty()
         .contains("result for registry-slug is unknown"),
     )
     val retryInstall =
-      runtime.installClawHubSkill("registry-slug", version = "1.2.3")
+      runtime.installDshHubSkill("registry-slug", version = "1.2.3")
         ?: error("retry job missing")
     runBlocking { retryInstall.join() }
 
     installed = true
     val confirmedInstall =
-      runtime.installClawHubSkill("registry-slug", version = "1.2.3")
+      runtime.installDshHubSkill("registry-slug", version = "1.2.3")
         ?: error("confirm job missing")
     runBlocking { confirmedInstall.join() }
 
     assertEquals(3, installCalls.get())
     assertFalse(
-      runtime.clawHubSkillSearchState.value.errorText
+      runtime.dshHubSkillSearchState.value.errorText
         .orEmpty()
         .contains("unknown"),
     )
-    assertEquals("Installed registry-slug.", runtime.clawHubSkillSearchState.value.messageText)
+    assertEquals("Installed registry-slug.", runtime.dshHubSkillSearchState.value.messageText)
   }
 
   @Test
@@ -95,23 +95,23 @@ class ClawHubSkillRuntimeTest {
       error("stale gateway request must not run")
     }
     val waitingToClaim = CountDownLatch(1)
-    runtime.clawHubSkillInstallBeforeClaimObserverForTests = { waitingToClaim.countDown() }
-    val installMutex = readField<Mutex>(runtime, "clawHubSkillInstallMutex")
+    runtime.dshHubSkillInstallBeforeClaimObserverForTests = { waitingToClaim.countDown() }
+    val installMutex = readField<Mutex>(runtime, "dshHubSkillInstallMutex")
     runBlocking { installMutex.lock() }
 
     val installJob =
-      runtime.installClawHubSkill("registry-slug", version = "1.2.3")
+      runtime.installDshHubSkill("registry-slug", version = "1.2.3")
         ?: error("install job missing")
     assertTrue(waitingToClaim.await(5, TimeUnit.SECONDS))
     writeField(runtime, "connectedEndpoint", GatewayEndpoint.manual("127.0.0.2", 18789))
     writeField(runtime, "gatewayDataGeneration", readField<Long>(runtime, "gatewayDataGeneration") + 1)
-    readField<MutableStateFlow<GatewayClawHubSkillSearchState>>(runtime, "_clawHubSkillSearchState").value =
-      GatewayClawHubSkillSearchState()
+    readField<MutableStateFlow<GatewayDshHubSkillSearchState>>(runtime, "_dshHubSkillSearchState").value =
+      GatewayDshHubSkillSearchState()
     installMutex.unlock()
 
     runBlocking { installJob.join() }
     assertTrue(
-      runtime.clawHubSkillSearchState.value.installingSlugs
+      runtime.dshHubSkillSearchState.value.installingSlugs
         .isEmpty(),
     )
     assertEquals(0, installCalls.get())
@@ -121,7 +121,7 @@ class ClawHubSkillRuntimeTest {
     if (!installed) {
       """{"managedSkillsDir":"/tmp/skills","skills":[]}"""
     } else {
-      """{"managedSkillsDir":"/tmp/skills","skills":[{"skillKey":"custom-frontmatter-key","name":"Installed skill","source":"dsh-managed","disabled":false,"eligible":true,"blockedByAllowlist":false,"blockedByAgentFilter":false,"bundled":false,"clawhub":{"status":"linked","valid":true,"slug":"registry-slug","installedVersion":"1.2.3"}}]}"""
+      """{"managedSkillsDir":"/tmp/skills","skills":[{"skillKey":"custom-frontmatter-key","name":"Installed skill","source":"dsh-managed","disabled":false,"eligible":true,"blockedByAllowlist":false,"blockedByAgentFilter":false,"bundled":false,"dshhub":{"status":"linked","valid":true,"slug":"registry-slug","installedVersion":"1.2.3"}}]}"""
     }
 
   private fun createTestRuntime(): NodeRuntime {
@@ -138,7 +138,7 @@ class ClawHubSkillRuntimeTest {
     writeField(runtime, "connectedEndpoint", GatewayEndpoint.manual("127.0.0.1", 18789))
     writeField(runtime, "operatorConnected", true)
     readField<MutableStateFlow<List<String>>>(runtime, "_operatorScopes").value = listOf("operator.admin")
-    readField<MutableStateFlow<Boolean>>(runtime, "_clawHubSkillMethodsAvailable").value = true
+    readField<MutableStateFlow<Boolean>>(runtime, "_dshHubSkillMethodsAvailable").value = true
     waitUntil { runtime.operatorAdminScopeAvailable.value }
   }
 

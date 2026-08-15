@@ -8,112 +8,112 @@ import org.junit.Test
 class ChatWorkingIndicatorTest {
   @Test
   fun stanceSelectionIsDeterministicForRunAndSalt() {
-    val first = pickWorkingClawStance("run-123", salt = 42)
+    val first = pickWorkingDshStance("run-123", salt = 42)
 
     repeat(20) {
-      assertEquals(first, pickWorkingClawStance("run-123", salt = 42))
+      assertEquals(first, pickWorkingDshStance("run-123", salt = 42))
     }
   }
 
   @Test
   fun stanceSelectionUsesConfiguredWeights() {
     val key = "run-weight-check"
-    val hash = workingClawHash(key)
-    val counts = mutableMapOf<WorkingClawStance, Int>()
+    val hash = workingDshHash(key)
+    val counts = mutableMapOf<WorkingDshStance, Int>()
 
     repeat(1_000) { bucket ->
-      val stance = pickWorkingClawStance(key, salt = hash xor bucket)
+      val stance = pickWorkingDshStance(key, salt = hash xor bucket)
       counts[stance] = counts.getOrDefault(stance, 0) + 1
     }
 
     assertEquals(1_000, counts.values.sum())
-    assertEquals(WorkingClawStance.entries.toSet(), counts.keys)
-    assertEquals(550, counts[WorkingClawStance.Default])
-    assertEquals(180, counts[WorkingClawStance.Southpaw])
-    assertEquals(50, counts[WorkingClawStance.Flurry])
-    assertEquals(40, counts[WorkingClawStance.Spin])
-    assertEquals(30, counts[WorkingClawStance.Shadowbox])
-    assertEquals(20, counts[WorkingClawStance.Backflip])
-    assertEquals(20, counts[WorkingClawStance.Zen])
-    assertEquals(20, counts[WorkingClawStance.Drummer])
-    assertEquals(20, counts[WorkingClawStance.Peekaboo])
-    assertEquals(20, counts[WorkingClawStance.NodOff])
-    assertEquals(20, counts[WorkingClawStance.Curious])
-    assertEquals(20, counts[WorkingClawStance.OmNom])
-    assertEquals(10, counts[WorkingClawStance.FakeOut])
+    assertEquals(WorkingDshStance.entries.toSet(), counts.keys)
+    assertEquals(550, counts[WorkingDshStance.Default])
+    assertEquals(180, counts[WorkingDshStance.Southpaw])
+    assertEquals(50, counts[WorkingDshStance.Flurry])
+    assertEquals(40, counts[WorkingDshStance.Spin])
+    assertEquals(30, counts[WorkingDshStance.Shadowbox])
+    assertEquals(20, counts[WorkingDshStance.Backflip])
+    assertEquals(20, counts[WorkingDshStance.Zen])
+    assertEquals(20, counts[WorkingDshStance.Drummer])
+    assertEquals(20, counts[WorkingDshStance.Peekaboo])
+    assertEquals(20, counts[WorkingDshStance.NodOff])
+    assertEquals(20, counts[WorkingDshStance.Curious])
+    assertEquals(20, counts[WorkingDshStance.OmNom])
+    assertEquals(10, counts[WorkingDshStance.FakeOut])
   }
 
   @Test
   fun newStancesUseSpecifiedCyclesAndKeyframePoses() {
-    assertEquals(6_000L, workingClawCycleMs(WorkingClawStance.Zen))
+    assertEquals(6_000L, workingDshCycleMs(WorkingDshStance.Zen))
     assertPose(
-      workingClawPose(WorkingClawStance.Zen, 0.30f),
+      workingDshPose(WorkingDshStance.Zen, 0.30f),
       scale = 1.08f,
       jawRotation = -10f,
     )
     assertPose(
-      workingClawPose(WorkingClawStance.Zen, 0.70f),
+      workingDshPose(WorkingDshStance.Zen, 0.70f),
       jawRotation = -24f,
     )
     assertPose(
-      workingClawPose(WorkingClawStance.Zen, 0.76f),
+      workingDshPose(WorkingDshStance.Zen, 0.76f),
       scale = 1f,
       jawRotation = 2f,
     )
 
-    assertEquals(1_200L, workingClawCycleMs(WorkingClawStance.Drummer))
-    assertEquals(-20f, workingClawPose(WorkingClawStance.Drummer, 0.10f).jawRotation, 0.001f)
+    assertEquals(1_200L, workingDshCycleMs(WorkingDshStance.Drummer))
+    assertEquals(-20f, workingDshPose(WorkingDshStance.Drummer, 0.10f).jawRotation, 0.001f)
     assertPose(
-      workingClawPose(WorkingClawStance.Drummer, 0.15f),
+      workingDshPose(WorkingDshStance.Drummer, 0.15f),
       rotationZ = -8f,
       jawRotation = 2f,
     )
-    assertEquals(-20f, workingClawPose(WorkingClawStance.Drummer, 0.50f).jawRotation, 0.001f)
+    assertEquals(-20f, workingDshPose(WorkingDshStance.Drummer, 0.50f).jawRotation, 0.001f)
     assertPose(
-      workingClawPose(WorkingClawStance.Drummer, 0.55f),
+      workingDshPose(WorkingDshStance.Drummer, 0.55f),
       rotationZ = 8f,
       jawRotation = 2f,
     )
 
-    assertEquals(2_400L, workingClawCycleMs(WorkingClawStance.Peekaboo))
+    assertEquals(2_400L, workingDshCycleMs(WorkingDshStance.Peekaboo))
     assertPose(
-      workingClawPose(WorkingClawStance.Peekaboo, 0.62f),
+      workingDshPose(WorkingDshStance.Peekaboo, 0.62f),
       translationYDp = 5f,
       scale = 0.72f,
       jawRotation = -2f,
     )
     assertPose(
-      workingClawPose(WorkingClawStance.Peekaboo, 0.78f),
+      workingDshPose(WorkingDshStance.Peekaboo, 0.78f),
       translationYDp = -1.5f,
       scale = 1.06f,
       jawRotation = -28f,
     )
 
-    assertEquals(3_600L, workingClawCycleMs(WorkingClawStance.NodOff))
+    assertEquals(3_600L, workingDshCycleMs(WorkingDshStance.NodOff))
     assertPose(
-      workingClawPose(WorkingClawStance.NodOff, 0.64f),
+      workingDshPose(WorkingDshStance.NodOff, 0.64f),
       rotationZ = -3f,
       translationYDp = -0.5f,
       jawRotation = -6f,
     )
 
-    assertEquals(2_400L, workingClawCycleMs(WorkingClawStance.Curious))
+    assertEquals(2_400L, workingDshCycleMs(WorkingDshStance.Curious))
     assertPose(
-      workingClawPose(WorkingClawStance.Curious, 0.40f),
+      workingDshPose(WorkingDshStance.Curious, 0.40f),
       rotationZ = -14f,
       jawRotation = -16f,
     )
 
-    assertEquals(2_400L, workingClawCycleMs(WorkingClawStance.OmNom))
+    assertEquals(2_400L, workingDshCycleMs(WorkingDshStance.OmNom))
     assertPose(
-      workingClawPose(WorkingClawStance.OmNom, 0.36f),
+      workingDshPose(WorkingDshStance.OmNom, 0.36f),
       translationXDp = 2.5f,
       jawRotation = 8f,
     )
 
-    assertEquals(2_400L, workingClawCycleMs(WorkingClawStance.FakeOut))
+    assertEquals(2_400L, workingDshCycleMs(WorkingDshStance.FakeOut))
     assertPose(
-      workingClawPose(WorkingClawStance.FakeOut, 0.58f),
+      workingDshPose(WorkingDshStance.FakeOut, 0.58f),
       rotationZ = 3f,
       jawRotation = 4f,
     )
@@ -191,7 +191,7 @@ class ChatWorkingIndicatorTest {
   }
 
   private fun assertPose(
-    pose: WorkingClawPose,
+    pose: WorkingDshPose,
     rotationZ: Float = 0f,
     translationXDp: Float = 0f,
     translationYDp: Float = 0f,

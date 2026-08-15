@@ -5,7 +5,7 @@ import ai.deepseek.harness.chat.ChatQuestionPrompt
 import ai.deepseek.harness.chat.ChatQuestionStatus
 import ai.deepseek.harness.gateway.Question
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -59,9 +59,9 @@ internal fun ChatQuestionCard(
 
   Surface(
     modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.sheet),
-    color = ClawTheme.colors.surfaceRaised,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.sheet),
+    color = DshTheme.colors.surfaceRaised,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Column(
       modifier = Modifier.padding(16.dp),
@@ -95,9 +95,9 @@ private fun ChatQuestionSummary(
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.row),
-    color = ClawTheme.colors.surfaceRaised,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.row),
+    color = DshTheme.colors.surfaceRaised,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Column(
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -107,14 +107,14 @@ private fun ChatQuestionSummary(
         Column {
           Text(
             text = question.header + ':',
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.text,
             fontWeight = FontWeight.SemiBold,
           )
           Text(
             text = terminalQuestionAnswer(prompt, question, status),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
@@ -132,18 +132,18 @@ private fun QuestionSection(
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Text(
       text = question.header.uppercase(),
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.primary,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.primary,
       fontWeight = FontWeight.SemiBold,
     )
-    Text(text = question.question, style = ClawTheme.type.body, color = ClawTheme.colors.text)
+    Text(text = question.question, style = DshTheme.type.body, color = DshTheme.colors.text)
     question.options.forEach { option ->
       val selected = option.label in draft.selectedOptions[question.questionId].orEmpty()
       Surface(
         onClick = { onDraftChanged(draft.toggle(question, option.label)) },
         enabled = enabled,
-        shape = RoundedCornerShape(ClawTheme.radii.row),
-        color = if (selected) ClawTheme.colors.surfacePressed else ClawTheme.colors.surface,
+        shape = RoundedCornerShape(DshTheme.radii.row),
+        color = if (selected) DshTheme.colors.surfacePressed else DshTheme.colors.surface,
       ) {
         Row(
           modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
@@ -156,9 +156,9 @@ private fun QuestionSection(
           }
           Spacer(Modifier.width(6.dp))
           Column(modifier = Modifier.weight(1f)) {
-            Text(text = option.label, style = ClawTheme.type.body, color = ClawTheme.colors.text)
+            Text(text = option.label, style = DshTheme.type.body, color = DshTheme.colors.text)
             option.description?.takeIf { it.isNotBlank() }?.let { description ->
-              Text(text = description, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+              Text(text = description, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
             }
           }
         }
@@ -192,8 +192,8 @@ private fun QuestionFooter(
     Row(verticalAlignment = Alignment.CenterVertically) {
       Text(
         text = questionCountdown(prompt.record.expiresAtMs, nowMs),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
       )
       Spacer(Modifier.weight(1f))
       TextButton(
@@ -216,7 +216,7 @@ private fun QuestionFooter(
       }
     }
     prompt.errorText?.let { error ->
-      Text(text = error, style = ClawTheme.type.caption, color = ClawTheme.colors.danger)
+      Text(text = error, style = DshTheme.type.caption, color = DshTheme.colors.danger)
     }
   }
 }

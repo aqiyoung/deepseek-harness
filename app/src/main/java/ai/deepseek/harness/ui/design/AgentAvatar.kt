@@ -72,7 +72,7 @@ internal fun agentAvatarSource(agent: GatewayAgentSummary): AgentAvatarSource? {
 
 /** Renders an agent image when loading succeeds, otherwise the caller-owned fallback. */
 @Composable
-internal fun ClawAgentAvatar(
+internal fun DshAgentAvatar(
   source: AgentAvatarSource?,
   size: Dp,
   shape: Shape = CircleShape,

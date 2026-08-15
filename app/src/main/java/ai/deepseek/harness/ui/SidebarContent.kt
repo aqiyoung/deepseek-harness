@@ -5,7 +5,7 @@ import ai.deepseek.harness.GatewayConnectionDisplay
 import ai.deepseek.harness.chat.ChatSessionEntry
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.selectableAgents
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.DeepSeekHarnessMascot
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -152,7 +152,7 @@ internal data class SidebarPalette(
 
 @Composable
 private fun sidebarPalette(): SidebarPalette {
-  val dark = ClawTheme.colors.canvas.luminance() < 0.5f
+  val dark = DshTheme.colors.canvas.luminance() < 0.5f
   return if (dark) {
     SidebarPalette(
       background = Color.Black,
@@ -222,7 +222,7 @@ internal fun DeepSeekHarnessSidebar(
         DeepSeekHarnessMascot(modifier = Modifier.size(28.dp))
         Text(
           text = "DeepSeekHarness",
-          style = ClawTheme.type.title.copy(fontSize = 18.sp, lineHeight = 22.sp),
+          style = DshTheme.type.title.copy(fontSize = 18.sp, lineHeight = 22.sp),
           color = palette.text,
           modifier = Modifier.weight(1f),
           maxLines = 1,
@@ -335,7 +335,7 @@ internal fun DeepSeekHarnessSidebar(
       if (recentSessions.isEmpty()) {
         Text(
           text = nativeString("No recent sessions"),
-          style = ClawTheme.type.caption,
+          style = DshTheme.type.caption,
           color = palette.muted,
           modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
         )
@@ -370,12 +370,12 @@ internal fun DeepSeekHarnessSidebar(
           Modifier
             .size(8.dp)
             .clip(CircleShape)
-            .background(if (connection.isConnected) ClawTheme.colors.success else palette.muted)
+            .background(if (connection.isConnected) DshTheme.colors.success else palette.muted)
             .clearAndSetSemantics {},
       )
       Text(
         text = connectionLabel,
-        style = ClawTheme.type.caption,
+        style = DshTheme.type.caption,
         color = palette.muted,
         maxLines = 1,
       )

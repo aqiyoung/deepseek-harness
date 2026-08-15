@@ -12,13 +12,13 @@ import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.canApproveGatewayDevicePairing
 import ai.deepseek.harness.currentAppLanguage
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawDetailRow
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTextBadge
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshDetailRow
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTextBadge
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.uppercaseFirstGraphemeOrNull
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,7 +86,7 @@ internal fun NodesDevicesSettingsScreen(
         ),
     )
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawSecondaryButton(
+      DshSecondaryButton(
         text = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"),
         onClick = viewModel::refreshNodesDevices,
         enabled = isConnected && !refreshing,
@@ -94,25 +94,25 @@ internal fun NodesDevicesSettingsScreen(
       )
     }
     errorText?.let {
-      ClawPanel {
-        Text(text = it, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = it, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     noticeText?.let {
-      ClawPanel {
-        Text(text = it, style = ClawTheme.type.body, color = ClawTheme.colors.success)
+      DshPanel {
+        Text(text = it, style = DshTheme.type.body, color = DshTheme.colors.success)
       }
     }
     when {
       !isConnected ->
-        ClawPanel {
-          Text(text = nativeString("Connect the gateway to load nodes and paired devices."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        DshPanel {
+          Text(text = nativeString("Connect the gateway to load nodes and paired devices."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       summary.isEmpty() && summary.devicePairingAvailable && pairingCapabilities.canManage ->
-        ClawPanel {
+        DshPanel {
           Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(text = nativeString("No nodes or paired devices."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-            Text(text = nativeString("Linked phones and node hosts will appear here after pairing."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+            Text(text = nativeString("No nodes or paired devices."), style = DshTheme.type.section, color = DshTheme.colors.text)
+            Text(text = nativeString("Linked phones and node hosts will appear here after pairing."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           }
         }
       else ->
@@ -161,23 +161,23 @@ private fun NodesDevicesPanel(
   }
   Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
     if (!summary.devicePairingAvailable || !pairingCapabilities.canManage) {
-      ClawPanel {
-        Text(text = devicePairingAdminUnavailableText(), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = devicePairingAdminUnavailableText(), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
     }
     val approvalCommands = summary.nodes.mapNotNull(::nodeApprovalCommandRow)
     if (approvalCommands.isNotEmpty()) {
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          Text(text = nativeString("Node approval required"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-          Text(text = nativeString("Run on the Gateway host:"), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("Node approval required"), style = DshTheme.type.section, color = DshTheme.colors.text)
+          Text(text = nativeString("Run on the Gateway host:"), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
           approvalCommands.forEach { (label, command) ->
-            Text(text = label, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+            Text(text = label, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
             SelectionContainer {
               Text(
                 text = command,
-                style = ClawTheme.type.body.copy(fontFamily = FontFamily.Monospace),
-                color = ClawTheme.colors.text,
+                style = DshTheme.type.body.copy(fontFamily = FontFamily.Monospace),
+                color = DshTheme.colors.text,
               )
             }
           }
@@ -198,7 +198,7 @@ private fun NodesDevicesPanel(
             onReject = { confirmation = DevicePairingConfirmation.Reject(device) },
           )
           if (index != summary.pendingDevices.lastIndex) {
-            HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+            HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
           }
         }
       }
@@ -208,7 +208,7 @@ private fun NodesDevicesPanel(
         summary.nodes.forEachIndexed { index, node ->
           NodeRow(node = node)
           if (index != summary.nodes.lastIndex) {
-            HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+            HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
           }
         }
       }
@@ -223,7 +223,7 @@ private fun NodesDevicesPanel(
             onRemove = { confirmation = DevicePairingConfirmation.Remove(device) },
           )
           if (index != summary.pairedDevices.lastIndex) {
-            HorizontalDivider(color = ClawTheme.colors.border, thickness = 1.dp)
+            HorizontalDivider(color = DshTheme.colors.border, thickness = 1.dp)
           }
         }
       }
@@ -279,7 +279,7 @@ private fun DevicePairingConfirmationDialog(
                 pendingDeviceIdentityLines(confirmation.device).forEach { (label, value) ->
                   Text(
                     text = nativeString("\$label: \$value", label, value),
-                    style = ClawTheme.type.body,
+                    style = DshTheme.type.body,
                     fontFamily = FontFamily.Monospace,
                   )
                 }
@@ -378,10 +378,10 @@ private fun NodesSection(
   Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
     Text(
       text = localizedUppercase(title, currentAppLanguage().languageTag),
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.textMuted,
     )
-    ClawPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
+    DshPanel(contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)) {
       Column {
         content()
       }
@@ -415,7 +415,7 @@ private fun PendingDeviceRow(
       title = device.displayName ?: nativeString("New device"),
       subtitle = pendingDeviceSubtitle(device),
       statusText = if (device.repair) nativeString("Repair") else nativeString("Review"),
-      status = ClawStatus.Warning,
+      status = DshStatus.Warning,
     )
     if (canApprove || canReject) {
       Row(
@@ -471,13 +471,13 @@ private fun DeviceListRow(
   title: String,
   subtitle: String,
   statusText: String,
-  status: ClawStatus,
+  status: DshStatus,
 ) {
-  ClawDetailRow(
+  DshDetailRow(
     title = title,
     subtitle = subtitle,
-    leading = { ClawTextBadge(text = badge) },
-    trailing = { ClawStatusPill(text = statusText, status = status) },
+    leading = { DshTextBadge(text = badge) },
+    trailing = { DshStatusPill(text = statusText, status = status) },
   )
 }
 
@@ -505,16 +505,16 @@ private fun nodeStatusText(node: GatewayNodeSummary): String =
     else -> if (node.connected) nativeString("Online") else nativeString("Offline")
   }
 
-private fun nodeStatus(node: GatewayNodeSummary): ClawStatus =
+private fun nodeStatus(node: GatewayNodeSummary): DshStatus =
   when (node.approvalState) {
-    GatewayNodeApprovalState.Approved -> if (node.connected) ClawStatus.Success else ClawStatus.Warning
+    GatewayNodeApprovalState.Approved -> if (node.connected) DshStatus.Success else DshStatus.Warning
     GatewayNodeApprovalState.PendingApproval,
     GatewayNodeApprovalState.PendingReapproval,
     GatewayNodeApprovalState.Unapproved,
-    -> ClawStatus.Warning
+    -> DshStatus.Warning
     GatewayNodeApprovalState.Loading,
     GatewayNodeApprovalState.Unsupported,
-    -> if (node.connected) ClawStatus.Neutral else ClawStatus.Warning
+    -> if (node.connected) DshStatus.Neutral else DshStatus.Warning
   }
 
 private fun nodeApprovalSubtitle(approvalState: GatewayNodeApprovalState): String? =
@@ -559,11 +559,11 @@ private fun pairedDeviceStatusText(tokens: List<GatewayDeviceTokenSummary>): Str
     else -> nativeString("Needs Token")
   }
 
-private fun pairedDeviceStatus(tokens: List<GatewayDeviceTokenSummary>): ClawStatus =
+private fun pairedDeviceStatus(tokens: List<GatewayDeviceTokenSummary>): DshStatus =
   when {
-    tokens.isEmpty() -> ClawStatus.Neutral
-    tokens.any { !it.revoked } -> ClawStatus.Success
-    else -> ClawStatus.Warning
+    tokens.isEmpty() -> DshStatus.Neutral
+    tokens.any { !it.revoked } -> DshStatus.Success
+    else -> DshStatus.Warning
   }
 
 internal enum class DeviceListKind {

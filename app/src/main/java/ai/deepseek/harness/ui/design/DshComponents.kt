@@ -53,7 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-internal enum class ClawStatus {
+internal enum class DshStatus {
   Neutral,
   Success,
   Warning,
@@ -62,9 +62,9 @@ internal enum class ClawStatus {
 
 /** Full-screen mobile scaffold that applies DeepSeekHarness safe-area and canvas tokens. */
 @Composable
-internal fun ClawScaffold(
+internal fun DshScaffold(
   modifier: Modifier = Modifier,
-  contentPadding: PaddingValues = PaddingValues(horizontal = ClawTheme.spacing.lg, vertical = ClawTheme.spacing.lg),
+  contentPadding: PaddingValues = PaddingValues(horizontal = DshTheme.spacing.lg, vertical = DshTheme.spacing.lg),
   contentWindowInsets: WindowInsets = WindowInsets.safeDrawing,
   content: @Composable () -> Unit,
 ) {
@@ -72,7 +72,7 @@ internal fun ClawScaffold(
     modifier =
       modifier
         .fillMaxSize()
-        .background(ClawTheme.colors.canvas)
+        .background(DshTheme.colors.canvas)
         .windowInsetsPadding(contentWindowInsets)
         .padding(contentPadding),
   ) {
@@ -82,7 +82,7 @@ internal fun ClawScaffold(
 
 /** Section title row with an optional trailing action slot. */
 @Composable
-internal fun ClawSectionHeader(
+internal fun DshSectionHeader(
   title: String,
   modifier: Modifier = Modifier,
   action: (@Composable () -> Unit)? = null,
@@ -94,8 +94,8 @@ internal fun ClawSectionHeader(
   ) {
     Text(
       text = title,
-      style = ClawTheme.type.section,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.section,
+      color = DshTheme.colors.text,
     )
     action?.invoke()
   }
@@ -103,7 +103,7 @@ internal fun ClawSectionHeader(
 
 /** Primary call-to-action button using the mobile design token set. */
 @Composable
-internal fun ClawPrimaryButton(
+internal fun DshPrimaryButton(
   text: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -113,14 +113,14 @@ internal fun ClawPrimaryButton(
   Button(
     onClick = onClick,
     enabled = enabled,
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.button),
     colors =
       ButtonDefaults.buttonColors(
-        containerColor = ClawTheme.colors.primary,
-        contentColor = ClawTheme.colors.primaryText,
-        disabledContainerColor = ClawTheme.colors.surfacePressed,
-        disabledContentColor = ClawTheme.colors.textSubtle,
+        containerColor = DshTheme.colors.primary,
+        contentColor = DshTheme.colors.primaryText,
+        disabledContainerColor = DshTheme.colors.surfacePressed,
+        disabledContentColor = DshTheme.colors.textSubtle,
       ),
     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
@@ -129,13 +129,13 @@ internal fun ClawPrimaryButton(
       Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp))
       Spacer(modifier = Modifier.width(8.dp))
     }
-    Text(text = text, style = ClawTheme.type.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Text(text = text, style = DshTheme.type.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
   }
 }
 
 /** Secondary action button for non-default commands. */
 @Composable
-internal fun ClawSecondaryButton(
+internal fun DshSecondaryButton(
   text: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -145,11 +145,11 @@ internal fun ClawSecondaryButton(
   Surface(
     onClick = onClick,
     enabled = enabled,
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
-    color = if (enabled) ClawTheme.colors.surfaceRaised else ClawTheme.colors.surface,
-    contentColor = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textSubtle,
-    border = BorderStroke(1.dp, if (enabled) ClawTheme.colors.borderStrong else ClawTheme.colors.border),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = if (enabled) DshTheme.colors.surfaceRaised else DshTheme.colors.surface,
+    contentColor = if (enabled) DshTheme.colors.text else DshTheme.colors.textSubtle,
+    border = BorderStroke(1.dp, if (enabled) DshTheme.colors.borderStrong else DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -160,14 +160,14 @@ internal fun ClawSecondaryButton(
         Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(7.dp))
       }
-      Text(text = text, style = ClawTheme.type.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = text, style = DshTheme.type.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
   }
 }
 
 /** Fixed-size circular icon button for toolbar actions. */
 @Composable
-internal fun ClawIconButton(
+internal fun DshIconButton(
   icon: ImageVector,
   contentDescription: String,
   onClick: () -> Unit,
@@ -177,11 +177,11 @@ internal fun ClawIconButton(
   Surface(
     onClick = onClick,
     enabled = enabled,
-    modifier = modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
-    color = if (enabled) ClawTheme.colors.surfaceRaised else ClawTheme.colors.surface,
-    contentColor = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textSubtle,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    color = if (enabled) DshTheme.colors.surfaceRaised else DshTheme.colors.surface,
+    contentColor = if (enabled) DshTheme.colors.text else DshTheme.colors.textSubtle,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(18.dp))
@@ -191,7 +191,7 @@ internal fun ClawIconButton(
 
 /** Transparent circular icon button for low-emphasis toolbar actions. */
 @Composable
-internal fun ClawPlainIconButton(
+internal fun DshPlainIconButton(
   icon: ImageVector,
   contentDescription: String,
   onClick: () -> Unit,
@@ -199,10 +199,10 @@ internal fun ClawPlainIconButton(
 ) {
   Surface(
     onClick = onClick,
-    modifier = modifier.size(ClawTheme.spacing.touchTarget),
+    modifier = modifier.size(DshTheme.spacing.touchTarget),
     shape = CircleShape,
     color = Color.Transparent,
-    contentColor = ClawTheme.colors.text,
+    contentColor = DshTheme.colors.text,
   ) {
     Box(contentAlignment = Alignment.Center) {
       Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(18.dp))
@@ -212,7 +212,7 @@ internal fun ClawPlainIconButton(
 
 /** Compact label/value row for health and readiness summaries. */
 @Composable
-internal fun ClawStatusRow(
+internal fun DshStatusRow(
   title: String,
   value: String,
   healthy: Boolean,
@@ -225,39 +225,39 @@ internal fun ClawStatusRow(
   ) {
     Text(
       text = title,
-      style = ClawTheme.type.body,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.body,
+      color = DshTheme.colors.text,
       modifier = Modifier.weight(1f),
       maxLines = 1,
     )
-    ClawStatusPill(
+    DshStatusPill(
       text = value,
-      status = if (healthy) ClawStatus.Success else ClawStatus.Warning,
+      status = if (healthy) DshStatus.Success else DshStatus.Warning,
     )
   }
 }
 
 /** Compact status chip with a semantic color dot. */
 @Composable
-internal fun ClawStatusPill(
+internal fun DshStatusPill(
   text: String,
-  status: ClawStatus,
+  status: DshStatus,
   modifier: Modifier = Modifier,
 ) {
-  val colors = ClawTheme.colors
+  val colors = DshTheme.colors
   val (dotColor, backgroundColor) =
     when (status) {
-      ClawStatus.Neutral -> colors.textSubtle to colors.surfaceRaised
-      ClawStatus.Success -> colors.success to colors.successSoft
-      ClawStatus.Warning -> colors.warning to colors.warningSoft
-      ClawStatus.Danger -> colors.danger to colors.dangerSoft
+      DshStatus.Neutral -> colors.textSubtle to colors.surfaceRaised
+      DshStatus.Success -> colors.success to colors.successSoft
+      DshStatus.Warning -> colors.warning to colors.warningSoft
+      DshStatus.Danger -> colors.danger to colors.dangerSoft
     }
 
   Surface(
     modifier = modifier,
-    shape = RoundedCornerShape(ClawTheme.radii.control),
+    shape = RoundedCornerShape(DshTheme.radii.control),
     color = backgroundColor,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -271,14 +271,14 @@ internal fun ClawStatusPill(
             .clip(CircleShape)
             .background(dotColor),
       )
-      Text(text = text, style = ClawTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+      Text(text = text, style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = DshTheme.colors.textMuted, maxLines = 1)
     }
   }
 }
 
 /** Small optional-selectable pill used for filters and metadata chips. */
 @Composable
-internal fun ClawPill(
+internal fun DshPill(
   text: String,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
@@ -293,15 +293,15 @@ internal fun ClawPill(
 
   Surface(
     modifier = surfaceModifier,
-    shape = RoundedCornerShape(ClawTheme.radii.pill),
-    color = if (selected) ClawTheme.colors.primary else ClawTheme.colors.surfaceRaised,
-    contentColor = if (selected) ClawTheme.colors.primaryText else ClawTheme.colors.textMuted,
-    border = BorderStroke(1.dp, if (selected) ClawTheme.colors.primary else ClawTheme.colors.border),
+    shape = RoundedCornerShape(DshTheme.radii.pill),
+    color = if (selected) DshTheme.colors.primary else DshTheme.colors.surfaceRaised,
+    contentColor = if (selected) DshTheme.colors.primaryText else DshTheme.colors.textMuted,
+    border = BorderStroke(1.dp, if (selected) DshTheme.colors.primary else DshTheme.colors.border),
   ) {
     Text(
       text = text,
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-      style = ClawTheme.type.caption,
+      style = DshTheme.type.caption,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -310,19 +310,19 @@ internal fun ClawPill(
 
 /** Panel wrapper for homogeneous lists with standard row separators. */
 @Composable
-internal fun <T> ClawListPanel(
+internal fun <T> DshListPanel(
   items: List<T>,
   modifier: Modifier = Modifier,
   row: @Composable (T) -> Unit,
 ) {
-  ClawPanel(modifier = modifier, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
-    ClawSeparatedColumn(items = items, row = row)
+  DshPanel(modifier = modifier, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)) {
+    DshSeparatedColumn(items = items, row = row)
   }
 }
 
 /** Column helper that inserts standard dividers between rendered rows. */
 @Composable
-internal fun <T> ClawSeparatedColumn(
+internal fun <T> DshSeparatedColumn(
   items: List<T>,
   modifier: Modifier = Modifier,
   row: @Composable (T) -> Unit,
@@ -331,7 +331,7 @@ internal fun <T> ClawSeparatedColumn(
     items.forEachIndexed { index, item ->
       row(item)
       if (index != items.lastIndex) {
-        HorizontalDivider(color = ClawTheme.colors.border.copy(alpha = 0.82f), thickness = 1.dp)
+        HorizontalDivider(color = DshTheme.colors.border.copy(alpha = 0.82f), thickness = 1.dp)
       }
     }
   }
@@ -339,7 +339,7 @@ internal fun <T> ClawSeparatedColumn(
 
 /** Two-line settings/detail row with caller-provided leading and trailing slots. */
 @Composable
-internal fun ClawDetailRow(
+internal fun DshDetailRow(
   title: String,
   subtitle: String,
   modifier: Modifier = Modifier,
@@ -357,8 +357,8 @@ internal fun ClawDetailRow(
   ) {
     leading()
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-      Text(text = title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-      Text(text = subtitle, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = subtitle, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
     trailing()
   }
@@ -366,45 +366,45 @@ internal fun ClawDetailRow(
 
 /** Circular text badge used for compact numeric or initials-style row marks. */
 @Composable
-internal fun ClawTextBadge(
+internal fun DshTextBadge(
   text: String,
   modifier: Modifier = Modifier,
 ) {
   Surface(
     modifier = modifier.size(30.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.surfacePressed,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
-    contentColor = ClawTheme.colors.text,
+    color = DshTheme.colors.surfacePressed,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
+    contentColor = DshTheme.colors.text,
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Text(text = text, style = ClawTheme.type.label, color = ClawTheme.colors.text, maxLines = 1)
+      Text(text = text, style = DshTheme.type.label, color = DshTheme.colors.text, maxLines = 1)
     }
   }
 }
 
 /** Circular icon badge used as a neutral leading marker in list rows. */
 @Composable
-internal fun ClawIconBadge(
+internal fun DshIconBadge(
   icon: ImageVector,
   modifier: Modifier = Modifier,
 ) {
   Surface(
     modifier = modifier.size(30.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.surfacePressed,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
-    contentColor = ClawTheme.colors.text,
+    color = DshTheme.colors.surfacePressed,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
+    contentColor = DshTheme.colors.text,
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = ClawTheme.colors.text)
+      Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = DshTheme.colors.text)
     }
   }
 }
 
 /** Reusable one-line list row with optional subtitle, metadata, slots, and click handling. */
 @Composable
-internal fun ClawListItem(
+internal fun DshListItem(
   title: String,
   modifier: Modifier = Modifier,
   subtitle: String? = null,
@@ -424,8 +424,8 @@ internal fun ClawListItem(
     modifier =
       rowModifier
         .fillMaxWidth()
-        .heightIn(min = ClawTheme.spacing.touchTarget)
-        .clip(RoundedCornerShape(ClawTheme.radii.row))
+        .heightIn(min = DshTheme.spacing.touchTarget)
+        .clip(RoundedCornerShape(DshTheme.radii.row))
         .padding(horizontal = 2.dp, vertical = 5.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(9.dp),
@@ -434,23 +434,23 @@ internal fun ClawListItem(
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
       Text(
         text = title,
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       if (subtitle != null) {
         Text(
           text = subtitle,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
       }
     }
     if (metadata != null) {
-      Text(text = metadata, style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle, maxLines = 1)
+      Text(text = metadata, style = DshTheme.type.caption, color = DshTheme.colors.textSubtle, maxLines = 1)
     }
     trailing?.invoke()
   }
@@ -479,7 +479,7 @@ internal fun segmentedControlRows(
 
 /** Equal-width segmented control with caller-controlled wrapping. */
 @Composable
-internal fun ClawSegmentedControl(
+internal fun DshSegmentedControl(
   options: List<String>,
   selected: String,
   onSelect: (String) -> Unit,
@@ -490,8 +490,8 @@ internal fun ClawSegmentedControl(
   Column(
     modifier =
       modifier
-        .clip(RoundedCornerShape(ClawTheme.radii.control))
-        .border(1.dp, ClawTheme.colors.border, RoundedCornerShape(ClawTheme.radii.control))
+        .clip(RoundedCornerShape(DshTheme.radii.control))
+        .border(1.dp, DshTheme.colors.border, RoundedCornerShape(DshTheme.radii.control))
         .padding(2.dp),
     verticalArrangement = Arrangement.spacedBy(2.dp),
   ) {
@@ -507,20 +507,20 @@ internal fun ClawSegmentedControl(
             modifier =
               Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(ClawTheme.radii.control))
-                .background(if (active) ClawTheme.colors.primary else Color.Transparent)
+                .clip(RoundedCornerShape(DshTheme.radii.control))
+                .background(if (active) DshTheme.colors.primary else Color.Transparent)
                 .clickable(enabled = enabled) { onSelect(option) }
                 .padding(horizontal = 9.dp, vertical = 7.dp),
             contentAlignment = Alignment.Center,
           ) {
             Text(
               text = option,
-              style = ClawTheme.type.caption,
+              style = DshTheme.type.caption,
               color =
                 when {
-                  active -> ClawTheme.colors.primaryText
-                  enabled -> ClawTheme.colors.textMuted
-                  else -> ClawTheme.colors.textSubtle
+                  active -> DshTheme.colors.primaryText
+                  enabled -> DshTheme.colors.textMuted
+                  else -> DshTheme.colors.textSubtle
                 },
               maxLines = 1,
               overflow = TextOverflow.Ellipsis,
@@ -534,7 +534,7 @@ internal fun ClawSegmentedControl(
 
 /** Token-styled text field used by settings and prototype screens. */
 @Composable
-internal fun ClawTextField(
+internal fun DshTextField(
   value: String,
   onValueChange: (String) -> Unit,
   placeholder: String,
@@ -554,26 +554,26 @@ internal fun ClawTextField(
     modifier =
       fieldModifier
         .fillMaxWidth()
-        .clip(RoundedCornerShape(ClawTheme.radii.control))
-        .background(ClawTheme.colors.surfaceRaised)
-        .border(1.dp, ClawTheme.colors.border, RoundedCornerShape(ClawTheme.radii.control))
+        .clip(RoundedCornerShape(DshTheme.radii.control))
+        .background(DshTheme.colors.surfaceRaised)
+        .border(1.dp, DshTheme.colors.border, RoundedCornerShape(DshTheme.radii.control))
         .padding(horizontal = 11.dp, vertical = 8.dp),
     textStyle =
-      ClawTheme.type.body.copy(
-        color = if (enabled) ClawTheme.colors.text else ClawTheme.colors.textSubtle,
+      DshTheme.type.body.copy(
+        color = if (enabled) DshTheme.colors.text else DshTheme.colors.textSubtle,
       ),
-    cursorBrush = SolidColor(ClawTheme.colors.primary),
+    cursorBrush = SolidColor(DshTheme.colors.primary),
     visualTransformation = visualTransformation,
     keyboardOptions = keyboardOptions,
     minLines = minLines,
     decorationBox = { innerTextField ->
       Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         label?.let {
-          Text(text = it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+          Text(text = it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
         }
         Box(modifier = Modifier.fillMaxWidth()) {
           if (value.isEmpty()) {
-            Text(text = placeholder, style = ClawTheme.type.body, color = ClawTheme.colors.textSubtle)
+            Text(text = placeholder, style = DshTheme.type.body, color = DshTheme.colors.textSubtle)
           }
           innerTextField()
         }
@@ -584,18 +584,18 @@ internal fun ClawTextField(
 
 /** Local design-system preview surface for visual smoke checks. */
 @Composable
-internal fun ClawComponentShowcase(modifier: Modifier = Modifier) {
+internal fun DshComponentShowcase(modifier: Modifier = Modifier) {
   var selected by rememberSaveable { mutableStateOf("Chat") }
   var prompt by rememberSaveable { mutableStateOf("") }
 
-  ClawScaffold(modifier = modifier) {
+  DshScaffold(modifier = modifier) {
     Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-      ClawTopBar(
+      DshTopBar(
         title = "DeepSeekHarness",
         subtitle = "Local command center",
-        navigation = { ClawAvatarMark(text = "OC") },
+        navigation = { DshAvatarMark(text = "OC") },
         actions = {
-          ClawIconButton(icon = Icons.Default.Search, contentDescription = "Search", onClick = {})
+          DshIconButton(icon = Icons.Default.Search, contentDescription = "Search", onClick = {})
         },
       )
 
@@ -605,13 +605,13 @@ internal fun ClawComponentShowcase(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
       ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-          Text(text = "DeepSeekHarness", style = ClawTheme.type.display, color = ClawTheme.colors.text)
-          Text(text = "Design system prototype", style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = "DeepSeekHarness", style = DshTheme.type.display, color = DshTheme.colors.text)
+          Text(text = "Design system prototype", style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
-        ClawStatusPill(text = "Connected", status = ClawStatus.Success)
+        DshStatusPill(text = "Connected", status = DshStatus.Success)
       }
 
-      ClawSegmentedControl(
+      DshSegmentedControl(
         options = listOf("Chat", "Voice", "Threads"),
         selected = selected,
         onSelect = { selected = it },
@@ -619,44 +619,44 @@ internal fun ClawComponentShowcase(modifier: Modifier = Modifier) {
       )
 
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        ClawSectionHeader(title = "Threads")
-        ClawListItem(
+        DshSectionHeader(title = "Threads")
+        DshListItem(
           title = "Testing testing 1 2 3",
           subtitle = "14 messages · Android",
           metadata = "now",
         )
-        ClawListItem(
+        DshListItem(
           title = "Provider setup",
           subtitle = "DeepSeekHarness gateway",
           metadata = "8m",
         )
       }
 
-      ClawTextField(value = prompt, onValueChange = { prompt = it }, placeholder = "Ask DeepSeekHarness anything", minLines = 3)
+      DshTextField(value = prompt, onValueChange = { prompt = it }, placeholder = "Ask DeepSeekHarness anything", minLines = 3)
 
       Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        ClawPrimaryButton(text = "Start Chat", onClick = {}, modifier = Modifier.weight(1f))
-        ClawSecondaryButton(text = "Voice", onClick = {}, modifier = Modifier.weight(1f))
+        DshPrimaryButton(text = "Start Chat", onClick = {}, modifier = Modifier.weight(1f))
+        DshSecondaryButton(text = "Voice", onClick = {}, modifier = Modifier.weight(1f))
       }
 
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ClawPill(text = "Realtime", selected = true)
-        ClawPill(text = "Dictation")
-        ClawPill(text = "Screen")
+        DshPill(text = "Realtime", selected = true)
+        DshPill(text = "Dictation")
+        DshPill(text = "Screen")
       }
 
-      ClawEmptyState(
+      DshEmptyState(
         title = "Nothing needs your attention",
         body = "DeepSeekHarness will surface approvals, failed jobs, and channel issues here.",
       )
 
-      ClawBottomNav(
+      DshBottomNav(
         items =
           listOf(
-            ClawNavItem(key = "overview", label = "Home", icon = Icons.Default.Home),
-            ClawNavItem(key = "chat", label = "Chat", icon = Icons.Default.ChatBubble),
-            ClawNavItem(key = "voice", label = "Voice", icon = Icons.Default.Mic),
-            ClawNavItem(key = "settings", label = "Settings", icon = Icons.Default.Settings),
+            DshNavItem(key = "overview", label = "Home", icon = Icons.Default.Home),
+            DshNavItem(key = "chat", label = "Chat", icon = Icons.Default.ChatBubble),
+            DshNavItem(key = "voice", label = "Voice", icon = Icons.Default.Mic),
+            DshNavItem(key = "settings", label = "Settings", icon = Icons.Default.Settings),
           ),
         selectedKey = "chat",
         onSelect = {},

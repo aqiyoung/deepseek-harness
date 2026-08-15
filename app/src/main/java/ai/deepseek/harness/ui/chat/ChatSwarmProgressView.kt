@@ -6,7 +6,7 @@ import ai.deepseek.harness.chat.ChatSwarmGroup
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.i18n.resolveNativeTextResource
 import ai.deepseek.harness.i18n.verbatimText
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -65,8 +65,8 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
   Surface(
     modifier = Modifier.fillMaxWidth(),
     shape = RoundedCornerShape(10.dp),
-    color = ClawTheme.colors.surfaceRaised,
-    border = androidx.compose.foundation.BorderStroke(1.dp, ClawTheme.colors.primary.copy(alpha = 0.2f)),
+    color = DshTheme.colors.surfaceRaised,
+    border = androidx.compose.foundation.BorderStroke(1.dp, DshTheme.colors.primary.copy(alpha = 0.2f)),
   ) {
     Column(
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
@@ -75,7 +75,7 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
           text = group.label,
-          style = ClawTheme.type.caption.copy(fontWeight = FontWeight.SemiBold),
+          style = DshTheme.type.caption.copy(fontWeight = FontWeight.SemiBold),
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -87,8 +87,8 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
               group.done,
               group.failed,
             ),
-          color = ClawTheme.colors.textMuted,
-          style = ClawTheme.type.caption,
+          color = DshTheme.colors.textMuted,
+          style = DshTheme.type.caption,
           maxLines = 1,
         )
         Spacer(Modifier.weight(1f))
@@ -96,8 +96,8 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
       group.narrator?.let { narrator ->
         Text(
           text = narrator,
-          color = ClawTheme.colors.textMuted,
-          style = ClawTheme.type.caption,
+          color = DshTheme.colors.textMuted,
+          style = DshTheme.type.caption,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
@@ -107,8 +107,8 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
           Text(
             text = phase.title ?: nativeString("Unphased"),
             modifier = Modifier.width(64.dp),
-            color = ClawTheme.colors.textMuted,
-            style = ClawTheme.type.caption,
+            color = DshTheme.colors.textMuted,
+            style = DshTheme.type.caption,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
           )
@@ -128,8 +128,8 @@ private fun ChatSwarmGroupCard(group: ChatSwarmGroup) {
               Text(
                 text = verbatimText("+${phase.hidden}").resolveNativeTextResource(),
                 modifier = Modifier.semantics { contentDescription = moreDescription },
-                color = ClawTheme.colors.textMuted,
-                style = ClawTheme.type.caption,
+                color = DshTheme.colors.textMuted,
+                style = DshTheme.type.caption,
               )
             }
           }
@@ -144,20 +144,20 @@ private fun ChatSwarmDotView(dot: ChatSwarmDot) {
   val description = verbatimText("${dot.label}: ${nativeString(dot.status.label)}").resolveNativeTextResource()
   when (dot.status) {
     ChatSwarmDotStatus.Queued -> {
-      val color = ClawTheme.colors.textMuted
+      val color = DshTheme.colors.textMuted
       Canvas(modifier = Modifier.size(9.dp).semantics { contentDescription = description }) {
         drawCircle(color = color, style = Stroke(width = 1.dp.toPx()))
       }
     }
-    ChatSwarmDotStatus.Running -> StatusDot(ClawTheme.colors.primary, description)
-    ChatSwarmDotStatus.Done -> StatusDot(ClawTheme.colors.success, description)
+    ChatSwarmDotStatus.Running -> StatusDot(DshTheme.colors.primary, description)
+    ChatSwarmDotStatus.Done -> StatusDot(DshTheme.colors.success, description)
     ChatSwarmDotStatus.Failed ->
       Box(
         modifier =
           Modifier
             .size(8.dp)
             .rotate(45f)
-            .border(4.dp, ClawTheme.colors.danger, RoundedCornerShape(2.dp))
+            .border(4.dp, DshTheme.colors.danger, RoundedCornerShape(2.dp))
             .semantics { contentDescription = description },
       )
   }

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
  * Stable bottom-navigation destination descriptor.
  */
 @Immutable
-internal data class ClawNavItem(
+internal data class DshNavItem(
   val key: String,
   val label: String,
   val icon: ImageVector,
@@ -43,7 +43,7 @@ internal data class ClawNavItem(
  * Compact app bar that keeps title, optional subtitle, navigation, and actions aligned.
  */
 @Composable
-internal fun ClawTopBar(
+internal fun DshTopBar(
   title: String,
   modifier: Modifier = Modifier,
   subtitle: String? = null,
@@ -54,7 +54,7 @@ internal fun ClawTopBar(
     modifier =
       modifier
         .fillMaxWidth()
-        .padding(horizontal = ClawTheme.spacing.lg, vertical = ClawTheme.spacing.sm),
+        .padding(horizontal = DshTheme.spacing.lg, vertical = DshTheme.spacing.sm),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(12.dp),
   ) {
@@ -62,16 +62,16 @@ internal fun ClawTopBar(
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
       Text(
         text = title,
-        style = ClawTheme.type.section,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.section,
+        color = DshTheme.colors.text,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       if (subtitle != null) {
         Text(
           text = subtitle,
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textSubtle,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -85,20 +85,20 @@ internal fun ClawTopBar(
  * Bottom navigation shell that applies navigation-bar insets before laying out destinations.
  */
 @Composable
-internal fun ClawBottomNav(
-  items: List<ClawNavItem>,
+internal fun DshBottomNav(
+  items: List<DshNavItem>,
   selectedKey: String,
   onSelect: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val safeInsets = WindowInsets.navigationBars.only(androidx.compose.foundation.layout.WindowInsetsSides.Bottom)
 
-  Box(modifier = modifier.fillMaxWidth().background(ClawTheme.colors.canvas)) {
+  Box(modifier = modifier.fillMaxWidth().background(DshTheme.colors.canvas)) {
     Surface(
       modifier = Modifier.fillMaxWidth(),
-      color = ClawTheme.colors.surface.copy(alpha = 0.92f),
-      border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.42f)),
-      shape = RoundedCornerShape(topStart = ClawTheme.radii.sheet, topEnd = ClawTheme.radii.sheet),
+      color = DshTheme.colors.surface.copy(alpha = 0.92f),
+      border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.42f)),
+      shape = RoundedCornerShape(topStart = DshTheme.radii.sheet, topEnd = DshTheme.radii.sheet),
       tonalElevation = 2.dp,
       shadowElevation = 8.dp,
     ) {
@@ -112,7 +112,7 @@ internal fun ClawBottomNav(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
       ) {
         items.forEach { item ->
-          ClawBottomNavItem(
+          DshBottomNavItem(
             item = item,
             selected = item.key == selectedKey,
             onClick = { onSelect(item.key) },
@@ -125,8 +125,8 @@ internal fun ClawBottomNav(
 }
 
 @Composable
-private fun ClawBottomNavItem(
-  item: ClawNavItem,
+private fun DshBottomNavItem(
+  item: DshNavItem,
   selected: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -134,9 +134,9 @@ private fun ClawBottomNavItem(
   Surface(
     onClick = onClick,
     modifier = modifier.heightIn(min = 52.dp),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
-    color = if (selected) ClawTheme.colors.surfacePressed.copy(alpha = 0.72f) else Color.Transparent,
-    contentColor = if (selected) ClawTheme.colors.text else ClawTheme.colors.textMuted,
+    shape = RoundedCornerShape(DshTheme.radii.control),
+    color = if (selected) DshTheme.colors.surfacePressed.copy(alpha = 0.72f) else Color.Transparent,
+    contentColor = if (selected) DshTheme.colors.text else DshTheme.colors.textMuted,
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp, vertical = 5.dp),
@@ -147,7 +147,7 @@ private fun ClawBottomNavItem(
       Text(
         modifier = Modifier.fillMaxWidth(),
         text = item.label,
-        style = ClawTheme.type.caption,
+        style = DshTheme.type.caption,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
@@ -160,19 +160,19 @@ private fun ClawBottomNavItem(
  * Two-character identity mark for users, agents, or nodes in compact UI rows.
  */
 @Composable
-internal fun ClawAvatarMark(
+internal fun DshAvatarMark(
   text: String,
   modifier: Modifier = Modifier,
 ) {
   Surface(
     modifier = modifier.size(38.dp),
     shape = CircleShape,
-    color = ClawTheme.colors.surfaceRaised,
-    contentColor = ClawTheme.colors.text,
-    border = BorderStroke(1.dp, ClawTheme.colors.border),
+    color = DshTheme.colors.surfaceRaised,
+    contentColor = DshTheme.colors.text,
+    border = BorderStroke(1.dp, DshTheme.colors.border),
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Text(text = text.take(2).uppercase(), style = ClawTheme.type.label)
+      Text(text = text.take(2).uppercase(), style = DshTheme.type.label)
     }
   }
 }

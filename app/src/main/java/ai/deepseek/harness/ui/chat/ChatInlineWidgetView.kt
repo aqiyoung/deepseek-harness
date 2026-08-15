@@ -7,7 +7,7 @@ import ai.deepseek.harness.gateway.GatewayTlsParams
 import ai.deepseek.harness.gateway.buildGatewayTlsConfig
 import ai.deepseek.harness.gateway.normalizeGatewayTlsFingerprint
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
@@ -163,8 +163,8 @@ internal fun ChatInlineWidget(
     preview.title?.trim()?.takeIf(String::isNotEmpty)?.let { title ->
       Text(
         text = title,
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
         modifier = Modifier.padding(bottom = 6.dp),
       )
     }
@@ -178,8 +178,8 @@ internal fun ChatInlineWidget(
             Surface(
               modifier = Modifier.fillMaxWidth().height(preview.height.dp),
               shape = RoundedCornerShape(10.dp),
-              border = BorderStroke(1.dp, ClawTheme.colors.border),
-              color = ClawTheme.colors.surface,
+              border = BorderStroke(1.dp, DshTheme.colors.border),
+              color = DshTheme.colors.surface,
             ) {
               InlineWidgetWebView(
                 resource = resource,
@@ -228,12 +228,12 @@ internal fun ChatInlineWidget(
       unavailable || resolvedResource != null ->
         Text(
           text = nativeString("Widget unavailable"),
-          style = ClawTheme.type.caption,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textMuted,
         )
       else ->
         Box(modifier = Modifier.fillMaxWidth().height(44.dp), contentAlignment = Alignment.Center) {
-          CircularProgressIndicator(color = ClawTheme.colors.textMuted)
+          CircularProgressIndicator(color = DshTheme.colors.textMuted)
         }
     }
   }

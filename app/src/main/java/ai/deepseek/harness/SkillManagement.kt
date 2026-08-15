@@ -8,17 +8,17 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 
-private const val CLAWHUB_RISK_ACKNOWLEDGEMENT_REQUIRED = "clawhub_risk_acknowledgement_required"
-internal const val CLAWHUB_INSTALL_REQUEST_TIMEOUT_MS = 125_000L
-internal const val CLAWHUB_SKILL_GATEWAY_UNAVAILABLE = "Update the Gateway to search and install ClawHub skills from Android."
-internal val CLAWHUB_SKILL_GATEWAY_METHODS = setOf("skills.search", "skills.detail", "skills.install")
+private const val DSHHUB_RISK_ACKNOWLEDGEMENT_REQUIRED = "dshhub_risk_acknowledgement_required"
+internal const val DSHHUB_INSTALL_REQUEST_TIMEOUT_MS = 125_000L
+internal const val DSHHUB_SKILL_GATEWAY_UNAVAILABLE = "Update the Gateway to search and install DeepSeek Harness Hub skills from Android."
+internal val DSHHUB_SKILL_GATEWAY_METHODS = setOf("skills.search", "skills.detail", "skills.install")
 
-data class GatewayClawHubSkillSearchState(
+data class GatewayDshHubSkillSearchState(
   val query: String = "",
   val searching: Boolean = false,
-  val results: List<GatewayClawHubSkillSummary> = emptyList(),
+  val results: List<GatewayDshHubSkillSummary> = emptyList(),
   val reviewingSlug: String? = null,
-  val installReview: GatewayClawHubInstallReview? = null,
+  val installReview: GatewayDshHubInstallReview? = null,
   val installingSlugs: Set<String> = emptySet(),
   val acknowledgeSlug: String? = null,
   val acknowledgeVersion: String? = null,
@@ -26,7 +26,7 @@ data class GatewayClawHubSkillSearchState(
   val messageText: String? = null,
 )
 
-data class GatewayClawHubSkillSummary(
+data class GatewayDshHubSkillSummary(
   val slug: String,
   val installRef: String?,
   val displayName: String,
@@ -41,7 +41,7 @@ data class GatewayClawHubSkillSummary(
     get() = installRef?.trim()?.takeIf(String::isNotEmpty) ?: slug
 }
 
-data class GatewayClawHubInstallReview(
+data class GatewayDshHubInstallReview(
   val slug: String,
   val displayName: String,
   val summary: String?,
@@ -49,24 +49,24 @@ data class GatewayClawHubInstallReview(
   val author: String,
 )
 
-internal data class GatewayClawHubInstallRejection(
+internal data class GatewayDshHubInstallRejection(
   val message: String,
   val warning: String?,
   val acknowledgeVersion: String?,
   val requiresAcknowledgement: Boolean,
 )
 
-internal fun parseClawHubSearchResults(
+internal fun parseDshHubSearchResults(
   raw: String,
   json: Json,
-): List<GatewayClawHubSkillSummary> {
+): List<GatewayDshHubSkillSummary> {
   val root = json.parseToJsonElement(raw) as? JsonObject ?: return emptyList()
   return (root["results"] as? JsonArray)
     ?.mapNotNull { item ->
       val value = item as? JsonObject ?: return@mapNotNull null
       val slug = value.string("slug") ?: return@mapNotNull null
       val displayName = value.string("displayName") ?: return@mapNotNull null
-      GatewayClawHubSkillSummary(
+      GatewayDshHubSkillSummary(
         slug = slug,
         installRef = value.string("installRef"),
         displayName = displayName,
@@ -76,11 +76,11 @@ internal fun parseClawHubSearchResults(
     }.orEmpty()
 }
 
-internal fun parseClawHubInstallReview(
+internal fun parseDshHubInstallReview(
   raw: String,
-  fallback: GatewayClawHubSkillSummary,
+  fallback: GatewayDshHubSkillSummary,
   json: Json,
-): GatewayClawHubInstallReview? {
+): GatewayDshHubInstallReview? {
   val root = json.parseToJsonElement(raw) as? JsonObject ?: return null
   val skill = root["skill"] as? JsonObject
   val latestVersion = root["latestVersion"] as? JsonObject
@@ -91,7 +91,7 @@ internal fun parseClawHubInstallReview(
   val ownerDisplayName = owner?.string("displayName")
   val ownerHandle = owner?.string("handle")
   val reviewedSlug =
-    canonicalClawHubSkillReference(
+    canonicalDshHubSkillReference(
       slug = skill?.string("slug") ?: fallback.slug,
       ownerHandle = ownerHandle,
     ) ?: return null
@@ -103,7 +103,7 @@ internal fun parseClawHubInstallReview(
       ownerHandle != null -> "@$ownerHandle"
       else -> "Unknown publisher"
     }
-  return GatewayClawHubInstallReview(
+  return GatewayDshHubInstallReview(
     slug = reviewedSlug,
     displayName = skill?.string("displayName") ?: fallback.displayName,
     summary = skill?.string("summary") ?: fallback.summary,
@@ -112,50 +112,50 @@ internal fun parseClawHubInstallReview(
   )
 }
 
-internal fun clawHubInstallRejection(
+internal fun dshHubInstallRejection(
   error: GatewaySession.ErrorShape,
   attemptedVersion: String?,
-): GatewayClawHubInstallRejection {
+): GatewayDshHubInstallRejection {
   val details = error.details
   val reviewedVersion = attemptedVersion?.trim()?.takeIf(String::isNotEmpty)
-  val gatewayVersion = details?.clawhubVersion?.trim()?.takeIf(String::isNotEmpty)
+  val gatewayVersion = details?.dshhubVersion?.trim()?.takeIf(String::isNotEmpty)
   val acknowledgementRequested =
-    details?.clawhubTrustCode == CLAWHUB_RISK_ACKNOWLEDGEMENT_REQUIRED
+    details?.dshhubTrustCode == DSHHUB_RISK_ACKNOWLEDGEMENT_REQUIRED
   val requiresAcknowledgement =
     acknowledgementRequested && reviewedVersion != null && gatewayVersion == reviewedVersion
-  return GatewayClawHubInstallRejection(
+  return GatewayDshHubInstallRejection(
     message =
       if (acknowledgementRequested && !requiresAcknowledgement) {
-        "The Gateway evaluated a different ClawHub release. Review the skill again before installing."
+        "The Gateway evaluated a different DshHub release. Review the skill again before installing."
       } else {
-        error.message.ifBlank { "The Gateway rejected this ClawHub install." }
+        error.message.ifBlank { "The Gateway rejected this DshHub install." }
       },
-    warning = details?.clawhubWarning?.trim()?.takeIf(String::isNotEmpty),
+    warning = details?.dshhubWarning?.trim()?.takeIf(String::isNotEmpty),
     acknowledgeVersion = reviewedVersion.takeIf { requiresAcknowledgement },
     requiresAcknowledgement = requiresAcknowledgement,
   )
 }
 
-internal fun supportsClawHubSkillManagement(methods: Set<String>): Boolean = methods.containsAll(CLAWHUB_SKILL_GATEWAY_METHODS)
+internal fun supportsDshHubSkillManagement(methods: Set<String>): Boolean = methods.containsAll(DSHHUB_SKILL_GATEWAY_METHODS)
 
-internal fun clawHubSearchParams(query: String): String =
+internal fun dshHubSearchParams(query: String): String =
   buildJsonObject {
     query.trim().takeIf(String::isNotEmpty)?.let { put("query", JsonPrimitive(it)) }
     put("limit", JsonPrimitive(25))
   }.toString()
 
-internal fun clawHubDetailParams(slug: String): String = buildJsonObject { put("slug", JsonPrimitive(slug)) }.toString()
+internal fun dshHubDetailParams(slug: String): String = buildJsonObject { put("slug", JsonPrimitive(slug)) }.toString()
 
-internal fun clawHubInstallParams(
+internal fun dshHubInstallParams(
   slug: String,
   version: String?,
   acknowledgeRisk: Boolean,
 ): String =
   buildJsonObject {
-    put("source", JsonPrimitive("clawhub"))
+    put("source", JsonPrimitive("dshhub"))
     put("slug", JsonPrimitive(slug))
     version?.trim()?.takeIf(String::isNotEmpty)?.let { put("version", JsonPrimitive(it)) }
-    if (acknowledgeRisk) put("acknowledgeClawHubRisk", JsonPrimitive(true))
+    if (acknowledgeRisk) put("acknowledgeDshHubRisk", JsonPrimitive(true))
     put("timeoutMs", JsonPrimitive(120_000))
   }.toString()
 
@@ -168,35 +168,35 @@ internal fun skillEnabledParams(
     put("enabled", JsonPrimitive(enabled))
   }.toString()
 
-internal fun formatClawHubInstallMessage(
+internal fun formatDshHubInstallMessage(
   message: String,
   warning: String?,
 ): String = if (warning.isNullOrBlank()) message else "$message\n\n$warning"
 
-internal fun isClawHubSkillInstalled(
+internal fun isDshHubSkillInstalled(
   skills: List<GatewaySkillSummary>,
   slug: String,
 ): Boolean {
-  val reference = parseClawHubSkillReference(slug) ?: return false
-  return skills.any { it.matchesClawHubReference(reference) }
+  val reference = parseDshHubSkillReference(slug) ?: return false
+  return skills.any { it.matchesDshHubReference(reference) }
 }
 
-internal fun isClawHubSkillInstalled(
+internal fun isDshHubSkillInstalled(
   skills: List<GatewaySkillSummary>,
   slug: String,
   version: String,
 ): Boolean =
-  parseClawHubSkillReference(slug)?.let { reference ->
-    skills.any { it.matchesClawHubReference(reference) && it.clawHubInstalledVersion == version }
+  parseDshHubSkillReference(slug)?.let { reference ->
+    skills.any { it.matchesDshHubReference(reference) && it.dshHubInstalledVersion == version }
   } ?: false
 
-internal fun isClawHubSkillOperationActive(
+internal fun isDshHubSkillOperationActive(
   activeSlugs: Set<String>,
   slug: String,
 ): Boolean {
-  val reference = parseClawHubSkillReference(slug) ?: return false
+  val reference = parseDshHubSkillReference(slug) ?: return false
   return activeSlugs.any { activeSlug ->
-    val active = parseClawHubSkillReference(activeSlug) ?: return@any false
+    val active = parseDshHubSkillReference(activeSlug) ?: return@any false
     active.slug.equals(reference.slug, ignoreCase = true) &&
       (
         active.ownerHandle == null ||
@@ -206,39 +206,39 @@ internal fun isClawHubSkillOperationActive(
   }
 }
 
-private data class ClawHubSkillReference(
+private data class DshHubSkillReference(
   val slug: String,
   val ownerHandle: String?,
 )
 
-private fun parseClawHubSkillReference(rawValue: String): ClawHubSkillReference? {
+private fun parseDshHubSkillReference(rawValue: String): DshHubSkillReference? {
   val value = rawValue.trim()
   if (value.isEmpty()) return null
-  if (!value.startsWith("@")) return ClawHubSkillReference(value, null)
+  if (!value.startsWith("@")) return DshHubSkillReference(value, null)
   val parts = value.drop(1).split("/")
   if (parts.size != 2 || parts.any(String::isEmpty)) return null
-  return ClawHubSkillReference(slug = parts[1], ownerHandle = parts[0].lowercase())
+  return DshHubSkillReference(slug = parts[1], ownerHandle = parts[0].lowercase())
 }
 
-private fun canonicalClawHubSkillReference(
+private fun canonicalDshHubSkillReference(
   slug: String,
   ownerHandle: String?,
 ): String? {
-  val reference = parseClawHubSkillReference(slug) ?: return null
+  val reference = parseDshHubSkillReference(slug) ?: return null
   val owner = ownerHandle?.trim()?.takeIf(String::isNotEmpty)?.lowercase() ?: reference.ownerHandle
   return owner?.let { "@$it/${reference.slug}" } ?: reference.slug
 }
 
-private fun GatewaySkillSummary.matchesClawHubReference(reference: ClawHubSkillReference): Boolean {
-  if (!clawHubValid) return false
-  val installedReference = clawHubSlug?.let(::parseClawHubSkillReference) ?: return false
+private fun GatewaySkillSummary.matchesDshHubReference(reference: DshHubSkillReference): Boolean {
+  if (!dshHubValid) return false
+  val installedReference = dshHubSlug?.let(::parseDshHubSkillReference) ?: return false
   if (!installedReference.slug.equals(reference.slug, ignoreCase = true)) return false
   val requestedOwner = reference.ownerHandle ?: return true
-  val installedOwner = installedReference.ownerHandle ?: clawHubOwnerHandle
+  val installedOwner = installedReference.ownerHandle ?: dshHubOwnerHandle
   return installedOwner?.equals(requestedOwner, ignoreCase = true) == true
 }
 
-internal fun clawHubInstallOutcomeUnknownMessage(slug: String): String = "The result for $slug is unknown. Reconnect, refresh Skills, then retry; the Gateway safely joins a matching install that is still running."
+internal fun dshHubInstallOutcomeUnknownMessage(slug: String): String = "The result for $slug is unknown. Reconnect, refresh Skills, then retry; the Gateway safely joins a matching install that is still running."
 
 private fun JsonObject.string(key: String): String? =
   (get(key) as? JsonPrimitive)

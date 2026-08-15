@@ -5,7 +5,7 @@ import ai.deepseek.harness.gateway.GatewayLoadedMedia
 import ai.deepseek.harness.gateway.GatewayMediaKind
 import ai.deepseek.harness.gateway.GatewayPreparingPlaybackInterceptor
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import android.content.Context
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -562,8 +562,8 @@ private fun AudioPlayerSurface(
 ) {
   Surface(
     shape = RoundedCornerShape(10.dp),
-    color = ClawTheme.colors.surfacePressed.copy(alpha = 0.72f),
-    border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.6f)),
+    color = DshTheme.colors.surfacePressed.copy(alpha = 0.72f),
+    border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.6f)),
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
@@ -577,8 +577,8 @@ private fun AudioPlayerSurface(
           onClick = onToggle,
           enabled = !playbackBlocked && !loading,
           shape = CircleShape,
-          color = ClawTheme.colors.primary,
-          contentColor = ClawTheme.colors.primaryText,
+          color = DshTheme.colors.primary,
+          contentColor = DshTheme.colors.primaryText,
         ) {
           Box(modifier = Modifier.size(34.dp), contentAlignment = Alignment.Center) {
             if (loading) {
@@ -592,12 +592,12 @@ private fun AudioPlayerSurface(
             }
           }
         }
-        Icon(Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(16.dp), tint = ClawTheme.colors.textMuted)
+        Icon(Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(16.dp), tint = DshTheme.colors.textMuted)
         Column(modifier = Modifier.weight(1f)) {
           Text(
             text = content.fileName?.takeIf(String::isNotBlank) ?: nativeString("Voice note"),
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.text,
           )
           val status =
             when {
@@ -606,7 +606,7 @@ private fun AudioPlayerSurface(
               playbackBlocked -> nativeString("Paused for voice playback")
               else -> null
             }
-          status?.let { Text(it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted) }
+          status?.let { Text(it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted) }
         }
       }
       Slider(
@@ -616,8 +616,8 @@ private fun AudioPlayerSurface(
         enabled = seekEnabled && durationMs > 0L && playerControlsAvailable(error, playbackBlocked),
       )
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(formatVoiceNoteDuration(positionMs), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
-        Text(formatVoiceNoteDuration(durationMs), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+        Text(formatVoiceNoteDuration(positionMs), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
+        Text(formatVoiceNoteDuration(durationMs), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
       }
     }
   }
@@ -647,7 +647,7 @@ private fun VideoPlayerSurface(
         Modifier
           .fillMaxWidth()
           .aspectRatio(ratio.coerceIn(0.5f, 2.4f))
-          .background(ClawTheme.colors.surfacePressed, RoundedCornerShape(10.dp)),
+          .background(DshTheme.colors.surfacePressed, RoundedCornerShape(10.dp)),
       contentAlignment = Alignment.Center,
     ) {
       if (player != null) {
@@ -663,7 +663,7 @@ private fun VideoPlayerSurface(
           modifier = Modifier.matchParentSize(),
         )
       } else {
-        Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(36.dp), tint = ClawTheme.colors.textMuted)
+        Icon(Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(36.dp), tint = DshTheme.colors.textMuted)
       }
       Box(
         modifier = Modifier.matchParentSize().clickable(enabled = !playbackBlocked && !loading, onClick = onToggle),
@@ -672,7 +672,7 @@ private fun VideoPlayerSurface(
         if (loading) {
           CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
         } else if (!isPlaying) {
-          Surface(shape = CircleShape, color = ClawTheme.colors.primary, contentColor = ClawTheme.colors.primaryText) {
+          Surface(shape = CircleShape, color = DshTheme.colors.primary, contentColor = DshTheme.colors.primaryText) {
             Icon(Icons.Default.PlayArrow, contentDescription = nativeString("Play video"), modifier = Modifier.padding(10.dp).size(24.dp))
           }
         }
@@ -680,8 +680,8 @@ private fun VideoPlayerSurface(
     }
     Text(
       text = content.fileName?.takeIf(String::isNotBlank) ?: nativeString("Video"),
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.textMuted,
     )
     val status =
       when {
@@ -691,7 +691,7 @@ private fun VideoPlayerSurface(
         else -> null
       }
     status?.let {
-      Text(it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+      Text(it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
     }
   }
 }
@@ -815,14 +815,14 @@ internal fun ChatMediaAttachmentLabel(content: ChatMessageContent) {
       imageVector = if (isAudio) Icons.Default.Mic else Icons.Default.Videocam,
       contentDescription = null,
       modifier = Modifier.size(16.dp),
-      tint = ClawTheme.colors.textMuted,
+      tint = DshTheme.colors.textMuted,
     )
     Text(
       text =
         content.fileName?.takeIf(String::isNotBlank)
           ?: if (isAudio) nativeString("Voice note") else nativeString("Video"),
-      style = ClawTheme.type.body,
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.body,
+      color = DshTheme.colors.text,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
       modifier = Modifier.weight(1f),
@@ -830,8 +830,8 @@ internal fun ChatMediaAttachmentLabel(content: ChatMessageContent) {
     content.durationMs?.let { duration ->
       Text(
         text = formatVoiceNoteDuration(duration),
-        style = ClawTheme.type.caption,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textMuted,
       )
     }
   }

@@ -1,6 +1,6 @@
 package ai.deepseek.harness.ui
 
-import ai.deepseek.harness.ui.design.ClawDesignTheme
+import ai.deepseek.harness.ui.design.DshDesignTheme
 import ai.deepseek.harness.ui.design.MascotMood
 import android.content.Context
 import android.provider.Settings
@@ -170,7 +170,7 @@ class InitialOnboardingLayoutTest {
   ) {
     composeRule.setContent {
       DeviceConfigurationOverride(DeviceConfigurationOverride.FontScale(fontScale)) {
-        ClawDesignTheme {
+        DshDesignTheme {
           Box(
             modifier =
               Modifier

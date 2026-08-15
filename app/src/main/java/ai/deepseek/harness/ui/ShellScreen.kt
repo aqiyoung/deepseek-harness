@@ -27,17 +27,17 @@ import ai.deepseek.harness.i18n.verbatimText
 import ai.deepseek.harness.node.CanvasController
 import ai.deepseek.harness.systemagent.SystemAgentChatAccess
 import ai.deepseek.harness.ui.design.AgentAvatarSource
-import ai.deepseek.harness.ui.design.ClawAgentAvatar
-import ai.deepseek.harness.ui.design.ClawDesignTheme
-import ai.deepseek.harness.ui.design.ClawEmptyState
-import ai.deepseek.harness.ui.design.ClawIconButton
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPlainIconButton
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawScaffold
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshAgentAvatar
+import ai.deepseek.harness.ui.design.DshDesignTheme
+import ai.deepseek.harness.ui.design.DshEmptyState
+import ai.deepseek.harness.ui.design.DshIconButton
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPlainIconButton
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.ui.design.DeepSeekHarnessMascot
 import ai.deepseek.harness.ui.design.agentAvatarSource
 import androidx.activity.compose.BackHandler
@@ -170,7 +170,7 @@ fun ShellScreen(
   val appearanceThemeMode by viewModel.appearanceThemeMode.collectAsState()
   val shellDark = appearanceThemeMode.isDark(systemDark = isSystemInDarkTheme())
   DeepSeekHarnessSystemBarAppearance(lightAppearance = !shellDark)
-  ClawDesignTheme(dark = shellDark) {
+  DshDesignTheme(dark = shellDark) {
     val nav = rememberSaveable(saver = ShellNavigation.Saver) { ShellNavigation() }
     var commandOpen by rememberSaveable { mutableStateOf(false) }
     var conversationScreenWasActive by rememberSaveable { mutableStateOf(false) }
@@ -271,7 +271,7 @@ fun ShellScreen(
       closeSidebar()
     }
 
-    Box(modifier = modifier.fillMaxSize().background(ClawTheme.colors.canvas)) {
+    Box(modifier = modifier.fillMaxSize().background(DshTheme.colors.canvas)) {
       AdaptiveNavigationShell(
         drawerState = sidebarDrawerState,
         compactNavigationVisible = compactNavigationVisible,
@@ -428,7 +428,7 @@ private fun CanvasOverlay(
   onClose: () -> Unit,
 ) {
   BackHandler(enabled = visible, onBack = onClose)
-  val overlayColor = if (visible) ClawTheme.colors.canvas else Color.Transparent
+  val overlayColor = if (visible) DshTheme.colors.canvas else Color.Transparent
   Box(modifier = Modifier.fillMaxSize().background(overlayColor)) {
     // The shell owns system-bar avoidance; arbitrary Canvas pages cannot know Android insets.
     CanvasScreen(
@@ -437,7 +437,7 @@ private fun CanvasOverlay(
       modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing),
     )
     if (visible) {
-      ClawIconButton(
+      DshIconButton(
         icon = Icons.Default.Close,
         contentDescription = nativeString("Close Canvas"),
         onClick = onClose,
@@ -484,22 +484,22 @@ private fun GatewayTrustDialog(
 
   AlertDialog(
     onDismissRequest = onDecline,
-    containerColor = ClawTheme.colors.surfaceRaised,
+    containerColor = DshTheme.colors.surfaceRaised,
     title = {
       Text(
         stringResource(R.string.trust_this_gateway),
-        style = ClawTheme.type.section,
-        color = ClawTheme.colors.text,
+        style = DshTheme.type.section,
+        color = DshTheme.colors.text,
       )
     },
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(message, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        Text(message, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         if (systemTrustAvailable) {
           Text(
             nativeString("This gateway now presents a certificate trusted by this device."),
-            style = ClawTheme.type.body,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
           )
         }
         if (manualEntry) {
@@ -622,7 +622,7 @@ private fun OverviewScreen(
     }
   }
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp),
     contentWindowInsets = shellContentInsets,
   ) {
@@ -641,8 +641,8 @@ private fun OverviewScreen(
         item {
           Text(
             text = nativeString("Overview"),
-            style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp),
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp),
+            color = DshTheme.colors.text,
           )
         }
 
@@ -685,10 +685,10 @@ private fun OverviewScreen(
 
         if (visibleRecentRows.isEmpty()) {
           item {
-            ClawEmptyState(
+            DshEmptyState(
               title = nativeString("No recent threads"),
               body = nativeString("Start a chat and your active DeepSeekHarness conversations will appear here."),
-              action = { ClawPrimaryButton(text = nativeString("Start Chat"), onClick = { onSelectTab(Tab.Chat) }) },
+              action = { DshPrimaryButton(text = nativeString("Start Chat"), onClick = { onSelectTab(Tab.Chat) }) },
             )
           }
         } else {
@@ -735,7 +735,7 @@ private fun OverviewHeader(
     horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     if (showSidebarButton) {
-      ClawPlainIconButton(
+      DshPlainIconButton(
         icon = Icons.Default.Menu,
         contentDescription = nativeString("Show Sidebar"),
         onClick = onOpenSidebar,
@@ -745,14 +745,14 @@ private fun OverviewHeader(
     DeepSeekHarnessMascot(modifier = Modifier.size(25.dp))
     Text(
       text = nativeString("DeepSeekHarness"),
-      style = ClawTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
-      color = ClawTheme.colors.text,
+      style = DshTheme.type.title.copy(fontSize = 17.sp, lineHeight = 21.sp),
+      color = DshTheme.colors.text,
       modifier = Modifier.weight(1f),
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
     OverviewStatusPill(status = status, onClick = onOpenStatus)
-    ClawPlainIconButton(icon = Icons.Default.Search, contentDescription = nativeString("Search"), onClick = onOpenCommand)
+    DshPlainIconButton(icon = Icons.Default.Search, contentDescription = nativeString("Search"), onClick = onOpenCommand)
   }
 }
 
@@ -761,20 +761,20 @@ private fun OverviewStatusPill(
   status: OverviewHeaderState,
   onClick: () -> Unit,
 ) {
-  val colors = ClawTheme.colors
+  val colors = DshTheme.colors
   val (dotColor, backgroundColor) =
     when (status.status) {
-      ClawStatus.Success -> colors.success to colors.successSoft
-      ClawStatus.Warning -> colors.warning to colors.warningSoft
-      ClawStatus.Danger -> colors.danger to colors.dangerSoft
-      ClawStatus.Neutral -> colors.textSubtle to colors.surfaceRaised
+      DshStatus.Success -> colors.success to colors.successSoft
+      DshStatus.Warning -> colors.warning to colors.warningSoft
+      DshStatus.Danger -> colors.danger to colors.dangerSoft
+      DshStatus.Neutral -> colors.textSubtle to colors.surfaceRaised
     }
   Surface(
     onClick = onClick,
-    modifier = Modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
+    modifier = Modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.control),
     color = backgroundColor.copy(alpha = 0.82f),
-    border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.32f)),
+    border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.32f)),
   ) {
     Row(
       modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
@@ -782,8 +782,8 @@ private fun OverviewStatusPill(
       horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(dotColor))
-      Text(text = nativeString(status.label), style = ClawTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = ClawTheme.colors.text, maxLines = 1)
-      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(15.dp), tint = ClawTheme.colors.textMuted)
+      Text(text = nativeString(status.label), style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = DshTheme.colors.text, maxLines = 1)
+      Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(15.dp), tint = DshTheme.colors.textMuted)
     }
   }
 }
@@ -803,18 +803,18 @@ private fun OverviewPrimaryPanel(
   onOpenAgent: () -> Unit,
   onOpenGateway: () -> Unit,
 ) {
-  OverviewLayeredPanel(contentPadding = PaddingValues(ClawTheme.spacing.sm), elevated = true) {
-    Column(verticalArrangement = Arrangement.spacedBy(ClawTheme.spacing.xs)) {
-      Text(text = nativeString("ACTIVE AGENT"), style = ClawTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = ClawTheme.colors.textMuted)
+  OverviewLayeredPanel(contentPadding = PaddingValues(DshTheme.spacing.sm), elevated = true) {
+    Column(verticalArrangement = Arrangement.spacedBy(DshTheme.spacing.xs)) {
+      Text(text = nativeString("ACTIVE AGENT"), style = DshTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = DshTheme.colors.textMuted)
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
         OverviewAgentBadge(text = agentBadge, active = isConnected, avatarSource = agentAvatarSource)
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
           Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(text = if (pendingRunCount > 0) nativeString("\$agentName is working", agentName) else agentName, style = ClawTheme.type.title.copy(fontSize = 19.sp, lineHeight = 23.sp), color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            Text(text = if (pendingRunCount > 0) nativeString("\$agentName is working", agentName) else agentName, style = DshTheme.type.title.copy(fontSize = 19.sp, lineHeight = 23.sp), color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
           }
-          Text(text = overviewAgentActivityText(isConnected = isConnected, pendingRunCount = pendingRunCount, sessionCount = sessionCount, cronJobCount = cronJobCount, statusText = statusText), style = ClawTheme.type.caption.copy(fontSize = 13.5.sp, lineHeight = 17.sp), color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Text(text = overviewAgentActivityText(isConnected = isConnected, pendingRunCount = pendingRunCount, sessionCount = sessionCount, cronJobCount = cronJobCount, statusText = statusText), style = DshTheme.type.caption.copy(fontSize = 13.5.sp, lineHeight = 17.sp), color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        ClawSecondaryButton(text = nativeString("View"), onClick = onOpenAgent)
+        DshSecondaryButton(text = nativeString("View"), onClick = onOpenAgent)
       }
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         OverviewStateChip(label = nativeString("Runs"), value = if (pendingRunCount > 0) nativeString("\$pendingRunCount active", pendingRunCount) else nativeString("Idle"), modifier = Modifier.weight(1f))
@@ -826,7 +826,7 @@ private fun OverviewPrimaryPanel(
         OverviewActionPill(text = nativeString("Talk"), icon = Icons.Outlined.MicNone, emphasized = false, onClick = onOpenVoice, modifier = Modifier.weight(1f))
       }
       if (!isConnected) {
-        ClawSecondaryButton(text = nativeString("Reconnect gateway"), icon = Icons.Default.Cloud, onClick = onOpenGateway, modifier = Modifier.fillMaxWidth())
+        DshSecondaryButton(text = nativeString("Reconnect gateway"), icon = Icons.Default.Cloud, onClick = onOpenGateway, modifier = Modifier.fillMaxWidth())
       }
     }
   }
@@ -842,20 +842,20 @@ private fun OverviewActionPill(
 ) {
   Surface(
     onClick = onClick,
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.control),
     color =
       if (emphasized) {
-        ClawTheme.colors.surfacePressed.copy(alpha = 0.9f)
+        DshTheme.colors.surfacePressed.copy(alpha = 0.9f)
       } else {
-        ClawTheme.colors.surfaceRaised.copy(alpha = 0.72f)
+        DshTheme.colors.surfaceRaised.copy(alpha = 0.72f)
       },
-    contentColor = ClawTheme.colors.text,
+    contentColor = DshTheme.colors.text,
     border =
       if (emphasized) {
         null
       } else {
-        BorderStroke(1.dp, ClawTheme.colors.borderStrong.copy(alpha = 0.7f))
+        BorderStroke(1.dp, DshTheme.colors.borderStrong.copy(alpha = 0.7f))
       },
     tonalElevation = if (emphasized) 2.dp else 0.dp,
   ) {
@@ -866,7 +866,7 @@ private fun OverviewActionPill(
     ) {
       Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(17.dp))
       Spacer(modifier = Modifier.width(8.dp))
-      Text(text = text, style = ClawTheme.type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = text, style = DshTheme.type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
   }
 }
@@ -880,9 +880,9 @@ private fun OverviewLayeredPanel(
 ) {
   Surface(
     modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
-    color = if (elevated) ClawTheme.colors.surfaceRaised.copy(alpha = 0.98f) else ClawTheme.colors.surfaceRaised.copy(alpha = 0.86f),
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = if (elevated) DshTheme.colors.surfaceRaised.copy(alpha = 0.98f) else DshTheme.colors.surfaceRaised.copy(alpha = 0.86f),
+    contentColor = DshTheme.colors.text,
     tonalElevation = if (elevated) 4.dp else 1.dp,
     shadowElevation = if (elevated) 9.dp else 2.dp,
   ) {
@@ -901,16 +901,16 @@ private fun OverviewAgentBadge(
   Surface(
     modifier = Modifier.size(42.dp),
     shape = CircleShape,
-    color = if (active) ClawTheme.colors.successSoft else ClawTheme.colors.surfacePressed,
-    contentColor = if (active) ClawTheme.colors.success else ClawTheme.colors.textMuted,
+    color = if (active) DshTheme.colors.successSoft else DshTheme.colors.surfacePressed,
+    contentColor = if (active) DshTheme.colors.success else DshTheme.colors.textMuted,
     tonalElevation = if (active) 3.dp else 1.dp,
     shadowElevation = if (active) 5.dp else 1.dp,
   ) {
-    ClawAgentAvatar(source = avatarSource, size = 42.dp) {
+    DshAgentAvatar(source = avatarSource, size = 42.dp) {
       Box(contentAlignment = Alignment.Center) {
         Text(
           text = text,
-          style = ClawTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp),
+          style = DshTheme.type.title.copy(fontSize = 16.sp, lineHeight = 20.sp),
           maxLines = 1,
         )
       }
@@ -925,16 +925,16 @@ private fun OverviewStateChip(
   modifier: Modifier = Modifier,
 ) {
   Surface(
-    modifier = modifier.heightIn(min = ClawTheme.spacing.touchTarget),
-    shape = RoundedCornerShape(ClawTheme.radii.control),
-    color = ClawTheme.colors.surfacePressed.copy(alpha = 0.58f),
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.control),
+    color = DshTheme.colors.surfacePressed.copy(alpha = 0.58f),
   ) {
     Column(
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
       verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-      Text(text = localizedUppercase(label, currentAppLanguage().languageTag), style = ClawTheme.type.caption.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = ClawTheme.colors.textSubtle, maxLines = 1)
-      Text(text = value, style = ClawTheme.type.caption.copy(fontSize = 14.sp, lineHeight = 17.sp), color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = localizedUppercase(label, currentAppLanguage().languageTag), style = DshTheme.type.caption.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = DshTheme.colors.textSubtle, maxLines = 1)
+      Text(text = value, style = DshTheme.type.caption.copy(fontSize = 14.sp, lineHeight = 17.sp), color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
   }
 }
@@ -967,20 +967,20 @@ private fun OverviewMetricTile(
   Surface(
     onClick = onClick,
     modifier = modifier.heightIn(min = overviewMetricTileMinHeight),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
-    color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.84f),
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = DshTheme.colors.surfaceRaised.copy(alpha = 0.84f),
+    contentColor = DshTheme.colors.text,
     tonalElevation = 2.dp,
     shadowElevation = 3.dp,
   ) {
-    Column(modifier = Modifier.padding(ClawTheme.spacing.xs), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = Modifier.padding(DshTheme.spacing.xs), verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Icon(imageVector = card.icon, contentDescription = null, modifier = Modifier.size(17.dp), tint = card.tint)
-        Text(text = localizedUppercase(card.title, currentAppLanguage().languageTag), style = ClawTheme.type.caption.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = nativeString("Open \${card.title}", card.title), modifier = Modifier.size(15.dp), tint = ClawTheme.colors.textMuted)
+        Text(text = localizedUppercase(card.title, currentAppLanguage().languageTag), style = DshTheme.type.caption.copy(fontSize = 10.5.sp, lineHeight = 13.sp), color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = nativeString("Open \${card.title}", card.title), modifier = Modifier.size(15.dp), tint = DshTheme.colors.textMuted)
       }
-      Text(text = card.value, style = ClawTheme.type.title.copy(fontSize = 22.sp, lineHeight = 25.sp), color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-      Text(text = card.subtitle, style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
+      Text(text = card.value, style = DshTheme.type.title.copy(fontSize = 22.sp, lineHeight = 25.sp), color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+      Text(text = card.subtitle, style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textSubtle, maxLines = 2, overflow = TextOverflow.Ellipsis)
       card.progressFraction?.let { progress ->
         OverviewProgressBar(progress = progress, tint = card.tint)
       }
@@ -1017,7 +1017,7 @@ private fun OverviewProgressBar(
         .fillMaxWidth()
         .height(4.dp)
         .clip(RoundedCornerShape(2.dp))
-        .background(ClawTheme.colors.surfacePressed),
+        .background(DshTheme.colors.surfacePressed),
   ) {
     Box(
       modifier =
@@ -1038,9 +1038,9 @@ private fun TalkEntryPanel(
   Surface(
     onClick = onOpenVoice,
     modifier = Modifier.fillMaxWidth().heightIn(min = overviewTalkPanelMinHeight),
-    shape = RoundedCornerShape(ClawTheme.radii.button),
-    color = ClawTheme.colors.surfaceRaised.copy(alpha = 0.9f),
-    contentColor = ClawTheme.colors.text,
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = DshTheme.colors.surfaceRaised.copy(alpha = 0.9f),
+    contentColor = DshTheme.colors.text,
     tonalElevation = 2.dp,
     shadowElevation = 3.dp,
   ) {
@@ -1057,10 +1057,10 @@ private fun TalkEntryPanel(
         }
       }
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = nativeString("Talk"), style = ClawTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = ClawTheme.colors.textMuted)
-        Text(text = nativeString("Open Talk"), style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = nativeString("Talk"), style = DshTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 15.sp), color = DshTheme.colors.textMuted)
+        Text(text = nativeString("Open Talk"), style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
-      ClawPlainIconButton(icon = Icons.Default.Tune, contentDescription = nativeString("Talk settings"), onClick = onOpenVoiceSettings)
+      DshPlainIconButton(icon = Icons.Default.Tune, contentDescription = nativeString("Talk settings"), onClick = onOpenVoiceSettings)
     }
   }
 }
@@ -1072,15 +1072,15 @@ private fun RecentSessionsHeader(onOpenSessions: () -> Unit) {
     action = {
       Surface(
         onClick = onOpenSessions,
-        modifier = Modifier.heightIn(min = ClawTheme.spacing.touchTarget),
+        modifier = Modifier.heightIn(min = DshTheme.spacing.touchTarget),
         color = Color.Transparent,
-        contentColor = ClawTheme.colors.textMuted,
+        contentColor = DshTheme.colors.textMuted,
       ) {
         Box(contentAlignment = Alignment.Center) {
           Text(
             text = nativeString("View all"),
-            style = ClawTheme.type.caption,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
@@ -1090,7 +1090,7 @@ private fun RecentSessionsHeader(onOpenSessions: () -> Unit) {
 
 internal data class OverviewHeaderState(
   val label: String,
-  val status: ClawStatus,
+  val status: DshStatus,
 )
 
 internal fun overviewHeaderState(
@@ -1098,9 +1098,9 @@ internal fun overviewHeaderState(
   hasAttention: Boolean,
 ): OverviewHeaderState =
   when {
-    !isConnected -> OverviewHeaderState("Offline", ClawStatus.Neutral)
-    hasAttention -> OverviewHeaderState("Needs attention", ClawStatus.Warning)
-    else -> OverviewHeaderState("Online", ClawStatus.Success)
+    !isConnected -> OverviewHeaderState("Offline", DshStatus.Neutral)
+    hasAttention -> OverviewHeaderState("Needs attention", DshStatus.Warning)
+    else -> OverviewHeaderState("Online", DshStatus.Success)
   }
 
 internal fun overviewHeaderRoute(attentionRows: List<HomeAttentionRow>): SettingsRoute = attentionRows.firstNotNullOfOrNull { it.settingsRoute } ?: SettingsRoute.Gateway
@@ -1159,10 +1159,10 @@ private fun overviewMetricCards(
       icon = spec.icon,
       tint =
         when (spec.status) {
-          ClawStatus.Success -> ClawTheme.colors.success
-          ClawStatus.Warning -> ClawTheme.colors.warning
-          ClawStatus.Danger -> ClawTheme.colors.danger
-          ClawStatus.Neutral -> ClawTheme.colors.textMuted
+          DshStatus.Success -> DshTheme.colors.success
+          DshStatus.Warning -> DshTheme.colors.warning
+          DshStatus.Danger -> DshTheme.colors.danger
+          DshStatus.Neutral -> DshTheme.colors.textMuted
         },
       tab = spec.tab,
       settingsRoute = spec.settingsRoute,
@@ -1175,7 +1175,7 @@ internal data class OverviewMetricCardSpec(
   val value: String,
   val subtitle: String,
   val icon: ImageVector,
-  val status: ClawStatus,
+  val status: DshStatus,
   val tab: Tab,
   val settingsRoute: SettingsRoute? = null,
   val progressFraction: Float? = null,
@@ -1208,9 +1208,9 @@ internal fun overviewMetricCardSpecs(
       icon = Icons.Default.Favorite,
       status =
         when {
-          !isConnected -> ClawStatus.Neutral
-          hasAttention -> ClawStatus.Warning
-          else -> ClawStatus.Success
+          !isConnected -> DshStatus.Neutral
+          hasAttention -> DshStatus.Warning
+          else -> DshStatus.Success
         },
       tab = Tab.Settings,
       settingsRoute = SettingsRoute.Gateway,
@@ -1232,9 +1232,9 @@ internal fun overviewMetricCardSpecs(
       icon = Icons.Default.Cloud,
       status =
         when {
-          nodesDevicesSummary.pendingDevices.isNotEmpty() || nodesDevicesSummary.hasNodeCapabilityApprovalPending() -> ClawStatus.Warning
-          onlineNodes > 0 -> ClawStatus.Success
-          else -> ClawStatus.Neutral
+          nodesDevicesSummary.pendingDevices.isNotEmpty() || nodesDevicesSummary.hasNodeCapabilityApprovalPending() -> DshStatus.Warning
+          onlineNodes > 0 -> DshStatus.Success
+          else -> DshStatus.Neutral
         },
       tab = Tab.Settings,
       settingsRoute = SettingsRoute.NodesDevices,
@@ -1245,7 +1245,7 @@ internal fun overviewMetricCardSpecs(
       value = pendingApprovals.toString(),
       subtitle = approvalsSummary(pendingApprovals),
       icon = Icons.Default.Security,
-      status = if (pendingApprovals > 0) ClawStatus.Warning else ClawStatus.Neutral,
+      status = if (pendingApprovals > 0) DshStatus.Warning else DshStatus.Neutral,
       tab = Tab.Settings,
       settingsRoute = SettingsRoute.Approvals,
     ),
@@ -1254,7 +1254,7 @@ internal fun overviewMetricCardSpecs(
       value = sessionCount.toString(),
       subtitle = if (sessionCount == 0) nativeString("No recent threads") else nativeString("Recent conversations"),
       icon = Icons.Default.Groups,
-      status = if (sessionCount > 0) ClawStatus.Success else ClawStatus.Neutral,
+      status = if (sessionCount > 0) DshStatus.Success else DshStatus.Neutral,
       tab = Tab.Sessions,
     ),
     OverviewMetricCardSpec(
@@ -1262,7 +1262,7 @@ internal fun overviewMetricCardSpecs(
       value = if (isConnected) nativeString("Browse") else nativeString("Offline"),
       subtitle = nativeString("Agent workspace files"),
       icon = Icons.Outlined.Folder,
-      status = if (isConnected) ClawStatus.Success else ClawStatus.Neutral,
+      status = if (isConnected) DshStatus.Success else DshStatus.Neutral,
       tab = Tab.Files,
     ),
   )
@@ -1447,7 +1447,7 @@ private fun HomeAttentionPanel(
 ) {
   OverviewLayeredPanel(contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text(text = nativeString("Needs attention"), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.warning)
+      Text(text = nativeString("Needs attention"), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.warning)
       rows.forEach { row ->
         ModuleListRow(
           row = ModuleRow(row.title, row.subtitle, row.icon, row.tab, row.settingsRoute),
@@ -1478,8 +1478,8 @@ private fun SectionLabel(
   ) {
     Text(
       text = localizedUppercase(localizedTitle, currentAppLanguage().languageTag),
-      style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+      color = DshTheme.colors.textMuted,
     )
     action?.invoke()
   }
@@ -1491,36 +1491,36 @@ private fun ModuleListRow(
   onClick: () -> Unit,
 ) {
   val localizedTitle = nativeString(row.title)
-  Surface(color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier =
         Modifier
           .fillMaxWidth()
           .heightIn(min = 54.dp)
-          .clip(RoundedCornerShape(ClawTheme.radii.row))
+          .clip(RoundedCornerShape(DshTheme.radii.row))
           .clickable(onClick = onClick)
           .padding(horizontal = 0.dp, vertical = 6.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-      Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = ClawTheme.colors.text)
+      Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = DshTheme.colors.text)
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
         Text(
           text = localizedTitle,
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.text,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.text,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         row.subtitle?.let {
-          Text(text = nativeString(it), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Text(text = nativeString(it), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
       }
       Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = settingsRowDisclosureDescription(localizedTitle, opensRoute = true),
         modifier = Modifier.size(17.dp),
-        tint = ClawTheme.colors.textMuted,
+        tint = DshTheme.colors.textMuted,
       )
     }
   }
@@ -1585,7 +1585,7 @@ private fun RecentSessionList(
           onClick = { onOpen(row.key, row.ownerAgentId) },
         )
         if (index != rows.lastIndex) {
-          HorizontalDivider(color = ClawTheme.colors.border.copy(alpha = 0.48f), thickness = 1.dp)
+          HorizontalDivider(color = DshTheme.colors.border.copy(alpha = 0.48f), thickness = 1.dp)
         }
       }
     }
@@ -1599,13 +1599,13 @@ private fun RecentSessionRowContent(
   metadata: String,
   onClick: () -> Unit,
 ) {
-  Surface(color = Color.Transparent, contentColor = ClawTheme.colors.text) {
+  Surface(color = Color.Transparent, contentColor = DshTheme.colors.text) {
     Row(
       modifier =
         Modifier
           .fillMaxWidth()
           .heightIn(min = overviewListRowMinHeight)
-          .clip(RoundedCornerShape(ClawTheme.radii.row))
+          .clip(RoundedCornerShape(DshTheme.radii.row))
           .clickable(onClick = onClick)
           .padding(horizontal = 0.dp, vertical = 5.dp),
       verticalAlignment = Alignment.CenterVertically,
@@ -1614,23 +1614,23 @@ private fun RecentSessionRowContent(
       Surface(
         modifier = Modifier.size(30.dp),
         shape = CircleShape,
-        color = ClawTheme.colors.canvas,
-        border = BorderStroke(1.dp, ClawTheme.colors.border.copy(alpha = 0.7f)),
+        color = DshTheme.colors.canvas,
+        border = BorderStroke(1.dp, DshTheme.colors.border.copy(alpha = 0.7f)),
       ) {
         Box(contentAlignment = Alignment.Center) {
-          Icon(imageVector = Icons.Outlined.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(14.dp), tint = ClawTheme.colors.text)
+          Icon(imageVector = Icons.Outlined.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(14.dp), tint = DshTheme.colors.text)
         }
       }
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-        Text(text = title, style = ClawTheme.type.body, color = ClawTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = source, style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = title, style = DshTheme.type.body, color = DshTheme.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = source, style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textSubtle, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
-      Text(text = metadata, style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted)
+      Text(text = metadata, style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted)
       Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = nativeString("Open thread"),
         modifier = Modifier.size(14.dp),
-        tint = ClawTheme.colors.textMuted,
+        tint = DshTheme.colors.textMuted,
       )
     }
   }
@@ -1643,7 +1643,7 @@ private fun VoiceShellScreen(
   onOpenGatewaySettings: () -> Unit,
   onOpenVoiceSettings: () -> Unit,
 ) {
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 0.dp, bottom = 0.dp),
     contentWindowInsets = shellContentInsets,
   ) {
@@ -1717,7 +1717,7 @@ private fun SettingsShellScreen(
   }
   val appLanguage = currentAppLanguage()
 
-  ClawScaffold(
+  DshScaffold(
     contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp),
     contentWindowInsets = shellContentInsets,
   ) {
@@ -1729,15 +1729,15 @@ private fun SettingsShellScreen(
           horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
           if (showSidebarButton) {
-            ClawPlainIconButton(
+            DshPlainIconButton(
               icon = Icons.Default.Menu,
               contentDescription = nativeString("Show Sidebar"),
               onClick = onOpenSidebar,
               modifier = Modifier.testTag("sidebar-open-settings"),
             )
           }
-          Text(text = nativeString("Settings"), style = ClawTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = ClawTheme.colors.text, modifier = Modifier.weight(1f))
-          ClawPlainIconButton(
+          Text(text = nativeString("Settings"), style = DshTheme.type.display.copy(fontSize = 24.sp, lineHeight = 28.sp), color = DshTheme.colors.text, modifier = Modifier.weight(1f))
+          DshPlainIconButton(
             icon = Icons.Default.Search,
             contentDescription = nativeString("Search settings"),
             onClick = onOpenCommand,
@@ -1854,14 +1854,14 @@ private fun SettingsShellScreen(
           horizontalAlignment = Alignment.CenterHorizontally,
           verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
-          Text(text = nativeString("DeepSeekHarness \${BuildConfig.VERSION_NAME} (\${BuildConfig.VERSION_CODE})", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("DeepSeekHarness \${BuildConfig.VERSION_NAME} (\${BuildConfig.VERSION_CODE})", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted)
           Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = if (isConnected) nativeString("All systems operational") else nativeString("Gateway not connected"),
-              style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
-              color = ClawTheme.colors.textSubtle,
+              style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp),
+              color = DshTheme.colors.textSubtle,
             )
-            Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (isConnected) ClawTheme.colors.success else ClawTheme.colors.textSubtle))
+            Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (isConnected) DshTheme.colors.success else DshTheme.colors.textSubtle))
           }
         }
       }
@@ -2077,8 +2077,8 @@ private fun SettingsSectionTitle(title: NativeText) {
   val localizedTitle = title.resolveNativeTextResource()
   Text(
     text = localizedUppercase(localizedTitle, currentAppLanguage().languageTag),
-    style = ClawTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp),
-    color = ClawTheme.colors.textMuted,
+    style = DshTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp),
+    color = DshTheme.colors.textMuted,
   )
 }
 
@@ -2087,12 +2087,12 @@ private fun ProfilePanel(
   displayName: String,
   onClick: () -> Unit,
 ) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
     Row(
       modifier =
         Modifier
           .fillMaxWidth()
-          .clip(RoundedCornerShape(ClawTheme.radii.row))
+          .clip(RoundedCornerShape(DshTheme.radii.row))
           .clickable(onClick = onClick),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -2100,28 +2100,28 @@ private fun ProfilePanel(
       Surface(
         modifier = Modifier.size(32.dp),
         shape = CircleShape,
-        color = ClawTheme.colors.surfacePressed,
-        border = BorderStroke(1.dp, ClawTheme.colors.borderStrong),
+        color = DshTheme.colors.surfacePressed,
+        border = BorderStroke(1.dp, DshTheme.colors.borderStrong),
       ) {
         Box(contentAlignment = Alignment.Center) {
           Text(
             text =
               localizedInitial(displayName, currentAppLanguage().languageTag) ?: "O",
-            style = ClawTheme.type.title.copy(fontSize = 14.sp, lineHeight = 17.sp),
-            color = ClawTheme.colors.text,
+            style = DshTheme.type.title.copy(fontSize = 14.sp, lineHeight = 17.sp),
+            color = DshTheme.colors.text,
             textAlign = TextAlign.Center,
           )
         }
       }
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = displayName, style = ClawTheme.type.section, color = ClawTheme.colors.text, maxLines = 1)
-        Text(text = nativeString("DeepSeekHarness mobile"), style = ClawTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = ClawTheme.colors.textMuted, maxLines = 1)
+        Text(text = displayName, style = DshTheme.type.section, color = DshTheme.colors.text, maxLines = 1)
+        Text(text = nativeString("DeepSeekHarness mobile"), style = DshTheme.type.caption.copy(fontSize = 12.5.sp, lineHeight = 16.sp), color = DshTheme.colors.textMuted, maxLines = 1)
       }
       Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = nativeString("Open profile"),
         modifier = Modifier.size(15.dp),
-        tint = ClawTheme.colors.text,
+        tint = DshTheme.colors.text,
       )
     }
   }
@@ -2133,7 +2133,7 @@ private fun SettingsGroup(
   onOpen: (SettingsRoute) -> Unit,
   onAction: (() -> Unit)? = null,
 ) {
-  ClawPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
     Column {
       rows.forEachIndexed { index, row ->
         SettingsListRow(
@@ -2149,7 +2149,7 @@ private fun SettingsGroup(
           },
         )
         if (index != rows.lastIndex) {
-          HorizontalDivider(color = ClawTheme.colors.border.copy(alpha = 0.82f), thickness = 1.dp)
+          HorizontalDivider(color = DshTheme.colors.border.copy(alpha = 0.82f), thickness = 1.dp)
         }
       }
     }
@@ -2169,27 +2169,27 @@ private fun SettingsListRow(
       Modifier
         .fillMaxWidth()
         .heightIn(min = 54.dp)
-        .clip(RoundedCornerShape(ClawTheme.radii.row))
+        .clip(RoundedCornerShape(DshTheme.radii.row))
         .clickable(onClick = onClick)
         .padding(horizontal = 0.dp, vertical = 7.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(10.dp),
   ) {
-    Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = ClawTheme.colors.text)
-    Text(text = localizedTitle, style = ClawTheme.type.body, color = ClawTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1)
+    Icon(imageVector = row.icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = DshTheme.colors.text)
+    Text(text = localizedTitle, style = DshTheme.type.body, color = DshTheme.colors.text, modifier = Modifier.weight(1f), maxLines = 1)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
       if (localizedValue.isNotBlank()) {
-        Text(text = localizedValue, style = ClawTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = ClawTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = localizedValue, style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = DshTheme.colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
       }
       row.status?.let { active ->
-        Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (active) ClawTheme.colors.success else ClawTheme.colors.textSubtle))
+        Box(modifier = Modifier.size(4.5.dp).clip(CircleShape).background(if (active) DshTheme.colors.success else DshTheme.colors.textSubtle))
       }
       if (showDisclosure) {
         Icon(
           imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
           contentDescription = settingsRowDisclosureDescription(localizedTitle, opensRoute = row.route != null),
           modifier = Modifier.size(17.dp),
-          tint = ClawTheme.colors.text,
+          tint = DshTheme.colors.text,
         )
       }
     }

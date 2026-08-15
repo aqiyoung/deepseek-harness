@@ -1,27 +1,27 @@
 package ai.deepseek.harness.ui
 
-import ai.deepseek.harness.CLAWHUB_SKILL_GATEWAY_UNAVAILABLE
-import ai.deepseek.harness.GatewayClawHubInstallReview
-import ai.deepseek.harness.GatewayClawHubSkillSearchState
-import ai.deepseek.harness.GatewayClawHubSkillSummary
+import ai.deepseek.harness.DSHHUB_SKILL_GATEWAY_UNAVAILABLE
+import ai.deepseek.harness.GatewayDshHubInstallReview
+import ai.deepseek.harness.GatewayDshHubSkillSearchState
+import ai.deepseek.harness.GatewayDshHubSkillSummary
 import ai.deepseek.harness.GatewaySkillSummary
 import ai.deepseek.harness.MainViewModel
 import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.isClawHubSkillInstalled
-import ai.deepseek.harness.isClawHubSkillOperationActive
-import ai.deepseek.harness.ui.design.ClawDetailRow
-import ai.deepseek.harness.ui.design.ClawIconButton
-import ai.deepseek.harness.ui.design.ClawListPanel
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawPill
-import ai.deepseek.harness.ui.design.ClawPrimaryButton
-import ai.deepseek.harness.ui.design.ClawSecondaryButton
-import ai.deepseek.harness.ui.design.ClawSegmentedControl
-import ai.deepseek.harness.ui.design.ClawStatus
-import ai.deepseek.harness.ui.design.ClawStatusPill
-import ai.deepseek.harness.ui.design.ClawTextBadge
-import ai.deepseek.harness.ui.design.ClawTextField
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.isDshHubSkillInstalled
+import ai.deepseek.harness.isDshHubSkillOperationActive
+import ai.deepseek.harness.ui.design.DshDetailRow
+import ai.deepseek.harness.ui.design.DshIconButton
+import ai.deepseek.harness.ui.design.DshListPanel
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshPill
+import ai.deepseek.harness.ui.design.DshPrimaryButton
+import ai.deepseek.harness.ui.design.DshSecondaryButton
+import ai.deepseek.harness.ui.design.DshSegmentedControl
+import ai.deepseek.harness.ui.design.DshStatus
+import ai.deepseek.harness.ui.design.DshStatusPill
+import ai.deepseek.harness.ui.design.DshTextBadge
+import ai.deepseek.harness.ui.design.DshTextField
+import ai.deepseek.harness.ui.design.DshTheme
 import ai.deepseek.harness.uppercaseFirstGraphemeOrNull
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -86,8 +86,8 @@ internal fun SkillsSettingsScreen(
   val skillsRefreshing by viewModel.skillsRefreshing.collectAsState()
   val skillsErrorText by viewModel.skillsErrorText.collectAsState()
   val skillMutationKeys by viewModel.skillMutationKeys.collectAsState()
-  val clawHubState by viewModel.clawHubSkillSearchState.collectAsState()
-  val clawHubMethodsAvailable by viewModel.clawHubSkillMethodsAvailable.collectAsState()
+  val dshHubState by viewModel.dshHubSkillSearchState.collectAsState()
+  val dshHubMethodsAvailable by viewModel.dshHubSkillMethodsAvailable.collectAsState()
   val isConnected by viewModel.isConnected.collectAsState()
   val operatorAdminScopeAvailable by viewModel.operatorAdminScopeAvailable.collectAsState()
   val canManageSkills = isConnected && operatorAdminScopeAvailable
@@ -99,7 +99,7 @@ internal fun SkillsSettingsScreen(
   var selectedTabName by rememberSaveable { mutableStateOf(SkillsTab.Installed.name) }
   var installedSearch by rememberSaveable { mutableStateOf("") }
   var installedFilterName by rememberSaveable { mutableStateOf(InstalledSkillFilter.All.name) }
-  var clawHubQuery by rememberSaveable { mutableStateOf("") }
+  var dshHubQuery by rememberSaveable { mutableStateOf("") }
   val selectedTab = SkillsTab.entries.firstOrNull { it.name == selectedTabName } ?: SkillsTab.Installed
   val installedFilter =
     InstalledSkillFilter.entries.firstOrNull { it.name == installedFilterName }
@@ -131,7 +131,7 @@ internal fun SkillsSettingsScreen(
 
   SettingsDetailFrame(
     title = nativeString("Skills"),
-    subtitle = nativeString("Manage installed skills and add trusted releases from ClawHub."),
+    subtitle = nativeString("Manage installed skills and add trusted releases from DshHub."),
     icon = Icons.Default.Settings,
     onBack = onBack,
   ) {
@@ -146,7 +146,7 @@ internal fun SkillsSettingsScreen(
     )
     val installedTabLabel = nativeString("Installed")
     val browseTabLabel = nativeString("Browse")
-    ClawSegmentedControl(
+    DshSegmentedControl(
       options = listOf(installedTabLabel, browseTabLabel),
       selected = if (selectedTab == SkillsTab.Installed) installedTabLabel else browseTabLabel,
       onSelect = { selected ->
@@ -156,16 +156,16 @@ internal fun SkillsSettingsScreen(
       modifier = Modifier.fillMaxWidth(),
     )
     skillsErrorText?.let { errorText ->
-      ClawPanel {
-        Text(text = errorText, style = ClawTheme.type.body, color = ClawTheme.colors.warning)
+      DshPanel {
+        Text(text = errorText, style = DshTheme.type.body, color = DshTheme.colors.warning)
       }
     }
     if (isConnected && !operatorAdminScopeAvailable) {
-      ClawPanel {
+      DshPanel {
         Text(
           text = nativeString("Skill changes require operator.admin. Reconnect with an admin-capable gateway token."),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.warning,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.warning,
         )
       }
     }
@@ -185,31 +185,31 @@ internal fun SkillsSettingsScreen(
           onSkillEnabledChange = viewModel::setSkillEnabled,
         )
       SkillsTab.Browse ->
-        ClawHubSkillSearchPanel(
-          state = clawHubState,
+        DshHubSkillSearchPanel(
+          state = dshHubState,
           installedSkills = skills,
-          query = clawHubQuery,
+          query = dshHubQuery,
           isConnected = isConnected,
-          methodsAvailable = clawHubMethodsAvailable,
+          methodsAvailable = dshHubMethodsAvailable,
           canManageSkills = canManageSkills,
-          onQueryChange = { clawHubQuery = it },
-          onSearch = { viewModel.searchClawHubSkills(clawHubQuery) },
-          onReviewInstall = viewModel::reviewClawHubSkillInstall,
+          onQueryChange = { dshHubQuery = it },
+          onSearch = { viewModel.searchDshHubSkills(dshHubQuery) },
+          onReviewInstall = viewModel::reviewDshHubSkillInstall,
           onAcknowledgeInstall = { slug, version ->
-            viewModel.installClawHubSkill(slug, acknowledgeClawHubRisk = true, version = version)
+            viewModel.installDshHubSkill(slug, acknowledgeDshHubRisk = true, version = version)
           },
-          onClearMessage = viewModel::clearClawHubSkillMessage,
+          onClearMessage = viewModel::clearDshHubSkillMessage,
         )
     }
   }
-  clawHubState.installReview?.let { review ->
-    ClawHubInstallReviewDialog(
+  dshHubState.installReview?.let { review ->
+    DshHubInstallReviewDialog(
       review = review,
-      canInstall = canManageSkills && clawHubMethodsAvailable && review.slug !in clawHubState.installingSlugs,
-      onDismiss = viewModel::dismissClawHubSkillInstallReview,
+      canInstall = canManageSkills && dshHubMethodsAvailable && review.slug !in dshHubState.installingSlugs,
+      onDismiss = viewModel::dismissDshHubSkillInstallReview,
       onInstall = {
-        viewModel.dismissClawHubSkillInstallReview()
-        viewModel.installClawHubSkill(review.slug, version = review.version)
+        viewModel.dismissDshHubSkillInstallReview()
+        viewModel.installDshHubSkill(review.slug, version = review.version)
       },
     )
   }
@@ -264,7 +264,7 @@ private fun SkillsOverviewPanel(
   canRefresh: Boolean,
   onRefresh: () -> Unit,
 ) {
-  ClawPanel(contentPadding = PaddingValues(14.dp)) {
+  DshPanel(contentPadding = PaddingValues(14.dp)) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -272,10 +272,10 @@ private fun SkillsOverviewPanel(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
       ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-          Text(text = installedCount.toString(), style = ClawTheme.type.display, color = ClawTheme.colors.text)
-          Text(text = nativeString("Installed"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+          Text(text = installedCount.toString(), style = DshTheme.type.display, color = DshTheme.colors.text)
+          Text(text = nativeString("Installed"), style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
         }
-        ClawIconButton(
+        DshIconButton(
           icon = Icons.Default.Refresh,
           contentDescription = if (refreshing) nativeString("Refreshing") else nativeString("Refresh"),
           onClick = onRefresh,
@@ -291,19 +291,19 @@ private fun SkillsOverviewPanel(
         SkillCountLegend(
           label = nativeString("Ready"),
           count = readyCount,
-          color = ClawTheme.colors.success,
+          color = DshTheme.colors.success,
           modifier = Modifier.weight(1f),
         )
         SkillCountLegend(
           label = nativeString("Needs Setup"),
           count = needsSetupCount,
-          color = ClawTheme.colors.warning,
+          color = DshTheme.colors.warning,
           modifier = Modifier.weight(1f),
         )
         SkillCountLegend(
           label = nativeString("Off"),
           count = disabledCount,
-          color = ClawTheme.colors.textSubtle,
+          color = DshTheme.colors.textSubtle,
           modifier = Modifier.weight(1f),
         )
       }
@@ -323,18 +323,18 @@ private fun SkillDistributionBar(
       Modifier
         .fillMaxWidth()
         .height(6.dp)
-        .clip(RoundedCornerShape(ClawTheme.radii.pill))
-        .background(ClawTheme.colors.surfacePressed),
+        .clip(RoundedCornerShape(DshTheme.radii.pill))
+        .background(DshTheme.colors.surfacePressed),
   ) {
     if (total > 0) {
       if (readyCount > 0) {
-        Box(modifier = Modifier.weight(readyCount.toFloat()).fillMaxHeight().background(ClawTheme.colors.success))
+        Box(modifier = Modifier.weight(readyCount.toFloat()).fillMaxHeight().background(DshTheme.colors.success))
       }
       if (needsSetupCount > 0) {
-        Box(modifier = Modifier.weight(needsSetupCount.toFloat()).fillMaxHeight().background(ClawTheme.colors.warning))
+        Box(modifier = Modifier.weight(needsSetupCount.toFloat()).fillMaxHeight().background(DshTheme.colors.warning))
       }
       if (disabledCount > 0) {
-        Box(modifier = Modifier.weight(disabledCount.toFloat()).fillMaxHeight().background(ClawTheme.colors.textSubtle))
+        Box(modifier = Modifier.weight(disabledCount.toFloat()).fillMaxHeight().background(DshTheme.colors.textSubtle))
       }
     }
   }
@@ -350,9 +350,9 @@ private fun SkillCountLegend(
   Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
       Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
-      Text(text = label, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted, maxLines = 1)
+      Text(text = label, style = DshTheme.type.caption, color = DshTheme.colors.textMuted, maxLines = 1)
     }
-    Text(text = count.toString(), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+    Text(text = count.toString(), style = DshTheme.type.section, color = DshTheme.colors.text)
   }
 }
 
@@ -370,15 +370,15 @@ private fun InstalledSkillsPane(
   onSkillClick: (GatewaySkillSummary) -> Unit,
   onSkillEnabledChange: (String, Boolean) -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-      ClawTextField(value = query, onValueChange = onQueryChange, placeholder = nativeString("Search installed skills"))
+      DshTextField(value = query, onValueChange = onQueryChange, placeholder = nativeString("Search installed skills"))
       Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
       ) {
         InstalledSkillFilter.entries.forEach { option ->
-          ClawPill(
+          DshPill(
             text = installedSkillFilterLabel(option),
             selected = option == filter,
             onClick = { onFilterChange(option) },
@@ -389,19 +389,19 @@ private fun InstalledSkillsPane(
   }
   when {
     !isConnected ->
-      ClawPanel {
-        Text(text = nativeString("Connect the gateway to load skills."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = nativeString("Connect the gateway to load skills."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
     skills.isEmpty() ->
-      ClawPanel {
+      DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-          Text(text = nativeString("No skills installed."), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-          Text(text = nativeString("Skills installed on the gateway will appear here."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = nativeString("No skills installed."), style = DshTheme.type.section, color = DshTheme.colors.text)
+          Text(text = nativeString("Skills installed on the gateway will appear here."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
       }
     visibleSkills.isEmpty() ->
-      ClawPanel {
-        Text(text = nativeString("No installed skills match this search."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      DshPanel {
+        Text(text = nativeString("No installed skills match this search."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
     else ->
       SkillsPanel(
@@ -421,18 +421,18 @@ private fun SkillSwitchPanel(
   isMutating: Boolean,
   onSkillEnabledChange: (String, Boolean) -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = nativeString("Gateway switch"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = nativeString("Gateway switch"), style = DshTheme.type.section, color = DshTheme.colors.text)
         Text(
           text = if (skill.disabled) nativeString("Disabled for all agents.") else nativeString("Enabled for eligible agents."),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.textMuted,
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
         )
       }
       Switch(
@@ -446,10 +446,10 @@ private fun SkillSwitchPanel(
 
 @Composable
 private fun SkillSetupPanel(skill: GatewaySkillSummary) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-      Text(text = nativeString("Setup"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-      Text(text = skillConfigurationText(skill), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      Text(text = nativeString("Setup"), style = DshTheme.type.section, color = DshTheme.colors.text)
+      Text(text = skillConfigurationText(skill), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
   }
 }
@@ -460,14 +460,14 @@ private fun SkillDetailPanel(
   isConnected: Boolean,
 ) {
   if (!isConnected) {
-    ClawPanel {
-      Text(text = nativeString("Connect the gateway to load skill details."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+    DshPanel {
+      Text(text = nativeString("Connect the gateway to load skill details."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
     return
   }
   if (skill == null) {
-    ClawPanel {
-      Text(text = nativeString("Skill detail is not available in the current skills status."), style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+    DshPanel {
+      Text(text = nativeString("Skill detail is not available in the current skills status."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
     }
     return
   }
@@ -481,10 +481,10 @@ private fun SkillDetailPanel(
       ),
   )
   skill.description?.let { description ->
-    ClawPanel {
+    DshPanel {
       Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = nativeString("Description"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
-        Text(text = description, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+        Text(text = nativeString("Description"), style = DshTheme.type.section, color = DshTheme.colors.text)
+        Text(text = description, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       }
     }
   }
@@ -498,7 +498,7 @@ private fun SkillsPanel(
   onSkillClick: (GatewaySkillSummary) -> Unit,
   onSkillEnabledChange: (String, Boolean) -> Unit,
 ) {
-  ClawListPanel(items = skills) { skill ->
+  DshListPanel(items = skills) { skill ->
     SkillListRow(
       skill = skill,
       canManageSkills = canManageSkills,
@@ -517,14 +517,14 @@ private fun SkillListRow(
   onClick: () -> Unit,
   onSkillEnabledChange: (String, Boolean) -> Unit,
 ) {
-  ClawDetailRow(
+  DshDetailRow(
     title = skill.name,
     subtitle = skillSubtitle(skill),
     modifier = Modifier.clickable(onClickLabel = nativeString("Open skill detail"), onClick = onClick),
-    leading = { ClawTextBadge(text = skillBadge(skill)) },
+    leading = { DshTextBadge(text = skillBadge(skill)) },
     trailing = {
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        ClawStatusPill(text = skillStatusText(skill), status = skillStatus(skill))
+        DshStatusPill(text = skillStatusText(skill), status = skillStatus(skill))
         Switch(
           checked = !skill.disabled,
           onCheckedChange = { onSkillEnabledChange(skill.skillKey, it) },
@@ -536,8 +536,8 @@ private fun SkillListRow(
 }
 
 @Composable
-private fun ClawHubSkillSearchPanel(
-  state: GatewayClawHubSkillSearchState,
+private fun DshHubSkillSearchPanel(
+  state: GatewayDshHubSkillSearchState,
   installedSkills: List<GatewaySkillSummary>,
   query: String,
   isConnected: Boolean,
@@ -545,23 +545,23 @@ private fun ClawHubSkillSearchPanel(
   canManageSkills: Boolean,
   onQueryChange: (String) -> Unit,
   onSearch: () -> Unit,
-  onReviewInstall: (GatewayClawHubSkillSummary) -> Unit,
+  onReviewInstall: (GatewayDshHubSkillSummary) -> Unit,
   onAcknowledgeInstall: (String, String?) -> Unit,
   onClearMessage: () -> Unit,
 ) {
-  ClawPanel {
+  DshPanel {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      Text(text = nativeString("Find on ClawHub"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
+      Text(text = nativeString("Find on DshHub"), style = DshTheme.type.section, color = DshTheme.colors.text)
       Text(
         text = nativeString("Search registry metadata. The Gateway verifies trust again before any download."),
-        style = ClawTheme.type.body,
-        color = ClawTheme.colors.textMuted,
+        style = DshTheme.type.body,
+        color = DshTheme.colors.textMuted,
       )
       if (isConnected && !methodsAvailable) {
         Text(
-          text = nativeString(CLAWHUB_SKILL_GATEWAY_UNAVAILABLE),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.warning,
+          text = nativeString(DSHHUB_SKILL_GATEWAY_UNAVAILABLE),
+          style = DshTheme.type.body,
+          color = DshTheme.colors.warning,
         )
       }
       Row(
@@ -569,13 +569,13 @@ private fun ClawHubSkillSearchPanel(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
-        ClawTextField(
+        DshTextField(
           value = query,
           onValueChange = onQueryChange,
-          placeholder = nativeString("Search ClawHub"),
+          placeholder = nativeString("Search DshHub"),
           modifier = Modifier.weight(1f),
         )
-        ClawIconButton(
+        DshIconButton(
           icon = Icons.Default.Search,
           contentDescription = if (state.searching) nativeString("Searching") else nativeString("Search"),
           onClick = onSearch,
@@ -585,7 +585,7 @@ private fun ClawHubSkillSearchPanel(
     }
   }
   if (state.errorText != null || state.messageText != null) {
-    ClawHubNoticeCard(
+    DshHubNoticeCard(
       errorText = state.errorText,
       messageText = state.messageText,
       acknowledgeSlug = state.acknowledgeSlug,
@@ -597,24 +597,24 @@ private fun ClawHubSkillSearchPanel(
     )
   }
   if (state.results.isNotEmpty()) {
-    ClawListPanel(items = state.results) { skill ->
+    DshListPanel(items = state.results) { skill ->
       val installed =
-        skill.version?.let { version -> isClawHubSkillInstalled(installedSkills, skill.reference, version) }
-          ?: isClawHubSkillInstalled(installedSkills, skill.reference)
+        skill.version?.let { version -> isDshHubSkillInstalled(installedSkills, skill.reference, version) }
+          ?: isDshHubSkillInstalled(installedSkills, skill.reference)
       val subtitleParts =
         listOfNotNull(
           skill.summary,
           skill.reference,
           skill.version?.let { nativeString("Version \$it", it) },
         )
-      ClawDetailRow(
+      DshDetailRow(
         title = skill.displayName,
         subtitle = subtitleParts.joinToString(" · "),
-        leading = { ClawTextBadge(text = skillBadge(skill.displayName)) },
+        leading = { DshTextBadge(text = skillBadge(skill.displayName)) },
         trailing = {
           val reviewing = state.reviewingSlug == skill.reference
-          val installing = isClawHubSkillOperationActive(state.installingSlugs, skill.reference)
-          ClawSecondaryButton(
+          val installing = isDshHubSkillOperationActive(state.installingSlugs, skill.reference)
+          DshSecondaryButton(
             text =
               when {
                 installed -> nativeString("Installed")
@@ -632,7 +632,7 @@ private fun ClawHubSkillSearchPanel(
 }
 
 @Composable
-private fun ClawHubNoticeCard(
+private fun DshHubNoticeCard(
   errorText: String?,
   messageText: String?,
   acknowledgeSlug: String?,
@@ -645,14 +645,14 @@ private fun ClawHubNoticeCard(
   val requiresAcknowledgement = acknowledgeSlug != null
   val status =
     when {
-      requiresAcknowledgement -> ClawStatus.Warning
-      errorText != null -> ClawStatus.Danger
-      else -> ClawStatus.Success
+      requiresAcknowledgement -> DshStatus.Warning
+      errorText != null -> DshStatus.Danger
+      else -> DshStatus.Success
     }
   val rawText = errorText ?: messageText.orEmpty()
   val summary =
     if (requiresAcknowledgement) {
-      nativeString("The Gateway will verify this exact release with ClawHub before download. If the release needs explicit risk acknowledgement, Android will show the Gateway warning before retrying.")
+      nativeString("The Gateway will verify this exact release with DshHub before download. If the release needs explicit risk acknowledgement, Android will show the Gateway warning before retrying.")
     } else {
       rawText.substringBefore("\n\n").trim()
     }
@@ -665,17 +665,17 @@ private fun ClawHubNoticeCard(
   var detailsExpanded by rememberSaveable(rawText) { mutableStateOf(false) }
   val accent =
     when (status) {
-      ClawStatus.Success -> ClawTheme.colors.success
-      ClawStatus.Warning -> ClawTheme.colors.warning
-      ClawStatus.Danger -> ClawTheme.colors.danger
-      ClawStatus.Neutral -> ClawTheme.colors.textSubtle
+      DshStatus.Success -> DshTheme.colors.success
+      DshStatus.Warning -> DshTheme.colors.warning
+      DshStatus.Danger -> DshTheme.colors.danger
+      DshStatus.Neutral -> DshTheme.colors.textSubtle
     }
   val background =
     when (status) {
-      ClawStatus.Success -> ClawTheme.colors.successSoft
-      ClawStatus.Warning -> ClawTheme.colors.warningSoft
-      ClawStatus.Danger -> ClawTheme.colors.dangerSoft
-      ClawStatus.Neutral -> ClawTheme.colors.surfaceRaised
+      DshStatus.Success -> DshTheme.colors.successSoft
+      DshStatus.Warning -> DshTheme.colors.warningSoft
+      DshStatus.Danger -> DshTheme.colors.dangerSoft
+      DshStatus.Neutral -> DshTheme.colors.surfaceRaised
     }
   val title =
     when {
@@ -686,7 +686,7 @@ private fun ClawHubNoticeCard(
 
   Surface(
     modifier = Modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(ClawTheme.radii.panel),
+    shape = RoundedCornerShape(DshTheme.radii.panel),
     color = background,
     border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
   ) {
@@ -697,39 +697,39 @@ private fun ClawHubNoticeCard(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(accent))
-        Text(text = title, style = ClawTheme.type.section, color = ClawTheme.colors.text, modifier = Modifier.weight(1f))
+        Text(text = title, style = DshTheme.type.section, color = DshTheme.colors.text, modifier = Modifier.weight(1f))
       }
-      Text(text = summary, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+      Text(text = summary, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
       if (detailsExpanded && details != null) {
         Surface(
           modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(ClawTheme.radii.control),
-          color = ClawTheme.colors.surface.copy(alpha = 0.72f),
+          shape = RoundedCornerShape(DshTheme.radii.control),
+          color = DshTheme.colors.surface.copy(alpha = 0.72f),
         ) {
           Text(
             text = details,
             modifier = Modifier.padding(10.dp),
-            style = ClawTheme.type.mono,
-            color = ClawTheme.colors.textMuted,
+            style = DshTheme.type.mono,
+            color = DshTheme.colors.textMuted,
           )
         }
       }
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (details != null && !detailsExpanded) {
-          ClawSecondaryButton(
+          DshSecondaryButton(
             text = nativeString("Review"),
             onClick = { detailsExpanded = true },
             modifier = Modifier.weight(1f),
           )
         }
-        ClawSecondaryButton(
+        DshSecondaryButton(
           text = nativeString("Dismiss"),
           onClick = onDismiss,
           modifier = Modifier.weight(1f),
         )
       }
       acknowledgeSlug?.let { slug ->
-        ClawPrimaryButton(
+        DshPrimaryButton(
           text = nativeString("Acknowledge Gateway warning and install"),
           onClick = { onAcknowledgeInstall(slug, acknowledgeVersion) },
           enabled = canAcknowledge && slug !in installingSlugs && (details == null || detailsExpanded),
@@ -741,27 +741,27 @@ private fun ClawHubNoticeCard(
 }
 
 @Composable
-private fun ClawHubInstallReviewDialog(
-  review: GatewayClawHubInstallReview,
+private fun DshHubInstallReviewDialog(
+  review: GatewayDshHubInstallReview,
   canInstall: Boolean,
   onDismiss: () -> Unit,
   onInstall: () -> Unit,
 ) {
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text(text = nativeString("Review ClawHub skill")) },
+    title = { Text(text = nativeString("Review DshHub skill")) },
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = review.displayName, style = ClawTheme.type.section, color = ClawTheme.colors.text)
+        Text(text = review.displayName, style = DshTheme.type.section, color = DshTheme.colors.text)
         review.summary?.let {
-          Text(text = it, style = ClawTheme.type.body, color = ClawTheme.colors.textMuted)
+          Text(text = it, style = DshTheme.type.body, color = DshTheme.colors.textMuted)
         }
         ReviewLine(label = nativeString("Version"), value = review.version)
         ReviewLine(label = nativeString("Publisher"), value = review.author)
         Text(
-          text = nativeString("The Gateway will verify this exact release with ClawHub before download. If the release needs explicit risk acknowledgement, Android will show the Gateway warning before retrying."),
-          style = ClawTheme.type.body,
-          color = ClawTheme.colors.textMuted,
+          text = nativeString("The Gateway will verify this exact release with DshHub before download. If the release needs explicit risk acknowledgement, Android will show the Gateway warning before retrying."),
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
         )
       }
     },
@@ -784,8 +784,8 @@ private fun ReviewLine(
   value: String,
 ) {
   Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-    Text(text = label, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
-    Text(text = value, style = ClawTheme.type.body, color = ClawTheme.colors.text)
+    Text(text = label, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
+    Text(text = value, style = DshTheme.type.body, color = DshTheme.colors.text)
   }
 }
 
@@ -838,11 +838,11 @@ private fun skillStatusText(skill: GatewaySkillSummary): String =
     else -> nativeString("Ready")
   }
 
-private fun skillStatus(skill: GatewaySkillSummary): ClawStatus =
+private fun skillStatus(skill: GatewaySkillSummary): DshStatus =
   when {
-    skill.disabled -> ClawStatus.Neutral
-    skillNeedsSetup(skill) -> ClawStatus.Warning
-    else -> ClawStatus.Success
+    skill.disabled -> DshStatus.Neutral
+    skillNeedsSetup(skill) -> DshStatus.Warning
+    else -> DshStatus.Success
   }
 
 private fun skillSubtitle(skill: GatewaySkillSummary): String {

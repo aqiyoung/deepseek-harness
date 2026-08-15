@@ -3,7 +3,7 @@ package ai.deepseek.harness.ui.chat
 import ai.deepseek.harness.chat.ChatSessionEntry
 import ai.deepseek.harness.i18n.nativeString
 import ai.deepseek.harness.i18n.nativeStringResource
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,7 +46,7 @@ private data class TurnRecapWatch(
   /** False until a session row was observed; without a baseline, a later terminal is ambiguous. */
   var baselineKnown: Boolean,
   var baselineEndedAt: Long?,
-  /** A stamp changed while the claw was still up, so later stamps cannot be attributed safely. */
+  /** A stamp changed while the dsh was still up, so later stamps cannot be attributed safely. */
   var absorbedTerminal: Boolean,
   /** First idle render after the indicator cleared; canceled queued sends must expire promptly. */
   var settleStartedAt: Long?,
@@ -225,15 +225,15 @@ internal fun ChatTurnRecapRow(recap: TurnRecap) {
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(7.dp),
   ) {
-    WorkingClawIcon(runKey = "turn-recap", color = ClawTheme.colors.primary, parked = true)
+    WorkingDshIcon(runKey = "turn-recap", color = DshTheme.colors.primary, parked = true)
     Text(
       text = nativeStringResource("Done in \$duration", duration),
-      style = ClawTheme.type.caption,
-      color = ClawTheme.colors.textMuted,
+      style = DshTheme.type.caption,
+      color = DshTheme.colors.textMuted,
     )
     tokens?.let {
-      Text(text = nativeStringResource("·"), style = ClawTheme.type.caption, color = ClawTheme.colors.textSubtle)
-      Text(text = it, style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
+      Text(text = nativeStringResource("·"), style = DshTheme.type.caption, color = DshTheme.colors.textSubtle)
+      Text(text = it, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
     }
   }
 }

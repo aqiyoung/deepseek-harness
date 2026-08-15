@@ -1,8 +1,8 @@
 package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.R
-import ai.deepseek.harness.ui.design.ClawPanel
-import ai.deepseek.harness.ui.design.ClawTheme
+import ai.deepseek.harness.ui.design.DshPanel
+import ai.deepseek.harness.ui.design.DshTheme
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -177,7 +177,7 @@ internal fun AboutBuildIdentityPanel(
       ),
     )
 
-  ClawPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)) {
+  DshPanel(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
       val wraps = maxWidth < 260.dp || LocalDensity.current.fontScale >= 1.3f
       if (wraps) {
@@ -229,20 +229,20 @@ private fun AboutBuildIdentityCell(
   ) {
     Text(
       text = cell.title,
-      style = ClawTheme.type.caption.copy(fontSize = 11.sp, lineHeight = 14.sp),
-      color = ClawTheme.colors.textSubtle,
+      style = DshTheme.type.caption.copy(fontSize = 11.sp, lineHeight = 14.sp),
+      color = DshTheme.colors.textSubtle,
       textAlign = TextAlign.Center,
     )
     Text(
       text = cell.value,
       style =
-        ClawTheme.type.caption.copy(
-          fontFamily = if (cell.monospace) FontFamily.Monospace else ClawTheme.type.caption.fontFamily,
+        DshTheme.type.caption.copy(
+          fontFamily = if (cell.monospace) FontFamily.Monospace else DshTheme.type.caption.fontFamily,
           fontSize = 12.5.sp,
           lineHeight = 17.sp,
-          textDirection = if (cell.forceLeftToRight) TextDirection.Ltr else ClawTheme.type.caption.textDirection,
+          textDirection = if (cell.forceLeftToRight) TextDirection.Ltr else DshTheme.type.caption.textDirection,
         ),
-      color = if (cell.onClick == null) ClawTheme.colors.text else ClawTheme.colors.primary,
+      color = if (cell.onClick == null) DshTheme.colors.text else DshTheme.colors.primary,
       modifier = Modifier.fillMaxWidth(),
       textAlign = TextAlign.Center,
     )
