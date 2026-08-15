@@ -90,10 +90,10 @@ val invocationBuildTimestamp =
   providers.provider { buildTimestampFormatter.format(Instant.now()) }.get()
 val dshBuildTimestamp = explicitDeepSeekHarnessBuildTimestamp ?: invocationBuildTimestamp
 
-val androidStoreFile = providers.gradleProperty("DSH_ANDROID_STORE_FILE").orNull?.takeIf { it.isNotBlank() }
-val androidStorePassword = providers.gradleProperty("DSH_ANDROID_STORE_PASSWORD").orNull?.takeIf { it.isNotBlank() }
-val androidKeyAlias = providers.gradleProperty("DSH_ANDROID_KEY_ALIAS").orNull?.takeIf { it.isNotBlank() }
-val androidKeyPassword = providers.gradleProperty("DSH_ANDROID_KEY_PASSWORD").orNull?.takeIf { it.isNotBlank() }
+val androidStoreFile = providers.gradleProperty("OPENCLAW_ANDROID_STORE_FILE").orNull?.takeIf { it.isNotBlank() }
+val androidStorePassword = providers.gradleProperty("OPENCLAW_ANDROID_STORE_PASSWORD").orNull?.takeIf { it.isNotBlank() }
+val androidKeyAlias = providers.gradleProperty("OPENCLAW_ANDROID_KEY_ALIAS").orNull?.takeIf { it.isNotBlank() }
+val androidKeyPassword = providers.gradleProperty("OPENCLAW_ANDROID_KEY_PASSWORD").orNull?.takeIf { it.isNotBlank() }
 val resolvedAndroidStoreFile =
   androidStoreFile?.let { storeFilePath ->
     if (storeFilePath.startsWith("~/")) {
@@ -116,9 +116,9 @@ val missingAndroidBuildMetadata =
 
 if (wantsAndroidReleaseBuild && !hasAndroidReleaseSigning) {
   error(
-    "Missing Android release signing properties. Set DSH_ANDROID_STORE_FILE, " +
-      "DSH_ANDROID_STORE_PASSWORD, DSH_ANDROID_KEY_ALIAS, and " +
-      "DSH_ANDROID_KEY_PASSWORD in ~/.gradle/gradle.properties.",
+    "Missing Android release signing properties. Set OPENCLAW_ANDROID_STORE_FILE, " +
+      "OPENCLAW_ANDROID_STORE_PASSWORD, OPENCLAW_ANDROID_KEY_ALIAS, and " +
+      "OPENCLAW_ANDROID_KEY_PASSWORD in ~/.gradle/gradle.properties.",
   )
 }
 
