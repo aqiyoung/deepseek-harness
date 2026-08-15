@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="ask_openclaw_query_patterns">
+    <string-array name="ask_deepseek_harness_query_patterns">
         <item>ask DeepSeekHarness $prompt</item>
         <item>tell DeepSeekHarness to $prompt</item>
         <item>open DeepSeekHarness and ask $prompt</item>

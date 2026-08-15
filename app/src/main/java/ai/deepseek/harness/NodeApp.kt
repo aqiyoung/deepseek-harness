@@ -2,10 +2,6 @@ package ai.deepseek.harness
 
 import ai.deepseek.harness.i18n.NativeStringResources
 import ai.deepseek.harness.i18n.notifyNativeLocaleChanged
-import ai.deepseek.harness.wear.GoogleWearMessageSender
-import ai.deepseek.harness.wear.GoogleWearPeerResolver
-import ai.deepseek.harness.wear.WearProxyBridge
-import ai.deepseek.harness.wear.WearRealtimeChannelRegistry
 import android.app.Application
 import android.content.res.Configuration
 import android.os.StrictMode
@@ -30,21 +26,6 @@ class NodeApp : Application() {
   private val runtimeScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private val runtimeLock = Any()
   private var runtimeInstance: NodeRuntime? = null
-
-  internal val wearProxyBridge: WearProxyBridge by lazy {
-    WearProxyBridge(
-      scope = runtimeScope,
-      sender = GoogleWearMessageSender(this),
-      peerResolver = GoogleWearPeerResolver(this),
-      handleRequest = { sourceNodeId, request ->
-        ensureBackgroundRuntime().handleWearProxyRequest(sourceNodeId, request)
-      },
-    )
-  }
-
-  internal val wearRealtimeChannels: WearRealtimeChannelRegistry by lazy {
-    WearRealtimeChannelRegistry(this, runtimeScope)
-  }
 
   /**
    * Returns the single NodeRuntime for this process, creating it on first use.

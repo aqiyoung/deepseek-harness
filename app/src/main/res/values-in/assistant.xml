@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="ask_openclaw_query_patterns">
+    <string-array name="ask_deepseek_harness_query_patterns">
         <item>"tanyakan DeepSeekHarness %1$s"</item>
         <item>"beri tahu DeepSeekHarness untuk %1$s"</item>
         <item>"buka DeepSeekHarness dan tanyakan %1$s"</item>

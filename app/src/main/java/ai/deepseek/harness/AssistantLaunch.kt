@@ -7,7 +7,7 @@ import androidx.core.content.IntentCompat
 import java.util.Locale
 
 /** Android Assistant entry point used by manifest-declared app actions. */
-const val actionAskDeepSeekHarness = "ai.deepseek.harness.action.ASK_OPENCLAW"
+const val actionAskDeepSeekHarness = "ai.deepseek.harness.action.ASK_DEEPSEEK_HARNESS"
 
 /** Debug action that opens the Voice tab directly for Android E2E automation. */
 const val actionOpenVoiceE2e = "ai.deepseek.harness.debug.OPEN_VOICE_E2E"

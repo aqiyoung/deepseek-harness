@@ -2232,7 +2232,7 @@ private fun AboutHeroPanel() {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      DeepSeekHarnessMascot(contentDescription = nativeString("DeepSeekHarness logo"), modifier = Modifier.size(96.dp))
+      DeepSeekHarnessMascot(contentDescription = nativeString("DeepSeekHarness logo"), modifier = Modifier.size(80.dp))
       Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(text = nativeString("DeepSeekHarness"), style = ClawTheme.type.section, color = ClawTheme.colors.text)
         Text(text = nativeString("Personal AI on your devices"), style = ClawTheme.type.caption, color = ClawTheme.colors.textMuted)
@@ -2250,10 +2250,9 @@ private data class AboutLink(
 
 private val aboutLinks =
   listOf(
-    AboutLink("Website", "openclaw.ai", "https://openclaw.ai"),
-    AboutLink("Docs", "docs.openclaw.ai", "https://docs.openclaw.ai"),
-    AboutLink("GitHub", "github.com/openclaw/openclaw", "https://github.com/openclaw/openclaw"),
-    AboutLink("Discord", "discord.gg/clawd", "https://discord.gg/clawd"),
+    AboutLink("Website", "deepseek.com", "https://www.deepseek.com"),
+    AboutLink("Docs", "platform.deepseek.com", "https://platform.deepseek.com/api-docs/"),
+    AboutLink("GitHub", "github.com/deepseek-ai", "https://github.com/deepseek-ai"),
   )
 
 @Composable

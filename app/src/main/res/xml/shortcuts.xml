@@ -1,10 +1,10 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <capability
-        android:name="custom.actions.intent.ASK_OPENCLAW"
-        app:queryPatterns="@array/ask_openclaw_query_patterns">
+        android:name="custom.actions.intent.ASK_DEEPSEEK_HARNESS"
+        app:queryPatterns="@array/ask_deepseek_harness_query_patterns">
         <intent
-            android:action="ai.deepseek.harness.action.ASK_OPENCLAW"
+            android:action="ai.deepseek.harness.action.ASK_DEEPSEEK_HARNESS"
             android:targetPackage="ai.deepseek.harness"
             android:targetClass="ai.deepseek.harness.MainActivity">
             <parameter

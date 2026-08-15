@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="ask_openclaw_query_patterns">
+    <string-array name="ask_deepseek_harness_query_patterns">
         <item>"از DeepSeekHarness بپرس %1$s"</item>
         <item>"به DeepSeekHarness بگو %1$s"</item>
         <item>"DeepSeekHarness را باز کن و بپرس %1$s"</item>

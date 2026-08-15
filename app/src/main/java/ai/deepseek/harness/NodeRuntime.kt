@@ -115,17 +115,6 @@ import ai.deepseek.harness.voice.VoiceWakeManager
 import ai.deepseek.harness.voice.VoiceWakeMatch
 import ai.deepseek.harness.voice.VoiceWakePreferences
 import ai.deepseek.harness.voice.VoiceWakeSuppressionReason
-import ai.deepseek.harness.wear.WearProxyAgent
-import ai.deepseek.harness.wear.WearProxyBridge
-import ai.deepseek.harness.wear.WearProxyController
-import ai.deepseek.harness.wear.WearProxyGatewayException
-import ai.deepseek.harness.wear.WearProxyModel
-import ai.deepseek.harness.wear.WearRealtimeAttemptOwner
-import ai.deepseek.harness.wear.WearRealtimeTalkController
-import ai.deepseek.harness.wear.wearConnectionFailure
-import ai.deepseek.wear.shared.WearMessage
-import ai.deepseek.wear.shared.WearRealtimeTalkCodec
-import ai.deepseek.wear.shared.WearRealtimeTalkSnapshot
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -196,36 +185,6 @@ private fun execApprovalResolveFailureMessage(): String = nativeText("Could not 
 
 internal typealias GatewayDataRequestOverride =
   suspend (stableId: String, method: String, paramsJson: String?) -> String
-
-internal suspend fun startWearRealtimeTalkWhileCurrent(
-  owner: WearRealtimeAttemptOwner,
-  isCurrent: suspend (WearRealtimeAttemptOwner) -> Boolean,
-  start: suspend (onSessionActivated: () -> Unit) -> Boolean,
-  stop: suspend (WearRealtimeAttemptOwner) -> Unit,
-): Boolean {
-  if (!isCurrent(owner)) return false
-  var relayStarted = false
-  var committed = false
-  try {
-    val startReturned =
-      start {
-        // The controller invokes this synchronously at activation, before a
-        // canceled caller can lose the successful suspend result.
-        relayStarted = true
-      }
-    if (!startReturned || !isCurrent(owner)) return false
-    committed = true
-    return true
-  } finally {
-    // Relay creation suspends outside the channel registry. Never leave a late
-    // session alive when replacement or cancellation wins before commit.
-    if (relayStarted && !committed) {
-      withContext(NonCancellable) {
-        stop(owner)
-      }
-    }
-  }
-}
 
 private class ExecApprovalWriteOutcomeUnknown : IllegalStateException("approval resolve response was not authoritative")
 
@@ -1415,7 +1374,6 @@ class NodeRuntime private constructor(
         // this route cannot inherit readiness from the connection it replaced.
         systemAgentChatController.refresh(startIfNeeded = false)
         micCapture.onGatewayConnectionChanged(true)
-        wearProxyBridge()?.publishConnection(connected = true, status = "Connected")
         scope.launch {
           subscribeOperatorSessionEvents()
           refreshWakeWordsFromGateway()
@@ -1427,11 +1385,9 @@ class NodeRuntime private constructor(
         }
       },
       onDisconnected = { message ->
-        if (wearRealtimeTalkControllerLazy.isInitialized()) wearRealtimeTalkController.abort()
         clearOperatorGatewayState(retirePendingCronRuns = false)
         chat.applyMainSessionKey(resolveMainSessionKey())
         chat.onDisconnected(message)
-        val wearFailure = wearConnectionFailure(operatorConnectionProblem?.code, message)
         updateStatus {
           operatorConnected = false
           operatorStatusText = message
@@ -1439,14 +1395,8 @@ class NodeRuntime private constructor(
         }
         systemAgentChatController.refresh(startIfNeeded = false)
         micCapture.onGatewayConnectionChanged(false)
-        wearProxyBridge()?.publishConnection(
-          connected = false,
-          status = message,
-          failure = wearFailure,
-        )
       },
       onConnectFailure = { error, pauseReconnect ->
-        if (wearRealtimeTalkControllerLazy.isInitialized()) wearRealtimeTalkController.abort()
         val problem = gatewayConnectionProblem(error, pauseReconnect)
         updateStatus {
           operatorConnected = false
@@ -1455,11 +1405,6 @@ class NodeRuntime private constructor(
         }
         systemAgentChatController.refresh(startIfNeeded = false)
         micCapture.onGatewayConnectionChanged(false)
-        wearProxyBridge()?.publishConnection(
-          connected = false,
-          status = problem.message,
-          failure = wearConnectionFailure(problem.code, problem.message),
-        )
       },
       onEvent = { event, payloadJson ->
         handleGatewayEvent(event, payloadJson)
@@ -1511,94 +1456,6 @@ class NodeRuntime private constructor(
   private val secondaryOperatorSessions = ConcurrentHashMap<String, SecondaryOperatorRuntime>()
   private val _backgroundGatewayStatuses = MutableStateFlow<Map<String, String>>(emptyMap())
   val backgroundGatewayStatuses: StateFlow<Map<String, String>> = _backgroundGatewayStatuses.asStateFlow()
-
-  private val wearProxyController by lazy {
-    WearProxyController(
-      requestGateway = ::requestWearGateway,
-      isGatewayConnected = operatorSession::isReady,
-      gatewayStatusText = { synchronized(gatewayStatusLock) { operatorStatusText } },
-      hasOperatorAdminScope = { OperatorAdminScope in _operatorScopes.value },
-      activeAgentId = {
-        resolveAgentIdFromMainSessionKey(mainSessionKey.value) ?: gatewayDefaultAgentId.value
-      },
-      activeSessionKey = { chatSessionKey.value },
-      selectedModelRef = { chatSelectedModelRef.value },
-      agents = {
-        gatewayAgents.value.selectableAgents().map { agent ->
-          WearProxyAgent(
-            id = agent.id,
-            name = agent.name,
-            emoji = agent.emoji,
-          )
-        }
-      },
-      selectGatewayAgent = { agentId ->
-        if (gatewayAgents.value.selectableAgents().none { agent -> agent.id == agentId }) {
-          false
-        } else {
-          selectChatAgent(agentId)
-          true
-        }
-      },
-      models = {
-        chatModelCatalog.value
-          .asSequence()
-          .filter { model -> model.available != false }
-          .map { model ->
-            val provider = model.provider.trim()
-            val ref =
-              if (provider.isEmpty() || model.id.startsWith("$provider/")) {
-                model.id
-              } else {
-                "$provider/${model.id}"
-              }
-            WearProxyModel(ref = ref, name = model.name)
-          }.toList()
-      },
-      selectSessionModel = { sessionKey, modelRef ->
-        chat.setSessionModelAwait(sessionKey = sessionKey, modelRef = modelRef)
-      },
-      connectGateway = { refreshGatewayConnection() },
-      disconnectGateway = { disconnect() },
-      startRealtimeTalk = { nodeId, sessionKey, attemptId, language, attemptScopedAudio ->
-        if (startWearRealtimeTalk(nodeId, sessionKey, attemptId, language, attemptScopedAudio)) wearRealtimeTalkSnapshot.value else null
-      },
-      stopRealtimeTalk = { nodeId, attemptId ->
-        if (stopWearRealtimeTalk(nodeId, attemptId)) wearRealtimeTalkSnapshot.value else null
-      },
-    )
-  }
-
-  internal suspend fun handleWearProxyRequest(
-    sourceNodeId: String,
-    request: WearMessage.Request,
-  ): WearMessage.Response = wearProxyController.handle(request, sourceNodeId)
-
-  private suspend fun requestWearGateway(
-    method: String,
-    params: JsonObject,
-  ): JsonElement {
-    val lease =
-      operatorSession.captureRequestLease()
-        ?: throw WearProxyGatewayException("unavailable", "Phone gateway is offline")
-    val response =
-      try {
-        lease.request(method, params.toString())
-      } catch (err: GatewayRequestRejected) {
-        throw WearProxyGatewayException(err.gatewayError.code, err.gatewayError.message)
-      } catch (_: GatewayRequestNotEnqueued) {
-        throw WearProxyGatewayException("unavailable", "Phone gateway is offline")
-      } catch (_: GatewayRequestOutcomeUnknown) {
-        throw WearProxyGatewayException("unavailable", "Phone gateway request outcome is unknown")
-      }
-    return try {
-      json.parseToJsonElement(response)
-    } catch (_: Throwable) {
-      throw WearProxyGatewayException("invalid_response", "$method returned invalid JSON")
-    }
-  }
-
-  private fun wearProxyBridge(): WearProxyBridge? = (appContext as? NodeApp)?.wearProxyBridge
 
   private fun clearOperatorGatewayState(retirePendingCronRuns: Boolean) {
     invalidateNodeCapabilityApprovalState()
@@ -2096,114 +1953,6 @@ class NodeRuntime private constructor(
 
   val talkModeConversation: StateFlow<List<VoiceConversationEntry>>
     get() = talkMode.conversation
-
-  private val wearRealtimeLifecycleMutex = Mutex()
-
-  private val wearRealtimeTalkControllerLazy: Lazy<WearRealtimeTalkController> =
-    lazy {
-      WearRealtimeTalkController(
-        scope = scope,
-        isConnected = { gatewayConnectionDisplay.value.isConnected },
-        requestGateway = { method, paramsJson, timeoutMs ->
-          val gatewayId = connectedEndpoint?.stableId ?: error("Gateway not connected")
-          operatorSession.requestForEndpoint(gatewayId, method, paramsJson, timeoutMs)
-        },
-        sendGatewayFrame = { method, paramsJson, timeoutMs, onError ->
-          val gatewayId = connectedEndpoint?.stableId ?: error("Gateway not connected")
-          operatorSession.sendRequestFrameForEndpoint(gatewayId, method, paramsJson, timeoutMs) { error ->
-            onError(error.message)
-          }
-        },
-        sendWatchFrame = { owner, type, payload ->
-          val app = appContext as? NodeApp ?: error("Wear channel owner is unavailable")
-          app.wearRealtimeChannels.send(owner, type, payload)
-        },
-        onSnapshot = { snapshot ->
-          wearProxyBridge()?.publishTalk(WearRealtimeTalkCodec.encode(snapshot))
-        },
-        onForceCloseWatchChannel = { owner ->
-          scope.launch {
-            (appContext as? NodeApp)?.wearRealtimeChannels?.close(owner)
-          }
-        },
-      )
-    }
-
-  private val wearRealtimeTalkController: WearRealtimeTalkController
-    get() = wearRealtimeTalkControllerLazy.value
-
-  internal val wearRealtimeTalkSnapshot: StateFlow<WearRealtimeTalkSnapshot>
-    get() = wearRealtimeTalkController.snapshot
-
-  internal suspend fun startWearRealtimeTalk(
-    nodeId: String,
-    sessionKey: String,
-    attemptId: String,
-    language: String?,
-    attemptScopedAudio: Boolean,
-  ): Boolean {
-    if (talkModeEnabled.value || micEnabled.value || micCooldown.value) return false
-    val app = appContext as? NodeApp ?: return false
-    val claim =
-      app.wearRealtimeChannels.claim(
-        nodeId = nodeId,
-        attemptId = attemptId,
-        attemptScopedAudio = attemptScopedAudio,
-      ) ?: return false
-    val owner = claim.owner
-    val resolvedLanguage = talkMode.resolveRealtimeLanguageHint(language)
-    var started = false
-    return try {
-      started =
-        wearRealtimeLifecycleMutex.withLock {
-          if (talkModeEnabled.value || micEnabled.value || micCooldown.value) {
-            return@withLock false
-          }
-          startWearRealtimeTalkWhileCurrent(
-            owner = owner,
-            isCurrent = app.wearRealtimeChannels::isCurrent,
-            start = { onSessionActivated ->
-              wearRealtimeTalkController.start(
-                owner = owner,
-                sessionKey = sessionKey,
-                language = resolvedLanguage,
-                onSessionActivated = onSessionActivated,
-              )
-            },
-            stop = { staleOwner ->
-              wearRealtimeTalkController.stop(staleOwner)
-            },
-          )
-        }
-      started
-    } finally {
-      if (!started && claim.newlyAcquired) app.wearRealtimeChannels.release(owner)
-    }
-  }
-
-  internal suspend fun stopWearRealtimeTalk(
-    nodeId: String? = null,
-    attemptId: String? = null,
-  ): Boolean =
-    wearRealtimeLifecycleMutex.withLock {
-      // The watch closes its channel after receiving the stop response. Closing
-      // here races the response and makes a normal stop look like link failure.
-      wearRealtimeTalkController.stop(nodeId, attemptId)
-    }
-
-  internal suspend fun stopWearRealtimeTalk(owner: WearRealtimeAttemptOwner): Boolean =
-    wearRealtimeLifecycleMutex.withLock {
-      wearRealtimeTalkController.stop(owner)
-    }
-
-  internal fun appendWearRealtimeAudio(
-    owner: WearRealtimeAttemptOwner,
-    payload: ByteArray,
-  ) {
-    if (wearRealtimeTalkControllerLazy.isInitialized()) {
-      wearRealtimeTalkController.appendAudio(owner, payload)
-    }
-  }
 
   private fun syncMainSessionKey(agentId: String?) {
     val resolvedKey = resolveNodeMainSessionKey(agentId)
@@ -3071,14 +2820,6 @@ class NodeRuntime private constructor(
     scope.launch {
       nativeLocaleChanges.drop(1).collect {
         updateHomeCanvasState()
-      }
-    }
-
-    scope.launch {
-      chatModelCatalog.drop(1).distinctUntilChanged().collect {
-        // Chat metadata arrives after the connection event. Invalidate the Watch snapshot so
-        // its Home model picker cannot stay empty until the user refreshes manually.
-        if (operatorSession.isReady()) wearProxyBridge()?.publishResync()
       }
     }
 
@@ -4733,7 +4474,6 @@ class NodeRuntime private constructor(
   }
 
   private fun disconnect(retireRunState: Boolean) {
-    if (wearRealtimeTalkControllerLazy.isInitialized()) wearRealtimeTalkController.abort()
     prepareDisconnect(retireRunState)
     operatorSession.disconnect()
     nodeSession.disconnect()
@@ -5295,15 +5035,7 @@ class NodeRuntime private constructor(
     handleExecApprovalGatewayEvent(event = event, payloadJson = payloadJson)
     micCapture.handleGatewayEvent(event, payloadJson)
     talkMode.handleGatewayEvent(event, payloadJson)
-    if (wearRealtimeTalkControllerLazy.isInitialized()) {
-      wearRealtimeTalkController.handleGatewayEvent(event, payloadJson)
-    }
     chat.handleGatewayEvent(event, payloadJson)
-    if (event == "chat" && !payloadJson.isNullOrBlank()) {
-      runCatching { json.parseToJsonElement(payloadJson) }
-        .getOrNull()
-        ?.let { wearProxyBridge()?.publishChat(it) }
-    }
   }
 
   private fun handleNodeGatewayEvent(

@@ -16,5 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "DshAndroid"
 include(":app")
-include(":benchmark")
-include(":wear-shared")
