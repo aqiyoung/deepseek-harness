@@ -1,5 +1,6 @@
 package ai.deepseek.harness.ui.design
 
+import ai.deepseek.harness.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
