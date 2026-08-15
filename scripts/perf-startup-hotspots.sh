@@ -60,7 +60,7 @@ if ! command -v adb >/dev/null 2>&1; then
 fi
 
 if [[ -z "$OUTPUT_PERF_DATA" ]]; then
-  OUTPUT_PERF_DATA="/tmp/openclaw-startup-$(date +%Y%m%d-%H%M%S).perf.data"
+  OUTPUT_PERF_DATA="/tmp/dsh-startup-$(date +%Y%m%d-%H%M%S).perf.data"
 fi
 
 device_count="$(adb devices | awk 'NR>1 && $2=="device" {c+=1} END {print c+0}')"
@@ -90,7 +90,7 @@ app_profiler="$simpleperf_dir/app_profiler.py"
 report_py="$simpleperf_dir/report.py"
 ndk_path="$(cd -- "$simpleperf_dir/.." && pwd)"
 
-tmp_dir="$(mktemp -d -t openclaw-android-hotspots.XXXXXX)"
+tmp_dir="$(mktemp -d -t dsh-android-hotspots.XXXXXX)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 capture_log="$tmp_dir/capture.log"

@@ -96,7 +96,7 @@ export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetool
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
 export PATH="/opt/homebrew/opt/openjdk@17/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
-ARTIFACT_DIR="/tmp/openclaw-android-voice-e2e-$(date +%Y%m%d-%H%M%S)"
+ARTIFACT_DIR="/tmp/dsh-android-voice-e2e-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$ARTIFACT_DIR"
 
 cleanup_gateway() {
