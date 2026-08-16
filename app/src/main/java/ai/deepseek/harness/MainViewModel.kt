@@ -68,6 +68,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -78,6 +79,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 
@@ -526,8 +528,9 @@ class MainViewModel private constructor(
   val notificationForwardingSessionKey: StateFlow<String?> = prefs.notificationForwardingSessionKey
 
   val isConnected: StateFlow<Boolean> =
-    dsh.connectionState.map { it == DshConnectionState.Connected }
-      .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    combine(dsh.connectionState, dsh.authenticated) { state, auth ->
+      state == DshConnectionState.Connected || auth
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
   val gatewayControlPage: StateFlow<NodeRuntime.GatewayControlPage?> =
     runtimeState(initial = null) { it.gatewayControlPage }
   val desktopObserveAvailable: StateFlow<Boolean> =
@@ -536,31 +539,29 @@ class MainViewModel private constructor(
   val nodeCapabilityApproval: StateFlow<GatewayNodeCapabilityApproval> =
     runtimeState(initial = GatewayNodeCapabilityApproval.Loading) { it.nodeCapabilityApproval }
   val statusText: StateFlow<String> =
-    dsh.connectionState
-      .map {
-        when (it) {
-          DshConnectionState.Connected -> "Connected"
-          DshConnectionState.Connecting -> "Connecting…"
-          DshConnectionState.Error -> "Connection error"
-          else -> "Offline"
-        }
+    combine(dsh.connectionState, dsh.authenticated) { state, auth ->
+      when {
+        state == DshConnectionState.Connected -> "Connected"
+        auth -> "Connected" // HTTP API works; WS may still be connecting
+        state == DshConnectionState.Connecting -> "Connecting…"
+        state == DshConnectionState.Error -> "Connection error"
+        else -> "Offline"
       }
-      .stateIn(viewModelScope, SharingStarted.Eagerly, "Offline")
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, "Offline")
   val gatewayConnectionProblem: StateFlow<GatewayConnectionProblem?> = runtimeState(initial = null) { it.gatewayConnectionProblem }
   val gatewayConnectionDisplay: StateFlow<GatewayConnectionDisplay> =
-    dsh.connectionState
-      .map {
-        GatewayConnectionDisplay(
-          isConnected = it == DshConnectionState.Connected,
-          statusText = if (it == DshConnectionState.Connected) "Connected" else "Offline",
-          problem = null,
-        )
-      }
-      .stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        GatewayConnectionDisplay(false, "Offline", null),
+    combine(dsh.connectionState, dsh.authenticated) { state, auth ->
+      val online = state == DshConnectionState.Connected || auth
+      GatewayConnectionDisplay(
+        isConnected = online,
+        statusText = if (online) "Connected" else "Offline",
+        problem = null,
       )
+    }.stateIn(
+      viewModelScope,
+      SharingStarted.Eagerly,
+      GatewayConnectionDisplay(false, "Offline", null),
+    )
   val operatorAdminScopeAvailable: StateFlow<Boolean> = runtimeState(initial = false) { it.operatorAdminScopeAvailable }
   internal val systemAgentChatState: StateFlow<SystemAgentChatState> =
     runtimeState(initial = SystemAgentChatState()) { it.systemAgentChatState }
@@ -707,7 +708,20 @@ class MainViewModel private constructor(
   val chatSessionKey: StateFlow<String> = runtimeState(initial = "main") { it.chatSessionKey }
   val chatSessionOwnerAgentId: StateFlow<String?> = runtimeState(initial = null) { it.chatSessionOwnerAgentId }
   val chatSessionId: StateFlow<String?> = runtimeState(initial = null) { it.chatSessionId }
-  val chatMessages: StateFlow<List<ChatMessage>> = runtimeState(initial = emptyList()) { it.chatMessages }
+
+  /** DSH-backed chat transcript for the currently open DSH session (null when no DSH session loaded). */
+  private val _dshChatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
+  val dshChatMessages: StateFlow<List<ChatMessage>> = _dshChatMessages.asStateFlow()
+  private val _activeDshSessionId = MutableStateFlow<String?>(null)
+  val activeDshSessionId: StateFlow<String?> = _activeDshSessionId.asStateFlow()
+  private val _runtimeChatMessages: StateFlow<List<ChatMessage>> =
+    runtimeState(initial = emptyList()) { it.chatMessages }
+
+  /** Chat transcript: DSH messages when a DSH session is open, else the (openclaw) runtime transcript. */
+  val chatMessages: StateFlow<List<ChatMessage>> =
+    combine(_runtimeChatMessages, _dshChatMessages) { runtime, dshMsgs ->
+      if (dshMsgs.isNotEmpty()) dshMsgs else runtime
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
   val chatTranscriptAnchor: StateFlow<ChatTranscriptAnchorState?> =
     runtimeState(initial = null) { it.chatTranscriptAnchor }
   val chatHistoryLoading: StateFlow<Boolean> = runtimeState(initial = false) { it.chatHistoryLoading }
@@ -1791,9 +1805,61 @@ class MainViewModel private constructor(
     sessionKey: String,
     ownerAgentId: String? = null,
   ) {
-    // DSH 模式下没有旧 openclaw runtime；安全跳过（聊天收发尚未接到 DSH）。
+    // DSH 模式：sessionKey 即 DSH sessionId，加载其历史到 DSH 消息流。
+    if (isDshMode()) {
+      viewModelScope.launch { loadDshChat(sessionKey) }
+      return
+    }
     val runtime = runCatching { ensureRuntime() }.getOrNull() ?: return
     runtime.loadChat(sessionKey, ownerAgentId)
+  }
+
+  private fun isDshMode(): Boolean = dsh.authenticated.value || dsh.connectionState.value == DshConnectionState.Connected
+
+  private suspend fun loadDshChat(sessionId: String) {
+    _activeDshSessionId.value = sessionId
+    val events = runCatching { dsh.history(sessionId) }.getOrDefault(emptyList())
+    _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
+  }
+
+  /** Map a raw DSH `session/event` frame (already unwrapped to the inner event object) to a ChatMessage. */
+  private fun mapDshEventToChatMessage(event: JsonObject): ChatMessage? {
+    val type = event["type"]?.jsonPrimitive?.contentOrNull ?: return null
+    val time = event["time"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+    val data = event["data"]?.takeIf { it is JsonObject } as? JsonObject ?: return null
+    return when (type) {
+      "user/message" -> {
+        val id = data["id"]?.jsonPrimitive?.contentOrNull ?: (event["seq"]?.jsonPrimitive?.contentOrNull ?: "")
+        val content = textBlocksFrom(data["content"])
+        ChatMessage(id = id, role = "user", content = content, timestampMs = time)
+      }
+      "assistant/message" -> {
+        val msg = data["message"]?.takeIf { it is JsonObject } as? JsonObject ?: return null
+        val id = msg["id"]?.jsonPrimitive?.contentOrNull ?: (event["seq"]?.jsonPrimitive?.contentOrNull ?: "")
+        val content = textBlocksFrom(msg["content"])
+        ChatMessage(id = id, role = "assistant", content = content, timestampMs = time)
+      }
+      else -> null
+    }
+  }
+
+  /** Extract user-visible text blocks from a DSH content array (text/reasoning -> text, tool-call -> name+args). */
+  private fun textBlocksFrom(content: kotlinx.serialization.json.JsonElement?): List<ChatMessageContent> {
+    val arr = (content as? kotlinx.serialization.json.JsonArray) ?: return emptyList()
+    return arr.mapNotNull { item ->
+      val o = item as? JsonObject ?: return@mapNotNull null
+      val t = o["type"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+      when (t) {
+        "text" -> o["text"]?.jsonPrimitive?.contentOrNull?.let { ChatMessageContent(text = it) }
+        "reasoning" -> o["text"]?.jsonPrimitive?.contentOrNull?.let { ChatMessageContent(text = "🤔 $it") }
+        "tool-call" -> {
+          val name = o["name"]?.jsonPrimitive?.contentOrNull ?: "tool"
+          val args = o["arguments"]?.jsonPrimitive?.contentOrNull ?: ""
+          ChatMessageContent(text = "🔧 $name(${args.take(400)})")
+        }
+        else -> null
+      }
+    }
   }
 
   fun refreshChat() {
@@ -2102,7 +2168,16 @@ class MainViewModel private constructor(
     thinking: String,
     attachments: List<OutgoingAttachment>,
   ) {
-    // DSH 模式下没有旧 openclaw runtime；安全跳过（聊天收发尚未接到 DSH，下一步接入）。
+    // DSH 模式：把消息发到当前打开的 DSH 会话，然后刷新历史。
+    val sid = _activeDshSessionId.value
+    if (sid != null && isDshMode()) {
+      viewModelScope.launch {
+        runCatching { dsh.prompt(sid, message) }
+        val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
+        _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
+      }
+      return
+    }
     val runtime = runCatching { ensureRuntime() }.getOrNull() ?: return
     runtime.sendChat(message = message, thinking = thinking, attachments = attachments)
   }
@@ -2113,14 +2188,23 @@ class MainViewModel private constructor(
     thinking: String,
     attachments: List<OutgoingAttachment>,
     idempotencyKey: String,
-  ): Boolean =
-    ensureRuntime().sendChatForOwnerAwaitAcceptance(
+  ): Boolean {
+    // DSH 模式：把消息发到当前打开的 DSH 会话，再刷新历史。
+    val sid = _activeDshSessionId.value
+    if (sid != null && isDshMode()) {
+      val ok = runCatching { dsh.prompt(sid, message) }.getOrDefault(false)
+      val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
+      _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
+      return ok
+    }
+    return ensureRuntime().sendChatForOwnerAwaitAcceptance(
       owner = owner,
       message = message,
       thinking = thinking,
       attachments = attachments,
       idempotencyKey = idempotencyKey,
     )
+  }
 
   /** Admission outlives the composing Activity; accepted payloads clear by owner and snapshot. */
   internal fun beginChatComposerSend(

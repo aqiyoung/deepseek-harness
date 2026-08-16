@@ -52,6 +52,12 @@ class DshSessionManager(private val scope: CoroutineScope) {
     private val _connectionState = MutableStateFlow(DshConnectionState.Disconnected)
     val connectionState: StateFlow<DshConnectionState> = _connectionState.asStateFlow()
 
+    /** True once we have authenticated and successfully made at least one DSH API call.
+     *  This lets the UI treat the gateway as "online" for sending messages even when the
+     *  WebSocket downlink is still connecting (e.g. external nginx not forwarding Upgrade). */
+    private val _authenticated = MutableStateFlow(false)
+    val authenticated: StateFlow<Boolean> = _authenticated.asStateFlow()
+
     private val _sessions = MutableStateFlow<List<SessionInfo>>(emptyList())
     val sessions: StateFlow<List<SessionInfo>> = _sessions.asStateFlow()
 
@@ -118,7 +124,7 @@ class DshSessionManager(private val scope: CoroutineScope) {
 
     private fun loadAll() {
         scope.launch {
-            runCatching { loadSessions() }
+            runCatching { loadSessions() }.onSuccess { _authenticated.value = true }
             runCatching { loadHost() }
             runCatching { loadProviders() }
             runCatching { loadPresets() }
