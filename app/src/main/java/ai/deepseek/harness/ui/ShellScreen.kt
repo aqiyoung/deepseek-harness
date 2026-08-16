@@ -1093,7 +1093,7 @@ internal fun overviewMetricCardSpecs(
 ): List<OverviewMetricCardSpec> {
   return listOf(
     OverviewMetricCardSpec(
-      title = nativeString("Gateway"),
+      title = nativeString("Server"),
       value =
         when {
           !isConnected -> nativeString("Offline")
@@ -1262,7 +1262,7 @@ internal fun homeAttentionRows(
   listOfNotNull(
     if (!isConnected) {
       HomeAttentionRow(
-        nativeString("Gateway"),
+        nativeString("Server"),
         nativeString("Connect before chat and live status."),
         Icons.Default.Cloud,
         Tab.Settings,
@@ -1544,7 +1544,7 @@ private fun SettingsShellScreen(
       val settingsRows =
         listOfNotNull(
           SettingsRow(
-            nativeText("Gateway"),
+            nativeText("Server"),
             if (isConnected) nativeText("Connected") else nativeText("Not connected"),
             Icons.Default.Cloud,
             status = isConnected,
