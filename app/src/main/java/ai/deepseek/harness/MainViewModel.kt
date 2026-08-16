@@ -535,6 +535,12 @@ class MainViewModel private constructor(
     combine(dsh.connectionState, dsh.authenticated) { state, auth ->
       state == DshConnectionState.Connected || auth
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+  /** True when the app is operating in DSH mode (authenticated or WebSocket connected). */
+  val isDshMode: StateFlow<Boolean> =
+    combine(dsh.connectionState, dsh.authenticated) { state, auth ->
+      state == DshConnectionState.Connected || auth
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
   val gatewayControlPage: StateFlow<NodeRuntime.GatewayControlPage?> =
     runtimeState(initial = null) { it.gatewayControlPage }
   val desktopObserveAvailable: StateFlow<Boolean> =
@@ -1810,15 +1816,13 @@ class MainViewModel private constructor(
     ownerAgentId: String? = null,
   ) {
     // DSH 模式：sessionKey 即 DSH sessionId，加载其历史到 DSH 消息流。
-    if (isDshMode()) {
+    if (isDshMode.value) {
       viewModelScope.launch { loadDshChat(sessionKey) }
       return
     }
     val runtime = runCatching { ensureRuntime() }.getOrNull() ?: return
     runtime.loadChat(sessionKey, ownerAgentId)
   }
-
-  private fun isDshMode(): Boolean = dsh.authenticated.value || dsh.connectionState.value == DshConnectionState.Connected
 
   private suspend fun loadDshChat(sessionId: String) {
     _activeDshSessionId.value = sessionId
@@ -2174,7 +2178,7 @@ class MainViewModel private constructor(
   ) {
     // DSH 模式：把消息发到当前打开的 DSH 会话，然后刷新历史。
     val sid = _activeDshSessionId.value
-    if (sid != null && isDshMode()) {
+    if (sid != null && isDshMode.value) {
       viewModelScope.launch {
         runCatching { dsh.prompt(sid, message) }
         val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
@@ -2195,7 +2199,7 @@ class MainViewModel private constructor(
   ): Boolean {
     // DSH 模式：把消息发到当前打开的 DSH 会话，再刷新历史。
     val sid = _activeDshSessionId.value
-    if (sid != null && isDshMode()) {
+    if (sid != null && isDshMode.value) {
       val ok = runCatching { dsh.prompt(sid, message) }.getOrDefault(false)
       val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
       _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }

@@ -1231,6 +1231,8 @@ private fun GatewaySettingsScreen(
   val gatewayAgents by viewModel.gatewayAgents.collectAsState()
   val gatewayDefaultAgentId by viewModel.gatewayDefaultAgentId.collectAsState()
   val instanceId by viewModel.instanceId.collectAsState()
+  val isDshMode by viewModel.isDshMode.collectAsState()
+  val serverUrl by viewModel.serverUrl.collectAsState()
   var setupCode by remember { mutableStateOf("") }
   var hostInput by remember(manualHost) { mutableStateOf(manualHost.ifBlank { "127.0.0.1" }) }
   var portInput by remember(manualPort) { mutableStateOf(manualPort.toString()) }
@@ -1317,8 +1319,10 @@ private fun GatewaySettingsScreen(
   }
 
   // Discovery only runs while a discovery consumer is active; the Add Gateway
-  // panel needs live results just like onboarding does.
-  LaunchedEffect(Unit) { viewModel.startGatewayDiscovery() }
+  // panel needs live results just like onboarding does. DSH mode does not use gateway discovery.
+  if (!isDshMode) {
+    LaunchedEffect(Unit) { viewModel.startGatewayDiscovery() }
+  }
 
   fun connectSetupCode() {
     val plan =
@@ -1352,11 +1356,13 @@ private fun GatewaySettingsScreen(
     icon = Icons.Default.Cloud,
     onBack = onBack,
     trailingAction = {
-      DshPlainIconButton(
-        icon = Icons.Default.QrCode2,
-        contentDescription = nativeString("Scan QR"),
-        onClick = viewModel::pairNewGateway,
-      )
+      if (!isDshMode) {
+        DshPlainIconButton(
+          icon = Icons.Default.QrCode2,
+          contentDescription = nativeString("Scan QR"),
+          onClick = viewModel::pairNewGateway,
+        )
+      }
     },
   ) {
     val hasPairedGateways = pairedGateways.isNotEmpty()
@@ -1432,7 +1438,32 @@ private fun GatewaySettingsScreen(
       }
     }
 
-    if (!hasPairedGateways) {
+    if (isDshMode) {
+      DshPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Text(
+            text = nativeString("DSH Server"),
+            style = DshTheme.type.section,
+            color = DshTheme.colors.text,
+          )
+          Text(
+            text = serverUrl.ifBlank { nativeString("Not configured") },
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
+          )
+          Text(
+            text = nativeString("Mode"),
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textMuted,
+          )
+          Text(
+            text = nativeString("Direct DSH connection (HTTP /api + WebSocket). The legacy gateway configuration below does not apply."),
+            style = DshTheme.type.body,
+            color = DshTheme.colors.textMuted,
+          )
+        }
+      }
+    } else if (!hasPairedGateways) {
       manualGatewayPanel()
     }
 
@@ -1495,9 +1526,10 @@ private fun GatewaySettingsScreen(
       },
       modifier = Modifier.fillMaxWidth(),
     )
-    DshPanel {
-      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = nativeString("Add Gateway"), style = DshTheme.type.section, color = DshTheme.colors.text)
+    if (!isDshMode) {
+      DshPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          Text(text = nativeString("Add Gateway"), style = DshTheme.type.section, color = DshTheme.colors.text)
         Text(
           text = nativeString("Scan or paste a setup code to add another gateway."),
           style = DshTheme.type.body,
@@ -1589,8 +1621,9 @@ private fun GatewaySettingsScreen(
         }
       }
     }
-    if (hasPairedGateways) {
-      manualGatewayPanel()
+      if (hasPairedGateways) {
+        manualGatewayPanel()
+      }
     }
   }
 }
