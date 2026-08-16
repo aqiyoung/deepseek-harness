@@ -206,10 +206,13 @@ class DshApiClient(
             buildJsonObject {
                 put("type", JsonPrimitive("client-response"))
                 put("rpcId", JsonPrimitive(rpcId))
-                putJsonObject("result") {
-                    put("ok", true)
-                    put("value", result)
-                }
+                put(
+                    "result",
+                    buildJsonObject {
+                        put("ok", JsonPrimitive(true))
+                        put("value", result)
+                    },
+                )
             }
         val body = json.encodeToString(bodyJson).toRequestBody(mediaType)
         val httpReq =
