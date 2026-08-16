@@ -2,7 +2,9 @@ package ai.deepseek.harness.dsh
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -82,15 +84,17 @@ class DshApiClient(
                 .post(body)
                 .header("content-type", "application/json")
                 .build()
-        return runCatching {
-            okHttpClient.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) return@use null
-                resp.headers("set-cookie")
-                    .firstNotNullOfOrNull { raw ->
-                        raw.split(';').firstOrNull { it.trim().startsWith("dsh_session=") }
-                    }?.substringAfter("dsh_session=")
-            }
-        }.getOrNull()
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                okHttpClient.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@use null
+                    resp.headers("set-cookie")
+                        .firstNotNullOfOrNull { raw ->
+                            raw.split(';').firstOrNull { it.trim().startsWith("dsh_session=") }
+                        }?.substringAfter("dsh_session=")
+                }
+            }.getOrNull()
+        }
     }
 
     fun connect() {
@@ -172,15 +176,17 @@ class DshApiClient(
                 .header("content-type", "application/json")
                 .header("Cookie", cookie)
                 .build()
-        okHttpClient.newCall(httpReq).execute().use { resp ->
-            if (!resp.isSuccessful) {
-                throw IllegalStateException("HTTP ${resp.code} for /api/$method")
+        return withContext(Dispatchers.IO) {
+            okHttpClient.newCall(httpReq).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    throw IllegalStateException("HTTP ${resp.code} for /api/$method")
+                }
+                val text = resp.body?.string().orEmpty()
+                val sr = json.decodeFromString(DshServerResponse.serializer(), text)
+                if (sr.rpcId != rpcId) throw IllegalStateException("rpcId mismatch for $method")
+                if (!sr.result.ok) throw IllegalStateException("rpc error: ${sr.result.error}")
+                sr.result.value ?: JsonNull
             }
-            val text = resp.body?.string().orEmpty()
-            val sr = json.decodeFromString(DshServerResponse.serializer(), text)
-            if (sr.rpcId != rpcId) throw IllegalStateException("rpcId mismatch for $method")
-            if (!sr.result.ok) throw IllegalStateException("rpc error: ${sr.result.error}")
-            return sr.result.value ?: JsonNull
         }
     }
 
@@ -200,7 +206,9 @@ class DshApiClient(
                 .header("content-type", "application/json")
                 .header("Cookie", cookie)
                 .build()
-        okHttpClient.newCall(httpReq).execute().use { }
+        withContext(Dispatchers.IO) {
+            okHttpClient.newCall(httpReq).execute().use { }
+        }
     }
 
     fun disconnect() {
