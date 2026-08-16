@@ -536,11 +536,14 @@ class MainViewModel private constructor(
       state == DshConnectionState.Connected || auth
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-  /** True when the app is operating in DSH mode (authenticated or WebSocket connected). */
+  /** True when the app is operating in DSH mode (server configured, authenticated, or WebSocket connected). */
   val isDshMode: StateFlow<Boolean> =
-    combine(dsh.connectionState, dsh.authenticated) { state, auth ->
-      state == DshConnectionState.Connected || auth
+    combine(dsh.serverUrl, dsh.connectionState, dsh.authenticated) { url, state, auth ->
+      url.isNotBlank() || state == DshConnectionState.Connected || auth
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+  /** DSH server URL configured at login. */
+  val dshServerUrl: StateFlow<String> = dsh.serverUrl
   val gatewayControlPage: StateFlow<NodeRuntime.GatewayControlPage?> =
     runtimeState(initial = null) { it.gatewayControlPage }
   val desktopObserveAvailable: StateFlow<Boolean> =
@@ -1023,6 +1026,17 @@ class MainViewModel private constructor(
     val cookie = prefs.getSessionCookie()
     val url = prefs.serverUrl.value.trim().removeSuffix("/").ifEmpty { "https://dsh.threel.site" }
     dsh.connect(baseUrl = url, cookie = cookie)
+  }
+
+  /** Disconnect the native DSH client (HTTP /api + WebSocket). */
+  fun disconnectDsh() {
+    dsh.disconnect()
+  }
+
+  /** Reconnect the native DSH client using the saved server URL and session cookie. */
+  fun refreshDshConnection() {
+    dsh.disconnect()
+    connectDsh()
   }
 
   /**

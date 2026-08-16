@@ -1233,6 +1233,7 @@ private fun GatewaySettingsScreen(
   val instanceId by viewModel.instanceId.collectAsState()
   val isDshMode by viewModel.isDshMode.collectAsState()
   val serverUrl by viewModel.serverUrl.collectAsState()
+  val dshServerUrl by viewModel.dshServerUrl.collectAsState()
   var setupCode by remember { mutableStateOf("") }
   var hostInput by remember(manualHost) { mutableStateOf(manualHost.ifBlank { "127.0.0.1" }) }
   var portInput by remember(manualPort) { mutableStateOf(manualPort.toString()) }
@@ -1447,7 +1448,7 @@ private fun GatewaySettingsScreen(
             color = DshTheme.colors.text,
           )
           Text(
-            text = serverUrl.ifBlank { nativeString("Not configured") },
+            text = dshServerUrl.ifBlank { nativeString("Not configured") },
             style = DshTheme.type.body,
             color = DshTheme.colors.textMuted,
           )
@@ -1467,65 +1468,80 @@ private fun GatewaySettingsScreen(
       manualGatewayPanel()
     }
 
-    SettingsMetricPanel(
-      rows =
-        buildList {
-          add(SettingsMetric(nativeString("Connection"), if (gatewayConnectionDisplay.isConnected) nativeString("Connected") else nativeString("Offline")))
-          if (showDetailedMetrics) {
-            add(SettingsMetric(nativeString("Node"), if (isNodeConnected) nativeString("Online") else nativeString("Not paired")))
-            add(
-              SettingsMetric(
-                nativeString("Access"),
-                gatewayAccessLabel(
-                  isConnected = gatewayConnectionDisplay.isConnected,
-                  operatorAdminScopeAvailable = operatorAdminScopeAvailable,
+    if (isDshMode) {
+      SettingsMetricPanel(
+        rows =
+          listOf(
+            SettingsMetric(nativeString("Connection"), if (gatewayConnectionDisplay.isConnected) nativeString("Connected") else nativeString("Offline")),
+            SettingsMetric(nativeString("Address"), dshServerUrl.ifBlank { nativeString("Not available") }),
+            SettingsMetric(nativeString("Status"), gatewayConnectionDisplay.statusText),
+          ),
+      )
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        DshPrimaryButton(text = nativeString("Reconnect"), onClick = viewModel::refreshDshConnection, modifier = Modifier.weight(1f))
+        DshSecondaryButton(text = nativeString("Disconnect"), onClick = viewModel::disconnectDsh, modifier = Modifier.weight(1f))
+      }
+    } else {
+      SettingsMetricPanel(
+        rows =
+          buildList {
+            add(SettingsMetric(nativeString("Connection"), if (gatewayConnectionDisplay.isConnected) nativeString("Connected") else nativeString("Offline")))
+            if (showDetailedMetrics) {
+              add(SettingsMetric(nativeString("Node"), if (isNodeConnected) nativeString("Online") else nativeString("Not paired")))
+              add(
+                SettingsMetric(
+                  nativeString("Access"),
+                  gatewayAccessLabel(
+                    isConnected = gatewayConnectionDisplay.isConnected,
+                    operatorAdminScopeAvailable = operatorAdminScopeAvailable,
+                  ),
                 ),
-              ),
+              )
+              add(SettingsMetric(nativeString("Gateway"), serverName?.takeIf { it.isNotBlank() } ?: nativeString("Home Gateway")))
+            }
+            add(SettingsMetric(nativeString("Address"), remoteAddress?.takeIf { it.isNotBlank() } ?: nativeString("Not available")))
+            add(SettingsMetric(nativeString("Status"), gatewayStatusLabel(gatewayConnectionDisplay)))
+            if (showDetailedMetrics) {
+              add(SettingsMetric(nativeString("Discovered"), discoveredGateways.size.toString()))
+              add(SettingsMetric(nativeString("Default Agent"), defaultAgentName(gatewayAgents, gatewayDefaultAgentId)))
+              add(SettingsMetric(nativeString("Agents"), gatewayAgents.size.toString()))
+              add(SettingsMetric(nativeString("Instance ID"), instanceId, copyable = true))
+            }
+          },
+      )
+      if (gatewayConnectionDisplay.isConnected && !operatorAdminScopeAvailable) {
+        DshPanel {
+          Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+              text = nativeString("Limited Gateway access"),
+              style = DshTheme.type.section,
+              color = DshTheme.colors.text,
             )
-            add(SettingsMetric(nativeString("Gateway"), serverName?.takeIf { it.isNotBlank() } ?: nativeString("Home Gateway")))
+            Text(
+              text = gatewayLimitedAccessUpgradeText(),
+              style = DshTheme.type.body,
+              color = DshTheme.colors.textMuted,
+            )
           }
-          add(SettingsMetric(nativeString("Address"), remoteAddress?.takeIf { it.isNotBlank() } ?: nativeString("Not available")))
-          add(SettingsMetric(nativeString("Status"), gatewayStatusLabel(gatewayConnectionDisplay)))
-          if (showDetailedMetrics) {
-            add(SettingsMetric(nativeString("Discovered"), discoveredGateways.size.toString()))
-            add(SettingsMetric(nativeString("Default Agent"), defaultAgentName(gatewayAgents, gatewayDefaultAgentId)))
-            add(SettingsMetric(nativeString("Agents"), gatewayAgents.size.toString()))
-            add(SettingsMetric(nativeString("Instance ID"), instanceId, copyable = true))
-          }
-        },
-    )
-    if (gatewayConnectionDisplay.isConnected && !operatorAdminScopeAvailable) {
-      DshPanel {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-          Text(
-            text = nativeString("Limited Gateway access"),
-            style = DshTheme.type.section,
-            color = DshTheme.colors.text,
-          )
-          Text(
-            text = gatewayLimitedAccessUpgradeText(),
-            style = DshTheme.type.body,
-            color = DshTheme.colors.textMuted,
-          )
         }
       }
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        DshPrimaryButton(text = nativeString("Reconnect"), onClick = viewModel::refreshGatewayConnection, modifier = Modifier.weight(1f))
+        DshSecondaryButton(text = nativeString("Disconnect"), onClick = viewModel::disconnect, modifier = Modifier.weight(1f))
+      }
+      DshSecondaryButton(
+        text = nativeString("Diagnose"),
+        onClick = {
+          copyGatewayDiagnosticsReport(
+            context = context,
+            screen = "gateway settings",
+            gatewayAddress = gatewayDiagnosticsEndpoint(remoteAddress, manualHost, manualPort, manualTls),
+            statusText = gatewayStatusLabel(gatewayConnectionDisplay),
+          )
+        },
+        modifier = Modifier.fillMaxWidth(),
+      )
     }
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      DshPrimaryButton(text = nativeString("Reconnect"), onClick = viewModel::refreshGatewayConnection, modifier = Modifier.weight(1f))
-      DshSecondaryButton(text = nativeString("Disconnect"), onClick = viewModel::disconnect, modifier = Modifier.weight(1f))
-    }
-    DshSecondaryButton(
-      text = nativeString("Diagnose"),
-      onClick = {
-        copyGatewayDiagnosticsReport(
-          context = context,
-          screen = "gateway settings",
-          gatewayAddress = gatewayDiagnosticsEndpoint(remoteAddress, manualHost, manualPort, manualTls),
-          statusText = gatewayStatusLabel(gatewayConnectionDisplay),
-        )
-      },
-      modifier = Modifier.fillMaxWidth(),
-    )
     if (!isDshMode) {
       DshPanel {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -1574,58 +1590,60 @@ private fun GatewaySettingsScreen(
         }
       }
     }
-    DshPanel {
-      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = nativeString("Gateways"), style = DshTheme.type.section, color = DshTheme.colors.text)
-        if (pairedGateways.isEmpty()) {
-          Text(text = nativeString("No paired gateways."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
-        } else {
-          pairedGateways.forEachIndexed { index, entry ->
-            if (index > 0) HorizontalDivider(color = DshTheme.colors.border)
-            DshListItem(
-              title = entry.name,
-              subtitle =
-                when (entry.kind) {
-                  GatewayRegistryEntryKind.MANUAL -> "${entry.host}:${entry.port}"
-                  GatewayRegistryEntryKind.DISCOVERED -> entry.stableId
-                },
-              leading = {
-                if (entry.stableId == activeGatewayStableId) {
-                  DshIconBadge(Icons.Default.Check)
-                } else {
-                  DshIconBadge(Icons.Default.Cloud)
-                }
-              },
-              trailing = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                  Switch(
-                    checked = entry.stableId == activeGatewayStableId || entry.stableId in connectedGatewayStableIds,
-                    onCheckedChange = { enabled ->
-                      viewModel.setGatewayConnectionEnabled(entry.stableId, enabled)
-                    },
-                    enabled = entry.stableId != activeGatewayStableId,
-                  )
-                  TextButton(onClick = { pendingForgetStableId = entry.stableId }) {
-                    Text(nativeString("Forget"))
+    if (!isDshMode) {
+      DshPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          Text(text = nativeString("Gateways"), style = DshTheme.type.section, color = DshTheme.colors.text)
+          if (pairedGateways.isEmpty()) {
+            Text(text = nativeString("No paired gateways."), style = DshTheme.type.body, color = DshTheme.colors.textMuted)
+          } else {
+            pairedGateways.forEachIndexed { index, entry ->
+              if (index > 0) HorizontalDivider(color = DshTheme.colors.border)
+              DshListItem(
+                title = entry.name,
+                subtitle =
+                  when (entry.kind) {
+                    GatewayRegistryEntryKind.MANUAL -> "${entry.host}:${entry.port}"
+                    GatewayRegistryEntryKind.DISCOVERED -> entry.stableId
+                  },
+                leading = {
+                  if (entry.stableId == activeGatewayStableId) {
+                    DshIconBadge(Icons.Default.Check)
+                  } else {
+                    DshIconBadge(Icons.Default.Cloud)
                   }
-                }
-              },
-              onClick =
-                if (entry.stableId == activeGatewayStableId) {
-                  null
-                } else {
-                  { viewModel.switchToGateway(entry.stableId) }
                 },
-            )
+                trailing = {
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Switch(
+                      checked = entry.stableId == activeGatewayStableId || entry.stableId in connectedGatewayStableIds,
+                      onCheckedChange = { enabled ->
+                        viewModel.setGatewayConnectionEnabled(entry.stableId, enabled)
+                      },
+                      enabled = entry.stableId != activeGatewayStableId,
+                    )
+                    TextButton(onClick = { pendingForgetStableId = entry.stableId }) {
+                      Text(nativeString("Forget"))
+                    }
+                  }
+                },
+                onClick =
+                  if (entry.stableId == activeGatewayStableId) {
+                    null
+                  } else {
+                    { viewModel.switchToGateway(entry.stableId) }
+                  },
+              )
+            }
           }
         }
       }
-    }
       if (hasPairedGateways) {
         manualGatewayPanel()
       }
     }
   }
+}
 }
 
 internal fun gatewayAccessLabel(

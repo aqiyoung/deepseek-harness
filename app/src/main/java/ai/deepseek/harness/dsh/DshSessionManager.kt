@@ -52,6 +52,10 @@ class DshSessionManager(private val scope: CoroutineScope) {
     private val _connectionState = MutableStateFlow(DshConnectionState.Disconnected)
     val connectionState: StateFlow<DshConnectionState> = _connectionState.asStateFlow()
 
+    /** The DSH server URL we are configured to talk to. Set once login succeeds; cleared on explicit disconnect. */
+    private val _serverUrl = MutableStateFlow("")
+    val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
+
     /** True once we have authenticated and successfully made at least one DSH API call.
      *  This lets the UI treat the gateway as "online" for sending messages even when the
      *  WebSocket downlink is still connecting (e.g. external nginx not forwarding Upgrade). */
@@ -94,7 +98,9 @@ class DshSessionManager(private val scope: CoroutineScope) {
                 _connectionState.value = DshConnectionState.Error
                 return@launch
             }
-            val c = DshApiClient(baseUrl.trim().removeSuffix("/"), effectiveCookie, scope)
+            val normalizedUrl = baseUrl.trim().removeSuffix("/")
+            _serverUrl.value = normalizedUrl
+            val c = DshApiClient(normalizedUrl, effectiveCookie, scope)
             client = c
             c.connectionState.collect { state ->
                 _connectionState.value = state
@@ -277,5 +283,7 @@ class DshSessionManager(private val scope: CoroutineScope) {
         client?.disconnect()
         client = null
         _connectionState.value = DshConnectionState.Disconnected
+        _authenticated.value = false
+        _serverUrl.value = ""
     }
 }
