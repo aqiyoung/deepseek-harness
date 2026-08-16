@@ -100,8 +100,11 @@ class DshApiClient(
     private fun doConnect() {
         _connectionState.value = DshConnectionState.Connecting
         openStreams.set(0)
-        openWebSocket("mux", "$baseUrl/api/events.mux")
-        openWebSocket("host", "$baseUrl/api/events.host")
+        // The uplink uses http(s), but the downlink is a WebSocket: OkHttp requires a ws/wss
+        // scheme. Convert so both LAN http:// and external https:// server URLs work.
+        val wsBase = baseUrl.replaceFirst("^https://".toRegex(), "wss://").replaceFirst("^http://".toRegex(), "ws://")
+        openWebSocket("mux", "$wsBase/api/events.mux")
+        openWebSocket("host", "$wsBase/api/events.host")
     }
 
     private fun openWebSocket(stream: String, url: String) {
