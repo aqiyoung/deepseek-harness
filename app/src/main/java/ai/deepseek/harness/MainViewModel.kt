@@ -82,6 +82,7 @@ import kotlinx.coroutines.withContext
 import ai.deepseek.harness.chat.ChatMessageContent
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
