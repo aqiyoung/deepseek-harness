@@ -1,11 +1,8 @@
 package ai.deepseek.harness.ui
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
-import android.util.Log
-import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
@@ -13,11 +10,9 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,7 +55,6 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
   var currentUrl by remember { mutableStateOf(DSH_WEB_URL) }
   var lastError by remember { mutableStateOf<String?>(null) }
   val webViewRef = remember { mutableStateOf<WebView?>(null) }
-  val context = androidx.compose.ui.platform.LocalContext.current
 
   // Chat/file attachments from the web app surface here.
   var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
@@ -118,21 +112,11 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.size(20.dp),
           )
         }
-        IconButton(
-          onClick = {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentUrl)))
-          },
-        ) {
-          Text(
-            text = "浏览器",
-            style = MaterialTheme.typography.labelSmall,
-          )
-        }
         Text(
           text = currentUrl,
           style = MaterialTheme.typography.labelMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.padding(start = 8.dp).weight(1f),
+          modifier = Modifier.padding(start = 8.dp),
         )
       }
     }
@@ -153,11 +137,11 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
     androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize().weight(1f)) {
       androidx.compose.ui.viewinterop.AndroidView(
         modifier = Modifier.fillMaxSize(),
-        factory = { ctx ->
+        factory = { context ->
           CookieManager.getInstance().apply {
             setAcceptCookie(true)
           }
-          WebView(ctx)
+          WebView(context)
             .apply {
               settings.javaScriptEnabled = true
               settings.domStorageEnabled = true
@@ -186,7 +170,6 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     isLoading = true
                     lastError = null
                     url?.let { currentUrl = it }
-                    Log.d("WebHost", "pageStarted: $url")
                   }
 
                   override fun onPageFinished(
@@ -198,8 +181,6 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     canGoForward = view?.canGoForward() == true
                     url?.let { currentUrl = it }
                     view?.requestFocus()
-                    Log.d("WebHost", "pageFinished: $url")
-                    Toast.makeText(context, "Loaded: $url", Toast.LENGTH_SHORT).show()
                   }
 
                   override fun onReceivedError(
@@ -207,24 +188,8 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     request: WebResourceRequest?,
                     error: WebResourceError?,
                   ) {
-                    val msg = "ERR_${error?.errorCode}: ${error?.description}"
-                    Log.e("WebHost", "receivedError isMain=${request?.isForMainFrame} $msg")
                     if (request?.isForMainFrame == true) {
-                      lastError = msg
-                      Toast.makeText(context, "Load error: $msg", Toast.LENGTH_LONG).show()
-                    }
-                  }
-
-                  override fun onReceivedHttpError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    errorResponse: WebResourceResponse?,
-                  ) {
-                    val msg = "HTTP_${errorResponse?.statusCode}"
-                    Log.e("WebHost", "httpError isMain=${request?.isForMainFrame} $msg")
-                    if (request?.isForMainFrame == true) {
-                      lastError = msg
-                      Toast.makeText(context, "HTTP error: $msg", Toast.LENGTH_LONG).show()
+                      lastError = "ERR_${error?.errorCode}: ${error?.description}"
                     }
                   }
 
@@ -233,25 +198,18 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     handler: SslErrorHandler?,
                     error: SslError?,
                   ) {
+                    // DSH self-hosted instances may use private/CN-issued certs;
+                    // allow the user through on the same host we intended to load.
                     val host = error?.url?.let { Uri.parse(it).host }
-                    Log.w("WebHost", "sslError host=$host url=${error?.url}")
                     if (host != null && (host == Uri.parse(DSH_WEB_URL).host || host.endsWith(".threel.site"))) {
                       handler?.proceed()
-                      Toast.makeText(context, "SSL bypass for $host", Toast.LENGTH_SHORT).show()
                     } else {
                       handler?.cancel()
-                      Toast.makeText(context, "SSL cancelled for $host", Toast.LENGTH_LONG).show()
                     }
                   }
                 }
               webChromeClient =
                 object : WebChromeClient() {
-                  override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    val msg = "[${consoleMessage?.sourceId()}:${consoleMessage?.lineNumber()}] ${consoleMessage?.message()}"
-                    Log.d("WebHost", "console ${consoleMessage?.messageLevel()}: $msg")
-                    return true
-                  }
-
                   override fun onPermissionRequest(request: PermissionRequest?) {
                     request?.grant(request.resources)
                   }
@@ -267,15 +225,8 @@ fun WebHostScreen(modifier: Modifier = Modifier) {
                     return true
                   }
                 }
+              loadUrl(DSH_WEB_URL)
             }.also { webViewRef.value = it }
-        },
-        update = { webView ->
-          // Load exactly once. The page 302-redirects to /login, which changes
-          // webView.url — re-calling loadUrl on that mismatch causes a reload loop.
-          if (webView.url == null) {
-            Log.d("WebHost", "update initial loadUrl $DSH_WEB_URL")
-            webView.loadUrl(DSH_WEB_URL)
-          }
         },
       )
     }
