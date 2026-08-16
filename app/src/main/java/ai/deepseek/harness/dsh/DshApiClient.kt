@@ -172,8 +172,7 @@ class DshApiClient(
                 .header("content-type", "application/json")
                 .header("Cookie", cookie)
                 .build()
-        okHttpClient.newCall(httpReq).use { call ->
-            val resp = call.execute()
+        okHttpClient.newCall(httpReq).execute().use { resp ->
             if (!resp.isSuccessful) {
                 throw IllegalStateException("HTTP ${resp.code} for /api/$method")
             }
