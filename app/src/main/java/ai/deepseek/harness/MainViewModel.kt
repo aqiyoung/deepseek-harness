@@ -1612,7 +1612,8 @@ class MainViewModel private constructor(
   }
 
   fun refreshTalkSetupReadiness() {
-    ensureRuntime().refreshTalkSetupReadiness()
+    // DSH 模式下没有旧 openclaw runtime；进入聊天时安全跳过，避免闪退。
+    runCatching { ensureRuntime() }.getOrNull()?.refreshTalkSetupReadiness()
   }
 
   fun refreshAgents() {
@@ -1790,11 +1791,13 @@ class MainViewModel private constructor(
     sessionKey: String,
     ownerAgentId: String? = null,
   ) {
-    ensureRuntime().loadChat(sessionKey, ownerAgentId)
+    // DSH 模式下没有旧 openclaw runtime；安全跳过（聊天收发尚未接到 DSH）。
+    val runtime = runCatching { ensureRuntime() }.getOrNull() ?: return
+    runtime.loadChat(sessionKey, ownerAgentId)
   }
 
   fun refreshChat() {
-    ensureRuntime().refreshChat()
+    runCatching { ensureRuntime() }.getOrNull()?.refreshChat()
   }
 
   fun refreshChatSessions(
@@ -2068,7 +2071,7 @@ class MainViewModel private constructor(
   }
 
   fun refreshChatCommands() {
-    ensureRuntime().refreshChatCommands()
+    runCatching { ensureRuntime() }.getOrNull()?.refreshChatCommands()
   }
 
   fun retryChatOutboxCommand(id: String) {
@@ -2099,7 +2102,9 @@ class MainViewModel private constructor(
     thinking: String,
     attachments: List<OutgoingAttachment>,
   ) {
-    ensureRuntime().sendChat(message = message, thinking = thinking, attachments = attachments)
+    // DSH 模式下没有旧 openclaw runtime；安全跳过（聊天收发尚未接到 DSH，下一步接入）。
+    val runtime = runCatching { ensureRuntime() }.getOrNull() ?: return
+    runtime.sendChat(message = message, thinking = thinking, attachments = attachments)
   }
 
   internal suspend fun sendChatForOwnerAwaitAcceptance(
