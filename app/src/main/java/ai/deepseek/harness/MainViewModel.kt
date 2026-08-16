@@ -739,12 +739,46 @@ class MainViewModel private constructor(
     runtimeState(initial = null) { it.chatTranscriptAnchor }
   val chatHistoryLoading: StateFlow<Boolean> = runtimeState(initial = false) { it.chatHistoryLoading }
   val chatError: StateFlow<String?> = runtimeState(initial = null) { it.chatError }
-  val chatHealthOk: StateFlow<Boolean> = runtimeState(initial = false) { it.chatHealthOk }
+  private val _runtimeChatHealthOk: StateFlow<Boolean> = runtimeState(initial = false) { it.chatHealthOk }
+  private val _runtimeChatSelectedModelRef: StateFlow<String?> = runtimeState(initial = null) { it.chatSelectedModelRef }
+  private val _runtimeChatModelCatalog: StateFlow<List<GatewayModelSummary>> = runtimeState(initial = emptyList()) { it.chatModelCatalog }
+  /** DSH-mode model selection (no openclaw runtime exists there). */
+  private val _dshSelectedModelRef = MutableStateFlow<String?>(null)
+
+  val chatHealthOk: StateFlow<Boolean> =
+    combine(isDshMode, dsh.connectionState, dsh.authenticated, _runtimeChatHealthOk) { dshMode, state, auth, rt ->
+      if (dshMode) (state == DshConnectionState.Connected || auth) else rt
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
   val chatThinkingLevel: StateFlow<String> = runtimeState(initial = "off") { it.chatThinkingLevel }
   val chatThinkingLevelSelection: StateFlow<ChatThinkingLevelSelection> =
     runtimeState(initial = defaultChatThinkingLevelSelection) { it.chatThinkingLevelSelection }
-  val chatSelectedModelRef: StateFlow<String?> = runtimeState(initial = null) { it.chatSelectedModelRef }
-  val chatModelCatalog: StateFlow<List<GatewayModelSummary>> = runtimeState(initial = emptyList()) { it.chatModelCatalog }
+  val chatSelectedModelRef: StateFlow<String?> =
+    combine(isDshMode, _dshSelectedModelRef, _runtimeChatSelectedModelRef) { dshMode, dshSel, rt ->
+      if (dshMode) dshSel else rt
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+  val chatModelCatalog: StateFlow<List<GatewayModelSummary>> =
+    combine(isDshMode, dsh.modelGroups, _runtimeChatModelCatalog) { dshMode, groups, rt ->
+      if (dshMode) {
+        groups.flatMap { g ->
+          g.models.map { m ->
+            GatewayModelSummary(
+              id = m.id,
+              name = m.name,
+              provider = g.id,
+              available = true,
+              supportsVision = false,
+              supportsAudio = false,
+              supportsVideo = false,
+              supportsDocuments = false,
+              supportsReasoning = false,
+              contextTokens = null,
+            )
+          }
+        }
+      } else {
+        rt
+      }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
   val chatStreamingAssistantText: StateFlow<String?> = runtimeState(initial = null) { it.chatStreamingAssistantText }
   val chatPendingToolCalls: StateFlow<List<ChatPendingToolCall>> = runtimeState(initial = emptyList()) { it.chatPendingToolCalls }
   val chatSubagentActivities: StateFlow<Map<String, ai.deepseek.harness.chat.ChatSubagentActivity>> =
@@ -1986,6 +2020,10 @@ class MainViewModel private constructor(
     sessionKey: String,
     modelRef: String?,
   ) {
+    if (isDshMode.value) {
+      _dshSelectedModelRef.value = modelRef
+      return
+    }
     ensureRuntime().setChatSessionModel(sessionKey = sessionKey, modelRef = modelRef)
   }
 
@@ -2193,8 +2231,9 @@ class MainViewModel private constructor(
     // DSH 模式：把消息发到当前打开的 DSH 会话，然后刷新历史。
     val sid = _activeDshSessionId.value
     if (sid != null && isDshMode.value) {
+      val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
       viewModelScope.launch {
-        runCatching { dsh.prompt(sid, message) }
+        runCatching { dsh.prompt(sid, message, model = modelId) }
         val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
         _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
       }
@@ -2214,7 +2253,8 @@ class MainViewModel private constructor(
     // DSH 模式：把消息发到当前打开的 DSH 会话，再刷新历史。
     val sid = _activeDshSessionId.value
     if (sid != null && isDshMode.value) {
-      val ok = runCatching { dsh.prompt(sid, message) }.getOrDefault(false)
+      val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
+      val ok = runCatching { dsh.prompt(sid, message, model = modelId) }.getOrDefault(false)
       val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
       _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
       return ok

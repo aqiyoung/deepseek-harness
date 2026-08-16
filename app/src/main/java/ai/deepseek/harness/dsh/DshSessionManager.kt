@@ -244,10 +244,11 @@ class DshSessionManager(private val scope: CoroutineScope) {
     }
 
     /** Send a user message to a session. Returns true if accepted. */
-    suspend fun prompt(sessionId: String, text: String, mode: String = "queue"): Boolean {
+    suspend fun prompt(sessionId: String, text: String, mode: String = "queue", model: String? = null): Boolean {
         val payload = buildJsonObject {
             put("sessionId", JsonPrimitive(sessionId))
             put("mode", JsonPrimitive(mode))
+            if (!model.isNullOrBlank()) put("model", JsonPrimitive(model))
             put(
                 "content",
                 buildJsonArray {
