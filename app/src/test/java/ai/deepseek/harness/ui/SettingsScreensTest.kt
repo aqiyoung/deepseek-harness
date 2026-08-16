@@ -406,6 +406,24 @@ class SettingsScreensTest {
     assertEquals("10.0.0.5:18789", gatewayDiscoveredRowSubtitle(endpoint))
   }
 
+  @Test
+  fun gatewayScreenSurfacesManualConfigFirstWhenUnpaired() {
+    val source = settingsScreensSource()
+    val screenStart = source.indexOf("private fun GatewaySettingsScreen(")
+    // The redundant hero CTA has been removed; manual configuration is the
+    // primary action for first-run / server-hosted users (above the metric panel).
+    val scanHero = source.indexOf("nativeString(\"Scan QR to Pair\")", screenStart)
+    assertEquals(-1, scanHero)
+    val manualPanel = source.indexOf("nativeString(\"Manual Gateway\")", screenStart)
+    val addPanel = source.indexOf("nativeString(\"Add Gateway\")", screenStart)
+    val pairedPanel = source.indexOf("nativeString(\"Gateways\")", screenStart)
+    assertTrue(screenStart >= 0 && manualPanel > screenStart)
+    assertTrue(addPanel > manualPanel && pairedPanel > addPanel)
+    // Discovered gateways surface inside Add Gateway with a per-row connect.
+    val discoveredRows = source.indexOf("discoveredGateways.forEachIndexed", screenStart)
+    assertTrue(discoveredRows > addPanel && discoveredRows < pairedPanel)
+  }
+
   private fun settingsScreensSource(): String {
     val candidates =
       listOf(
