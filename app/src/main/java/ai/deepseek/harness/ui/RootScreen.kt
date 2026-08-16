@@ -23,6 +23,11 @@ fun RootScreen(viewModel: MainViewModel) {
   val updateToast by viewModel.appUpdateToast.collectAsState()
   val context = LocalContext.current
 
+  // 已登录则自动连上 DSH 实例（重启 App 后也保持在线）。
+  LaunchedEffect(isLoggedIn) {
+    if (isLoggedIn) viewModel.connectDsh()
+  }
+
   // 手动检查结果的 Toast 提示。
   LaunchedEffect(updateToast) {
     updateToast?.let {

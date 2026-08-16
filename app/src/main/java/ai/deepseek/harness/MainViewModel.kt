@@ -44,6 +44,8 @@ import ai.deepseek.harness.ui.chat.shouldMigrateComposerDraft
 import ai.deepseek.harness.ui.chat.toOutgoingAttachment
 import ai.deepseek.harness.voice.AndroidAudioInputSession
 import ai.deepseek.harness.voice.AudioInputDeviceOption
+import ai.deepseek.harness.dsh.DshConnectionState
+import ai.deepseek.harness.dsh.DshSessionManager
 import ai.deepseek.harness.voice.VoiceConversationEntry
 import ai.deepseek.harness.voice.VoiceWakePreferences
 import android.Manifest
@@ -68,6 +70,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -330,6 +333,9 @@ class MainViewModel private constructor(
   // Detail disposal clears it; process death drops it with the ViewModel.
   internal val cronEditorDraftMemory = CronEditorDraftMemory()
 
+  /** Native DSH client (current harness protocol). Drives connection + real server data. */
+  val dsh = DshSessionManager(viewModelScope)
+
   @Volatile private var permissionRequester: PermissionRequester? = null
 
   @Volatile private var foreground = false
@@ -519,7 +525,9 @@ class MainViewModel private constructor(
     prefs.notificationForwardingMaxEventsPerMinute
   val notificationForwardingSessionKey: StateFlow<String?> = prefs.notificationForwardingSessionKey
 
-  val isConnected: StateFlow<Boolean> = runtimeState(initial = false) { it.isConnected }
+  val isConnected: StateFlow<Boolean> =
+    dsh.connectionState.map { it == DshConnectionState.Connected }
+      .stateIn(viewModelScope, SharingStarted.Eagerly, false)
   val gatewayControlPage: StateFlow<NodeRuntime.GatewayControlPage?> =
     runtimeState(initial = null) { it.gatewayControlPage }
   val desktopObserveAvailable: StateFlow<Boolean> =
@@ -527,10 +535,32 @@ class MainViewModel private constructor(
   val isNodeConnected: StateFlow<Boolean> = runtimeState(initial = false) { it.nodeConnected }
   val nodeCapabilityApproval: StateFlow<GatewayNodeCapabilityApproval> =
     runtimeState(initial = GatewayNodeCapabilityApproval.Loading) { it.nodeCapabilityApproval }
-  val statusText: StateFlow<String> = runtimeState(initial = "Offline") { it.statusText }
+  val statusText: StateFlow<String> =
+    dsh.connectionState
+      .map {
+        when (it) {
+          DshConnectionState.Connected -> "Connected"
+          DshConnectionState.Connecting -> "Connecting…"
+          DshConnectionState.Error -> "Connection error"
+          else -> "Offline"
+        }
+      }
+      .stateIn(viewModelScope, SharingStarted.Eagerly, "Offline")
   val gatewayConnectionProblem: StateFlow<GatewayConnectionProblem?> = runtimeState(initial = null) { it.gatewayConnectionProblem }
   val gatewayConnectionDisplay: StateFlow<GatewayConnectionDisplay> =
-    runtimeState(initial = GatewayConnectionDisplay(false, "Offline", null)) { it.gatewayConnectionDisplay }
+    dsh.connectionState
+      .map {
+        GatewayConnectionDisplay(
+          isConnected = it == DshConnectionState.Connected,
+          statusText = if (it == DshConnectionState.Connected) "Connected" else "Offline",
+          problem = null,
+        )
+      }
+      .stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        GatewayConnectionDisplay(false, "Offline", null),
+      )
   val operatorAdminScopeAvailable: StateFlow<Boolean> = runtimeState(initial = false) { it.operatorAdminScopeAvailable }
   internal val systemAgentChatState: StateFlow<SystemAgentChatState> =
     runtimeState(initial = SystemAgentChatState()) { it.systemAgentChatState }
@@ -694,7 +724,24 @@ class MainViewModel private constructor(
     runtimeState(initial = emptyMap()) { it.chatSubagentActivities }
   val chatQuestions: StateFlow<List<ChatQuestionPrompt>> = runtimeState(initial = emptyList()) { it.chatQuestions }
   val chatPlanSteps: StateFlow<List<ChatPlanStep>> = runtimeState(initial = emptyList()) { it.chatPlanSteps }
-  val chatSessions: StateFlow<List<ChatSessionEntry>> = runtimeState(initial = emptyList()) { it.chatSessions }
+  val chatSessions: StateFlow<List<ChatSessionEntry>> =
+    dsh.sessions
+      .map { list ->
+        list.map { s ->
+          ChatSessionEntry(
+            key = s.sessionId,
+            updatedAtMs = s.updatedAt,
+            sessionId = s.sessionId,
+            displayName = s.title,
+            derivedTitle = s.title,
+            label = s.title,
+            hasActiveRun = s.running,
+            lastActivityAt = s.updatedAt,
+            modelProvider = s.agentPreset,
+          )
+        }
+      }
+      .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
   val chatSwarmGroups: StateFlow<List<ChatSwarmGroup>> = runtimeState(initial = emptyList()) { it.chatSwarmGroups }
   val chatSessionBranches: StateFlow<List<SessionBranch>> = runtimeState(initial = emptyList()) { it.chatSessionBranches }
   val chatSessionBranchesLoading: StateFlow<Boolean> = runtimeState(initial = false) { it.chatSessionBranchesLoading }
@@ -941,6 +988,17 @@ class MainViewModel private constructor(
   /** Persists the DSH backend server address used by the login request. */
   fun setServerUrl(value: String) {
     prefs.setServerUrl(value)
+  }
+
+  /**
+   * After a successful DSH web login, connects the native DSH client with the saved session cookie
+   * and backend address. This replaces the legacy openclaw gateway registration: dsh.threel.site
+   * speaks the current harness protocol (HTTP /api + WebSocket downlinks), so we connect directly.
+   */
+  fun connectDsh() {
+    val cookie = prefs.getSessionCookie()
+    val url = prefs.serverUrl.value.trim().removeSuffix("/").ifEmpty { "https://dsh.threel.site" }
+    dsh.connect(baseUrl = url, cookie = cookie)
   }
 
   /**
@@ -1546,7 +1604,7 @@ class MainViewModel private constructor(
   }
 
   fun refreshModelCatalog() {
-    ensureRuntime().refreshModelCatalog()
+    viewModelScope.launch { dsh.loadModels() }
   }
 
   fun refreshProviderModels() {
@@ -1558,7 +1616,7 @@ class MainViewModel private constructor(
   }
 
   fun refreshAgents() {
-    ensureRuntime().refreshAgents()
+    viewModelScope.launch { dsh.loadPresets() }
   }
 
   fun refreshCronJobs() {
@@ -1743,7 +1801,7 @@ class MainViewModel private constructor(
     limit: Int? = null,
     archived: Boolean = false,
   ) {
-    ensureRuntime().refreshChatSessions(limit = limit, archived = archived)
+    viewModelScope.launch { dsh.loadSessions() }
   }
 
   suspend fun patchChatSession(
