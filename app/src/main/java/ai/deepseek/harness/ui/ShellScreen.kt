@@ -609,7 +609,7 @@ private fun OverviewScreen(
             cronJobCount = cronStatus.jobs,
             onOpenChat = { onSelectTab(Tab.Chat) },
             onOpenAgent = { onOpenSettingsRoute(SettingsRoute.Agents) },
-            onOpenGateway = { onOpenSettingsRoute(SettingsRoute.Gateway) },
+            onOpenGateway = { viewModel.refreshDshConnection(); onOpenSettingsRoute(SettingsRoute.Gateway) },
           )
         }
 

@@ -102,6 +102,7 @@ class DshSessionManager(private val scope: CoroutineScope) {
             _serverUrl.value = normalizedUrl
             val c = DshApiClient(normalizedUrl, effectiveCookie, scope)
             client = c
+            c.connect()
             c.connectionState.collect { state ->
                 _connectionState.value = state
                 if (state == DshConnectionState.Connected) {
