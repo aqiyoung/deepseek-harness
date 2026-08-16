@@ -5,7 +5,9 @@ import ai.deepseek.harness.ui.DeepSeekHarnessTheme
 import ai.deepseek.harness.ui.RootScreen
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
+import java.io.File
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -52,8 +54,29 @@ class MainActivity : AppCompatActivity() {
   private val runtimeUiStarter = MainActivityRuntimeUiStarter()
   private var screenshotScene: AndroidScreenshotScene? = null
 
+  /**
+   * 把未捕获崩溃堆栈落盘到应用文件目录 crash.txt，方便无 adb 环境时定位闪退。
+   * 同时保留系统默认处理器（仍会弹出“已停止”）。
+   */
+  private fun installCrashLogger() {
+    val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+      try {
+        val dir = getExternalFilesDir(null) ?: filesDir
+        val file = File(dir, "crash.txt")
+        file.appendText(
+          "==== crash @ ${System.currentTimeMillis()} on ${thread.name} ====\n" +
+            Log.getStackTraceString(throwable) + "\n\n",
+        )
+      } catch (_: Throwable) {
+      }
+      defaultHandler?.uncaughtException(thread, throwable)
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    installCrashLogger()
     pendingIntentRouter.setInitialIntent(intent)
     WindowCompat.setDecorFitsSystemWindows(window, false)
     permissionRequester.attach(this)
