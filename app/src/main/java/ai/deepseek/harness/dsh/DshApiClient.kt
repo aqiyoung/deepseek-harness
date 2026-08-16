@@ -167,8 +167,18 @@ class DshApiClient(
     /** Unary call. Returns the `value` of the result (JsonNull if void). */
     suspend fun call(method: String, payload: JsonElement? = JsonNull): JsonElement {
         val rpcId = UUID.randomUUID().toString()
-        val req = DshClientRequest(rpcId = rpcId, method = method, payload = payload)
-        val body = json.encodeToString(DshClientRequest.serializer(), req).toRequestBody(mediaType)
+        // Build the envelope explicitly (do NOT rely on data-class default values) so the
+        // discriminator `type` is always present. The server rejects the request with
+        // "invalid client-request message / expected client-request" when `type` is omitted.
+        // `payload` defaults to `{}` (not null) to match the working reference client.
+        val bodyJson =
+            buildJsonObject {
+                put("type", JsonPrimitive("client-request"))
+                put("rpcId", JsonPrimitive(rpcId))
+                put("method", JsonPrimitive(method))
+                put("payload", if (payload == null || payload is JsonNull) JsonObject(emptyMap()) else payload)
+            }
+        val body = json.encodeToString(bodyJson).toRequestBody(mediaType)
         val httpReq =
             Request.Builder()
                 .url("$baseUrl/api/$method")
@@ -192,13 +202,16 @@ class DshApiClient(
 
     /** Respond to a server→client request (approvals / questions). */
     suspend fun respond(rpcId: String, result: JsonElement) {
-        val body =
-            json
-                .encodeToString(
-                    DshClientResponse.serializer(),
-                    DshClientResponse(rpcId = rpcId, result = DshRpcResult(ok = true, value = result)),
-                )
-                .toRequestBody(mediaType)
+        val bodyJson =
+            buildJsonObject {
+                put("type", JsonPrimitive("client-response"))
+                put("rpcId", JsonPrimitive(rpcId))
+                putJsonObject("result") {
+                    put("ok", true)
+                    put("value", result)
+                }
+            }
+        val body = json.encodeToString(bodyJson).toRequestBody(mediaType)
         val httpReq =
             Request.Builder()
                 .url("$baseUrl/api/respond")
