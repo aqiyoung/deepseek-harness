@@ -2,7 +2,6 @@
 agp = "9.3.1"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
-androidx-browser = "1.8.0"
 androidx-camera = "1.6.1"
 androidx-compose-bom = "2026.06.01"
 androidx-core = "1.16.0"
@@ -39,7 +38,6 @@ serialization-json = "1.11.0"
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
-androidx-browser = { module = "androidx.browser:browser", version.ref = "androidx-browser" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidx-camera" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "androidx-camera" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "androidx-camera" }
