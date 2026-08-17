@@ -70,7 +70,10 @@ fun LoginScreen(
   onLoginSuccess: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val serverUrl by viewModel.serverUrl.collectAsState()
+  val _serverUrl by viewModel.serverUrl.collectAsState()
+  var serverInput by remember { mutableStateOf(_serverUrl) }
+  LaunchedEffect(_serverUrl) { serverInput = _serverUrl }
+
   var username by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var isVerifying by remember { mutableStateOf(false) }
@@ -125,8 +128,8 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
             TextField(
-                value = serverUrl,
-                onValueChange = { viewModel.setServerUrl(it) },
+                value = serverInput,
+                onValueChange = { serverInput = it },
                 placeholder = { Text(text = "https://dsh.threel.site") },
                 label = { Text(text = "服务器地址") },
                 enabled = !isVerifying,
@@ -201,14 +204,15 @@ fun LoginScreen(
               enabled = !isVerifying,
               modifier = Modifier.fillMaxWidth(),
               onClick = {
-                if (serverUrl.isBlank() || username.isBlank() || password.isBlank()) {
+                if (serverInput.isBlank() || username.isBlank() || password.isBlank()) {
                   error = "请填写服务器地址、用户名和密码"
                   return@DshPrimaryButton
                 }
                 error = null
                 isVerifying = true
                 scope.launch {
-                  val url = serverUrl.trim().removeSuffix("/")
+                  viewModel.setServerUrl(serverInput)
+                  val url = serverInput.trim().removeSuffix("/")
                   when (val result = dshAuthenticate(url, username.trim(), password)) {
                     is LoginResult.Success -> {
                       result.cookie?.let { viewModel.setSessionCookie(it) }
