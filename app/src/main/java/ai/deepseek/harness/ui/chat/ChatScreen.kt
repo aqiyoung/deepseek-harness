@@ -90,13 +90,6 @@ fun ChatScreen(
 
   LaunchedEffect(preferredModel) { selectedModel = preferredModel }
 
-  // Auto-select first session
-  LaunchedEffect(sessions, activeSessionId) {
-    if (activeSessionId == null && sessions.isNotEmpty()) {
-      viewModel.loadSessionHistory(sessions.first().sessionId)
-    }
-  }
-
   // Auto-scroll to bottom
   LaunchedEffect(chatMessages.size) {
     if (chatMessages.isNotEmpty()) {
@@ -142,7 +135,7 @@ fun ChatScreen(
         .padding(horizontal = 12.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      if (chatMessages.isEmpty() && !isConnected) {
+      if (sessions.isEmpty() && !isConnected) {
         item {
           Box(
             modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -158,7 +151,23 @@ fun ChatScreen(
         }
       }
 
-      if (chatMessages.isEmpty() && isConnected) {
+      if (sessions.isEmpty() && isConnected) {
+        item {
+          Box(
+            modifier = Modifier.fillMaxWidth().padding(32.dp),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = "Loading sessions...",
+              style = DshTheme.type.body,
+              color = DshTheme.colors.textMuted,
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      }
+
+      if (sessions.isNotEmpty() && activeSessionId == null && chatMessages.isEmpty()) {
         item {
           Box(
             modifier = Modifier.fillMaxWidth().padding(32.dp),
