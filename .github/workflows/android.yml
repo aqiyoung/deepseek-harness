@@ -43,6 +43,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Verify Config files
+        run: |
+          ls -la Config/
+          cat Config/Version.properties
+
       - name: Build debug APK
         run: |
           ./gradlew :app:assembleDebug --no-daemon
