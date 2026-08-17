@@ -1872,9 +1872,30 @@ class MainViewModel private constructor(
     runtime.loadChat(sessionKey, ownerAgentId)
   }
 
+  /**
+   * Resolve the real DSH session the chat should attach to. DSH has no notion of the openclaw
+   * "main" session key, so the chat must resolve to an actual session: prefer an already-active
+   * known session, then the most recently updated session, then create a fresh one. This keeps
+   * the DSH chat self-sufficient instead of silently targeting a non-existent "main" session.
+   */
+  private suspend fun ensureActiveDshSession(): String? {
+    val cur = _activeDshSessionId.value
+    if (!cur.isNullOrBlank() && dsh.sessions.value.any { it.sessionId == cur }) return cur
+    runCatching { dsh.loadSessions() }
+    val recent = dsh.sessions.value.maxByOrNull { it.updatedAt }
+    if (recent != null) {
+      _activeDshSessionId.value = recent.sessionId
+      return recent.sessionId
+    }
+    val created = dsh.createSession()
+    if (created != null) _activeDshSessionId.value = created
+    return created
+  }
+
   private suspend fun loadDshChat(sessionId: String) {
-    _activeDshSessionId.value = sessionId
-    val events = runCatching { dsh.history(sessionId) }.getOrDefault(emptyList())
+    val real = ensureActiveDshSession() ?: sessionId
+    _activeDshSessionId.value = real
+    val events = runCatching { dsh.history(real) }.getOrDefault(emptyList())
     _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
   }
 
@@ -2229,7 +2250,7 @@ class MainViewModel private constructor(
     attachments: List<OutgoingAttachment>,
   ) {
     // DSH 模式：把消息发到当前打开的 DSH 会话，然后刷新历史。
-    val sid = _activeDshSessionId.value
+    val sid = ensureActiveDshSession()
     if (sid != null && isDshMode.value) {
       val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
       viewModelScope.launch {
@@ -2251,7 +2272,7 @@ class MainViewModel private constructor(
     idempotencyKey: String,
   ): Boolean {
     // DSH 模式：把消息发到当前打开的 DSH 会话，再刷新历史。
-    val sid = _activeDshSessionId.value
+    val sid = ensureActiveDshSession()
     if (sid != null && isDshMode.value) {
       val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
       val ok = runCatching { dsh.prompt(sid, message, model = modelId) }.getOrDefault(false)
