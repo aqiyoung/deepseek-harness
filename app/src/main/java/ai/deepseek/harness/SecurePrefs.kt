@@ -113,6 +113,34 @@ class SecurePrefs(context: Context) {
     _appLanguage.value = language
   }
 
+  // ── Preferred Model / Preset ──
+
+  private val _preferredModel = MutableStateFlow(
+    plainPrefs.getString("chat.preferredModel", null) ?: "",
+  )
+  val preferredModel: StateFlow<String> = _preferredModel
+
+  fun setPreferredModel(model: String?) {
+    plainPrefs.edit {
+      if (model.isNullOrBlank()) { remove("chat.preferredModel") }
+      else { putString("chat.preferredModel", model.trim()) }
+    }
+    _preferredModel.value = model ?: ""
+  }
+
+  private val _preferredPreset = MutableStateFlow(
+    plainPrefs.getString("chat.preferredPreset", null) ?: "",
+  )
+  val preferredPreset: StateFlow<String> = _preferredPreset
+
+  fun setPreferredPreset(preset: String?) {
+    plainPrefs.edit {
+      if (preset.isNullOrBlank()) { remove("chat.preferredPreset") }
+      else { putString("chat.preferredPreset", preset.trim()) }
+    }
+    _preferredPreset.value = preset ?: ""
+  }
+
   private val _modelFavorites = MutableStateFlow(loadStringList("chat.modelFavorites"))
   val modelFavorites: StateFlow<List<String>> = _modelFavorites
 

@@ -1,15 +1,9 @@
 package ai.deepseek.harness.dsh
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
@@ -23,7 +17,7 @@ import kotlinx.serialization.json.put
  * [StateFlow]s the UI can observe. Chat primitives ([prompt], [history], [cancel]) and the live
  * mux event stream ([sessionEvents]) are also provided so a native chat surface can be built on top.
  */
-class DshSessionManager(private val scope: CoroutineScope) {
+class DshSessionManager(private val scope: kotlinx.coroutines.CoroutineScope) {
     data class SessionInfo(
         val sessionId: String,
         val title: String,
@@ -47,18 +41,23 @@ class DshSessionManager(private val scope: CoroutineScope) {
     data class ModelInfo(val id: String, val name: String)
     data class SettingsNs(val name: String)
 
+    /** A single trajectory step observed from the mux stream. */
+    data class TrajectoryStep(
+        val timestamp: Long,
+        val type: String,
+        val text: String? = null,
+        val model: String? = null,
+        val status: String? = null,
+    )
+
     private var client: DshApiClient? = null
 
     private val _connectionState = MutableStateFlow(DshConnectionState.Disconnected)
     val connectionState: StateFlow<DshConnectionState> = _connectionState.asStateFlow()
 
-    /** The DSH server URL we are configured to talk to. Set once login succeeds; cleared on explicit disconnect. */
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
-    /** True once we have authenticated and successfully made at least one DSH API call.
-     *  This lets the UI treat the gateway as "online" for sending messages even when the
-     *  WebSocket downlink is still connecting (e.g. external nginx not forwarding Upgrade). */
     private val _authenticated = MutableStateFlow(false)
     val authenticated: StateFlow<Boolean> = _authenticated.asStateFlow()
 
@@ -87,7 +86,10 @@ class DshSessionManager(private val scope: CoroutineScope) {
     private val _sessionEvents = MutableStateFlow<Map<String, List<JsonObject>>>(emptyMap())
     val sessionEvents: StateFlow<Map<String, List<JsonObject>>> = _sessionEvents.asStateFlow()
 
-    /** Authenticate (if [cookie] missing) and open the downlink streams; then load all data. */
+    /** Real-time trajectory for the active session. */
+    private val _trajectory = MutableStateFlow<List<TrajectoryStep>>(emptyList())
+    val trajectory: StateFlow<List<TrajectoryStep>> = _trajectory.asStateFlow()
+
     fun connect(baseUrl: String, cookie: String?, user: String? = null, password: String? = null) {
         scope.launch {
             var effectiveCookie = cookie
@@ -124,9 +126,63 @@ class DshSessionManager(private val scope: CoroutineScope) {
                         val list = (this[sid] ?: emptyList()).toMutableList().apply { add(event) }
                         this[sid] = list
                     }
+                    // Build trajectory step
+                    val step = parseTrajectoryStep(event, sid)
+                    if (step != null) {
+                        _trajectory.value = (_trajectory.value.toMutableList() + step).takeLast(100)
+                    }
                 }
             }
         }
+    }
+
+    private fun parseTrajectoryStep(event: JsonObject, sid: String): TrajectoryStep? {
+        val type = event["type"]?.jsonPrimitive?.contentOrNull ?: return null
+        val timestamp = System.currentTimeMillis()
+
+        return when (type) {
+            "user/message" -> {
+                val text = event["content"]?.jsonArray?.firstOrNull()?.jsonObject
+                    ?.get("text")?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "user", text = text, status = "sent")
+            }
+            "assistant/message" -> {
+                val text = event["content"]?.jsonArray?.firstOrNull()?.jsonObject
+                    ?.get("text")?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "assistant", text = text, status = "received")
+            }
+            "model/call" -> {
+                val model = event["model"]?.jsonPrimitive?.contentOrNull
+                    ?: event["provider"]?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "model", text = "LLM call", model = model, status = "started")
+            }
+            "model/response" -> {
+                val model = event["model"]?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "model", text = "LLM response", model = model, status = "done")
+            }
+            "tool/call" -> {
+                val name = event["toolName"]?.jsonPrimitive?.contentOrNull
+                    ?: event["name"]?.jsonPrimitive?.contentOrNull
+                    ?: event["tool"]?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "tool", text = "Tool: $name", status = "started")
+            }
+            "tool/result" -> {
+                val name = event["toolName"]?.jsonPrimitive?.contentOrNull
+                    ?: event["name"]?.jsonPrimitive?.contentOrNull
+                    ?: event["tool"]?.jsonPrimitive?.contentOrNull
+                val text = event["result"]?.jsonPrimitive?.contentOrNull
+                    ?: event["output"]?.jsonPrimitive?.contentOrNull
+                TrajectoryStep(timestamp, "tool", text = "Tool result: $name" + (text?.let { " — $it" } ?: ""), status = "done")
+            }
+            else -> {
+                // Generic step for unknown types (keep for visibility)
+                TrajectoryStep(timestamp, type, text = null, status = null)
+            }
+        }
+    }
+
+    fun clearTrajectory() {
+        _trajectory.value = emptyList()
     }
 
     private fun loadAll() {
@@ -142,7 +198,7 @@ class DshSessionManager(private val scope: CoroutineScope) {
     }
 
     suspend fun loadSessions() {
-        val v = client?.call("session.list", buildJsonObject { put("cursor", JsonPrimitive("")) })
+        val v = client?.call("session.list", buildJsonObject { put("cursor", kotlinx.serialization.json.JsonPrimitive("")) })
             ?: return
         val items = (v as? JsonObject)?.get("items")?.takeIf { it is JsonArray }?.jsonArray ?: return
         _sessions.value = items.mapNotNull { it as? JsonObject }.mapNotNull { mapSession(it) }
@@ -204,9 +260,8 @@ class DshSessionManager(private val scope: CoroutineScope) {
     }
 
     suspend fun loadModels() {
-        // Per-session model catalog; use the first session if available, else skip.
         val sid = _sessions.value.firstOrNull()?.sessionId ?: return
-        val v = client?.call("session.models", buildJsonObject { put("sessionId", JsonPrimitive(sid)) })
+        val v = client?.call("session.models", buildJsonObject { put("sessionId", kotlinx.serialization.json.JsonPrimitive(sid)) })
             ?: return
         val o = v as? JsonObject ?: return
         val groups = o["groups"]?.takeIf { it is JsonArray }?.jsonArray ?: return
@@ -233,29 +288,27 @@ class DshSessionManager(private val scope: CoroutineScope) {
             .map { SettingsNs(it) }
     }
 
-    /** Create a new ordinary session in [cwd] (or the host cwd) and return its id, or null. */
     suspend fun createSession(cwd: String? = null, agentPreset: String? = null): String? {
         val payload = buildJsonObject {
-            if (cwd != null) put("cwd", JsonPrimitive(cwd))
-            if (agentPreset != null) put("agentPreset", JsonPrimitive(agentPreset))
+            if (cwd != null) put("cwd", kotlinx.serialization.json.JsonPrimitive(cwd))
+            if (agentPreset != null) put("agentPreset", kotlinx.serialization.json.JsonPrimitive(agentPreset))
         }
         val v = client?.call("session.create", payload) ?: return null
         return (v as? JsonObject)?.get("sessionId")?.jsonPrimitive?.contentOrNull
     }
 
-    /** Send a user message to a session. Returns true if accepted. */
     suspend fun prompt(sessionId: String, text: String, mode: String = "queue", model: String? = null): Boolean {
         val payload = buildJsonObject {
-            put("sessionId", JsonPrimitive(sessionId))
-            put("mode", JsonPrimitive(mode))
-            if (!model.isNullOrBlank()) put("model", JsonPrimitive(model))
+            put("sessionId", kotlinx.serialization.json.JsonPrimitive(sessionId))
+            put("mode", kotlinx.serialization.json.JsonPrimitive(mode))
+            if (!model.isNullOrBlank()) put("model", kotlinx.serialization.json.JsonPrimitive(model))
             put(
                 "content",
-                buildJsonArray {
+                kotlinx.serialization.json.buildJsonArray {
                     add(
                         buildJsonObject {
-                            put("type", JsonPrimitive("text"))
-                            put("text", JsonPrimitive(text))
+                            put("type", kotlinx.serialization.json.JsonPrimitive("text"))
+                            put("text", kotlinx.serialization.json.JsonPrimitive(text))
                         },
                     )
                 },
@@ -264,11 +317,10 @@ class DshSessionManager(private val scope: CoroutineScope) {
         return runCatching { client?.call("session.prompt", payload); true }.getOrDefault(false)
     }
 
-    /** Fetch the history tail (raw events) for a session. */
     suspend fun history(sessionId: String): List<JsonObject> {
         val v = client?.call(
             "session.history",
-            buildJsonObject { put("sessionId", JsonPrimitive(sessionId)) },
+            buildJsonObject { put("sessionId", kotlinx.serialization.json.JsonPrimitive(sessionId)) },
         ) ?: return emptyList()
         val arr = (v as? JsonObject)?.get("events")?.takeIf { it is JsonArray }?.jsonArray ?: return emptyList()
         return arr.mapNotNull { (it as? JsonObject)?.get("event") as? JsonObject }
@@ -276,7 +328,7 @@ class DshSessionManager(private val scope: CoroutineScope) {
 
     suspend fun cancel(sessionId: String): Boolean {
         return runCatching {
-            client?.call("session.cancel", buildJsonObject { put("sessionId", JsonPrimitive(sessionId)) })
+            client?.call("session.cancel", buildJsonObject { put("sessionId", kotlinx.serialization.json.JsonPrimitive(sessionId)) })
             true
         }.getOrDefault(false)
     }

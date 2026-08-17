@@ -73,6 +73,27 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     setAppLanguage(language)
   }
 
+  // ── Preferred Model / Preset ──
+
+  val preferredModel: StateFlow<String> = prefs.preferredModel
+  val preferredPreset: StateFlow<String> = prefs.preferredPreset
+
+  fun setPreferredModel(model: String?) {
+    prefs.setPreferredModel(model)
+  }
+
+  fun setPreferredPreset(preset: String?) {
+    prefs.setPreferredPreset(preset)
+  }
+
+  // ── Trajectory ──
+
+  val trajectory: StateFlow<List<DshSessionManager.TrajectoryStep>> = dsh.trajectory
+
+  fun clearTrajectory() {
+    dsh.clearTrajectory()
+  }
+
   // ── Sessions ──
 
   val sessions: StateFlow<List<DshSessionManager.SessionInfo>> = dsh.sessions
@@ -169,8 +190,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   /** Send a prompt to a session with optional model override. */
   fun sendPrompt(sessionId: String, text: String, model: String? = null) {
     viewModelScope.launch {
-      dsh.prompt(sessionId, text, model = model)
-      // Refresh history after sending
+      dsh.prompt(sessionId, text, model = model ?: prefs.preferredModel.value.ifBlank { null })
       loadSessionHistory(sessionId)
     }
   }
@@ -178,7 +198,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   /** Create a new session with optional model preset. */
   fun createSession(cwd: String? = null, agentPreset: String? = null, model: String? = null) {
     viewModelScope.launch {
-      val id = dsh.createSession(cwd, agentPreset)
+      val id = dsh.createSession(cwd, agentPreset ?: prefs.preferredPreset.value.ifBlank { null })
       dsh.loadSessions()
       if (id != null) {
         _activeDshSessionId.value = id
