@@ -6,6 +6,7 @@ import ai.deepseek.harness.AppearanceThemeMode
 import ai.deepseek.harness.AppLanguage
 import ai.deepseek.harness.BuildConfig
 import ai.deepseek.harness.MainViewModel
+import ai.deepseek.harness.appLanguageRowSubtitle
 import ai.deepseek.harness.currentSystemLanguageTag
 import ai.deepseek.harness.ui.design.DshListItem
 import ai.deepseek.harness.ui.design.DshPanel
@@ -176,18 +177,9 @@ private fun LanguageSettingsScreen(
             trailing = {
               if (currentLang == lang) Text("✓", color = DshTheme.colors.primary)
             },
-            onClick = { viewModel.setAppLanguage(lang) },
+            onClick = { viewModel.applyAppLanguage(lang) },
           )
         }
-      }
-    }
-  }
-} {
-  SettingsScaffold(title = "About", onBack = onBack) {
-    Column(modifier = Modifier.padding(DshTheme.spacing.lg)) {
-      DshPanel {
-        DshListItem(title = "Version", subtitle = BuildConfig.VERSION_NAME)
-        DshListItem(title = "Build", subtitle = "${BuildConfig.VERSION_CODE}")
       }
     }
   }

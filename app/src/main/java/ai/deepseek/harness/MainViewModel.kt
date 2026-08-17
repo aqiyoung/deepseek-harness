@@ -68,7 +68,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
   val appLanguage: StateFlow<AppLanguage> = prefs.appLanguage
 
-  fun setAppLanguage(language: AppLanguage) {
+  fun applyAppLanguage(language: AppLanguage) {
     prefs.saveAppLanguage(language)
     setAppLanguage(language)
   }
