@@ -49,8 +49,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val statusText: StateFlow<String> =
     combine(dsh.connectionState, dsh.authenticated) { state, auth ->
       when {
-        state == DshConnectionState.Connected -> "Connected"
         auth -> "Connected"
+        state == DshConnectionState.Connected -> "Connected"
         state == DshConnectionState.Connecting -> "Connecting…"
         state == DshConnectionState.Error -> "Connection error"
         else -> "Offline"
@@ -179,6 +179,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   fun loadSessionHistory(sessionId: String) {
     viewModelScope.launch {
       _activeDshSessionId.value = sessionId
+      prefs.setActiveSessionId(sessionId)
       val events = dsh.history(sessionId)
       val messages = events.mapNotNull { event ->
         parseChatMessage(event)

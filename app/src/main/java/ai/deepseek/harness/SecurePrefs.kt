@@ -167,6 +167,21 @@ class SecurePrefs(context: Context) {
     _modelRecents.value = next
   }
 
+  // ── Active Session (for restart restore) ──
+
+  private val _activeSessionId = MutableStateFlow(
+    plainPrefs.getString("chat.activeSessionId", "") ?: "",
+  )
+  val activeSessionId: StateFlow<String> = _activeSessionId
+
+  fun setActiveSessionId(value: String?) {
+    plainPrefs.edit {
+      if (value.isNullOrBlank()) remove("chat.activeSessionId")
+      else putString("chat.activeSessionId", value.trim())
+    }
+    _activeSessionId.value = value ?: ""
+  }
+
   // ── Helpers ──
 
   private fun loadStringList(key: String): List<String> {

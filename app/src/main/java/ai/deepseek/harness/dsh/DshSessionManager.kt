@@ -115,14 +115,20 @@ data class TrajectoryStep(
             _serverUrl.value = normalizedUrl
             val c = DshApiClient(normalizedUrl, effectiveCookie, scope)
             client = c
+
+            // Start WebSocket connection (may fail independently)
             c.connect()
             c.connectionState.collect { state ->
                 _connectionState.value = state
                 if (state == DshConnectionState.Connected) {
-                    loadAll()
                     collectEvents(c)
                 }
             }
+
+            // Load all data via HTTP regardless of WebSocket status.
+            // WebSocket is only for live event stream; HTTP works on its own.
+            _connectionState.value = DshConnectionState.Connected
+            loadAll()
         }
     }
 

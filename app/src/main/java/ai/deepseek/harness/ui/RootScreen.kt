@@ -16,17 +16,27 @@ import androidx.compose.ui.platform.LocalContext
 fun RootScreen(viewModel: MainViewModel) {
   val context = LocalContext.current
   val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+  val sessions by viewModel.dsh.sessions.collectAsState()
 
   // Apply saved language on startup
   LaunchedEffect(Unit) {
     val saved = viewModel.appLanguage.value
-    if (saved == currentAppLanguage()) return@LaunchedEffect
-    viewModel.applyAppLanguage(saved)
+    if (saved != currentAppLanguage()) {
+      viewModel.applyAppLanguage(saved)
+    }
   }
 
   // Auto-connect on startup if logged in
   LaunchedEffect(isLoggedIn) {
     if (isLoggedIn) viewModel.connectDsh()
+  }
+
+  // Auto-restore last active session when sessions are available
+  LaunchedEffect(sessions.size, viewModel.dsh.authenticated.value) {
+    if (sessions.isEmpty()) return@LaunchedEffect
+    if (viewModel.dsh.authenticated.value) {
+      viewModel.loadSessionHistory(sessions.first().sessionId)
+    }
   }
 
   if (!isLoggedIn) {
