@@ -1,6 +1,6 @@
 package ai.deepseek.harness.chat
 
-import ai.deepseek.harness.gateway.SessionObserverDigest
+
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -251,7 +251,7 @@ data class ChatSessionEntry(
   val lastReadAt: Long? = null,
   val agentStatus: ChatSessionAgentStatus? = null,
   val hasAgentStatusMetadata: Boolean = agentStatus != null,
-  val observerDigest: SessionObserverDigest? = null,
+  val observerDigest: kotlinx.serialization.json.JsonElement? = null,
   val hasObserverDigestMetadata: Boolean = observerDigest != null,
   val lastActivityAt: Long? = null,
   val totalTokens: Long? = null,

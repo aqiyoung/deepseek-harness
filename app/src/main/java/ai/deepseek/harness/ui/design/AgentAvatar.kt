@@ -1,6 +1,6 @@
 package ai.deepseek.harness.ui.design
 
-import ai.deepseek.harness.GatewayAgentSummary
+
 import ai.deepseek.harness.ui.image.RemoteImageResult
 import ai.deepseek.harness.ui.image.decodeRemoteImageBitmap
 import ai.deepseek.harness.ui.image.safeRemoteImageStore
@@ -53,11 +53,8 @@ internal sealed interface AgentAvatarSource {
 }
 
 /** Returns the authoritative Android-renderable agent avatar source, if present. */
-internal fun agentAvatarSource(agent: GatewayAgentSummary): AgentAvatarSource? {
-  val candidate =
-    agent.avatarUrl?.trim()?.takeIf { it.isNotEmpty() }
-      ?: agent.avatar?.trim()?.takeIf { it.isNotEmpty() }
-      ?: return null
+internal fun agentAvatarSource(avatar: String?): AgentAvatarSource? {
+  val candidate = avatar?.trim()?.takeIf { it.isNotEmpty() } ?: return null
   if (remoteImagePrefix.containsMatchIn(candidate)) {
     return AgentAvatarSource.Remote(candidate)
   }
