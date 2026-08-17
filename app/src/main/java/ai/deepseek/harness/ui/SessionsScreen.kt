@@ -34,7 +34,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +56,7 @@ fun SessionsScreen(
   val presets by dsh.presets.collectAsState()
 
   var showModelPicker by remember { mutableStateOf(false) }
+  val scope = rememberCoroutineScope()
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -69,7 +72,7 @@ fun SessionsScreen(
           style = DshTheme.type.section,
           color = DshTheme.colors.text,
         )
-        IconButton(onClick = { viewModel.dsh.loadSessions() }) {
+        IconButton(onClick = { scope.launch { viewModel.dsh.loadSessions() } }) {
           Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = DshTheme.colors.textMuted)
         }
       }

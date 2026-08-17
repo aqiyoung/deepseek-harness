@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.AppearanceThemeMode
@@ -40,13 +38,11 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Tools
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -114,8 +110,6 @@ private fun SettingsHomeScreen(
   Column(modifier = Modifier.fillMaxSize()) {
     TabRow(
       selectedTabIndex = selectedTab,
-      divider = { TabRowDefaults.divider(modifier = Modifier.height(1.dp)) },
-      indicator = { },
       containerColor = DshTheme.colors.surfaceRaised,
       contentColor = DshTheme.colors.primary,
     ) {
