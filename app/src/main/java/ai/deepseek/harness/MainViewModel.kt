@@ -2250,10 +2250,10 @@ class MainViewModel private constructor(
     attachments: List<OutgoingAttachment>,
   ) {
     // DSH 模式：把消息发到当前打开的 DSH 会话，然后刷新历史。
-    val sid = ensureActiveDshSession()
-    if (sid != null && isDshMode.value) {
-      val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
+    if (isDshMode.value) {
       viewModelScope.launch {
+        val sid = ensureActiveDshSession() ?: return@launch
+        val modelId = _dshSelectedModelRef.value?.substringAfter('/')?.takeIf { it.isNotBlank() }
         runCatching { dsh.prompt(sid, message, model = modelId) }
         val events = runCatching { dsh.history(sid) }.getOrDefault(emptyList())
         _dshChatMessages.value = events.mapNotNull { mapDshEventToChatMessage(it) }
