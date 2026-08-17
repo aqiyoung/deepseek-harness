@@ -4,6 +4,19 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
+// Version properties loaded from Config/Version.properties (synced from version.json)
+val dshAndroidVersionFile = rootProject.file("Config/Version.properties")
+val dshAndroidVersionProperties = java.util.Properties().apply {
+  if (!dshAndroidVersionFile.isFile) {
+    error("Missing Android version properties at $dshAndroidVersionFile. Run version sync.")
+  }
+  dshAndroidVersionFile.inputStream().use(::load)
+}
+val dshAndroidVersionName = dshAndroidVersionProperties.getProperty("DSH_ANDROID_VERSION_NAME")?.trim()
+  ?: error("Missing DSH_ANDROID_VERSION_NAME in Config/Version.properties")
+val dshAndroidVersionCode = dshAndroidVersionProperties.getProperty("DSH_ANDROID_VERSION_CODE")?.trim()?.toIntOrNull()
+  ?: error("Invalid DSH_ANDROID_VERSION_CODE in Config/Version.properties")
+
 android {
   namespace = "ai.deepseek.harness"
   compileSdk = 36
@@ -30,8 +43,8 @@ android {
     applicationId = "ai.deepseek.harness"
     minSdk = 31
     targetSdk = 36
-    versionCode = 1
-    versionName = "1.0.0"
+    versionCode = dshAndroidVersionCode
+    versionName = dshAndroidVersionName
   }
 
   buildTypes {
