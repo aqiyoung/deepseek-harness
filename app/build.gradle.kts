@@ -23,20 +23,16 @@ android {
   namespace = "ai.deepseek.harness"
   compileSdk = 36
 
-  // Release signing: configured via Gradle properties (set by GitHub Actions from secrets)
-  val releaseStoreFile = project.findProperty("DSH_ANDROID_STORE_FILE") as String?
-  val releaseStorePassword = project.findProperty("DSH_ANDROID_STORE_PASSWORD") as String?
-  val releaseKeyAlias = project.findProperty("DSH_ANDROID_KEY_ALIAS") as String?
-  val releaseKeyPassword = project.findProperty("DSH_ANDROID_KEY_PASSWORD") as String?
-  val hasSigning = releaseStoreFile != null && releaseStorePassword != null && releaseKeyAlias != null && releaseKeyPassword != null
+  // Release signing: OPENCLAW_ANDROID_* Gradle properties set by GitHub Actions env.
+  val hasSigning = project.hasProperty("OPENCLAW_ANDROID_STORE_FILE")
 
   if (hasSigning) {
     signingConfigs {
       create("release") {
-        storeFile = file(releaseStoreFile)
-        storePassword = releaseStorePassword
-        keyAlias = releaseKeyAlias
-        keyPassword = releaseKeyPassword
+        storeFile = project.findProperty("OPENCLAW_ANDROID_STORE_FILE")?.let { file(it) }
+        storePassword = project.findProperty("OPENCLAW_ANDROID_STORE_PASSWORD") as String?
+        keyAlias = project.findProperty("OPENCLAW_ANDROID_KEY_ALIAS") as String?
+        keyPassword = project.findProperty("OPENCLAW_ANDROID_KEY_PASSWORD") as String?
       }
     }
   }
