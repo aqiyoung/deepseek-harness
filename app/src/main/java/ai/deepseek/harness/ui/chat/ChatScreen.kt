@@ -35,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -237,7 +238,7 @@ fun ChatScreen(
       onDismiss = { showModelPicker = false },
       onConfirm = { model ->
         selectedModel = model ?: ""
-        viewModel.setPreferredModel(model.ifBlank { null })
+        viewModel.setPreferredModel(model?.ifBlank { null })
         showModelPicker = false
       },
     )

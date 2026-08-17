@@ -238,7 +238,6 @@ private fun ModelSettingsTab(viewModel: MainViewModel) {
             modifier = Modifier
               .fillMaxWidth()
               .background(if (isSelected) DshTheme.colors.primary.copy(alpha = 0.1f) else Color.Transparent, RoundedCornerShape(8.dp))
-              .border(if (isSelected) 1.dp to DshTheme.colors.primary else 0.dp to Color.Transparent, RoundedCornerShape(8.dp))
               .padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
