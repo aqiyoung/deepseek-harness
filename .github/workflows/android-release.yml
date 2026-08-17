@@ -51,6 +51,13 @@ jobs:
         run: |
           ./gradlew :app:assembleRelease --no-daemon
 
+      - name: Rename APK
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd app/build/outputs/apk/release
+          mv app-release.apk "dsh-${VERSION}-release.apk"
+          ls -lh
+
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:

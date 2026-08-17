@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import ai.deepseek.harness.ui.design.DshDesignTheme
 import ai.deepseek.harness.ui.design.DshPrimaryButton
 import ai.deepseek.harness.ui.design.DshScaffold
-import ai.deepseek.harness.ui.design.DshTextField
 import ai.deepseek.harness.ui.design.DshTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -122,48 +124,75 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
-            DshTextField(
-              value = serverUrl,
-              onValueChange = { viewModel.setServerUrl(it) },
-              placeholder = "https://dsh.threel.site",
-              label = "服务器地址",
-              enabled = !isVerifying,
-              keyboardOptions =
-                KeyboardOptions(
-                  autoCorrect = false,
-                  keyboardType = KeyboardType.Uri,
-                  imeAction = ImeAction.Next,
+            TextField(
+                value = serverUrl,
+                onValueChange = { viewModel.setServerUrl(it) },
+                placeholder = { Text(text = "https://dsh.threel.site") },
+                label = { Text(text = "服务器地址") },
+                enabled = !isVerifying,
+                keyboardOptions =
+                  KeyboardOptions(
+                    autoCorrect = false,
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Next,
+                  ),
+                colors = TextFieldDefaults.colors(
+                  unfocusedContainerColor = Color.Transparent,
+                  focusedContainerColor = Color.Transparent,
+                  unfocusedIndicatorColor = Color(0xFFD1D5DB),
+                  focusedIndicatorColor = Color(0xFFFF5A1F),
                 ),
-            )
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(horizontal = 4.dp),
+              )
 
-            DshTextField(
-              value = username,
-              onValueChange = { username = it },
-              placeholder = "用户名",
-              label = "用户名",
-              enabled = !isVerifying,
-              keyboardOptions =
-                KeyboardOptions(
-                  autoCorrect = false,
-                  keyboardType = KeyboardType.Text,
-                  imeAction = ImeAction.Next,
+              TextField(
+                value = username,
+                onValueChange = { username = it },
+                placeholder = { Text(text = "用户名") },
+                label = { Text(text = "用户名") },
+                enabled = !isVerifying,
+                keyboardOptions =
+                  KeyboardOptions(
+                    autoCorrect = false,
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                  ),
+                colors = TextFieldDefaults.colors(
+                  unfocusedContainerColor = Color.Transparent,
+                  focusedContainerColor = Color.Transparent,
+                  unfocusedIndicatorColor = Color(0xFFD1D5DB),
+                  focusedIndicatorColor = Color(0xFFFF5A1F),
                 ),
-            )
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(horizontal = 4.dp),
+              )
 
-            DshTextField(
-              value = password,
-              onValueChange = { password = it },
-              placeholder = "密码",
-              label = "密码",
-              enabled = !isVerifying,
-              visualTransformation = PasswordVisualTransformation(),
-              keyboardOptions =
-                KeyboardOptions(
-                  autoCorrect = false,
-                  keyboardType = KeyboardType.Password,
-                  imeAction = ImeAction.Done,
+              TextField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = { Text(text = "密码") },
+                label = { Text(text = "密码") },
+                enabled = !isVerifying,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions =
+                  KeyboardOptions(
+                    autoCorrect = false,
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                  ),
+                colors = TextFieldDefaults.colors(
+                  unfocusedContainerColor = Color.Transparent,
+                  focusedContainerColor = Color.Transparent,
+                  unfocusedIndicatorColor = Color(0xFFD1D5DB),
+                  focusedIndicatorColor = Color(0xFFFF5A1F),
                 ),
-            )
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(horizontal = 4.dp),
+              )
 
             Spacer(modifier = Modifier.height(8.dp))
 
