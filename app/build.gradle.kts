@@ -8,6 +8,24 @@ android {
   namespace = "ai.deepseek.harness"
   compileSdk = 36
 
+  // Release signing: configured via Gradle properties (set by GitHub Actions from secrets)
+  val storeFile = project.findProperty("DSH_ANDROID_STORE_FILE") as String?
+  val storePassword = project.findProperty("DSH_ANDROID_STORE_PASSWORD") as String?
+  val keyAlias = project.findProperty("DSH_ANDROID_KEY_ALIAS") as String?
+  val keyPassword = project.findProperty("DSH_ANDROID_KEY_PASSWORD") as String?
+  val hasSigning = storeFile != null && storePassword != null && keyAlias != null && keyPassword != null
+
+  if (hasSigning) {
+    signingConfigs {
+      create("release") {
+        storeFile = file(storeFile)
+        storePassword = storePassword
+        keyAlias = keyAlias
+        keyPassword = keyPassword
+      }
+    }
+  }
+
   defaultConfig {
     applicationId = "ai.deepseek.harness"
     minSdk = 31
@@ -21,6 +39,9 @@ android {
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      if (hasSigning) {
+        signingConfig = signingConfigs.getByName("release")
+      }
     }
     debug {
       isMinifyEnabled = false

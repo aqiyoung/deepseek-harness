@@ -3,19 +3,22 @@ name: Android CI (DSH Client)
 on:
   push:
     branches: ["android-dsh-simplified"]
+    tags: ["v*"]
   pull_request:
     branches: ["android-dsh-simplified"]
 
 permissions:
   contents: write
 
+env:
+  ANDROID_COMPILE_SDK: "36"
+  ANDROID_BUILD_TOOLS: "36.1.0"
+  ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+
 jobs:
   build:
+    name: Build Debug APK
     runs-on: ubuntu-latest
-    env:
-      ANDROID_COMPILE_SDK: "36"
-      ANDROID_BUILD_TOOLS: "36.1.0"
-      ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,3 +53,65 @@ jobs:
           name: dsh-android-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+  release:
+    name: Build Release APK
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages + accept licenses
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-${{ env.ANDROID_COMPILE_SDK }}" "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
+
+      - name: Decode signing keystore
+        if: ${{ secrets.DSH_RELEASE_KEYSTORE_B64 != '' }}
+        run: echo "${{ secrets.DSH_RELEASE_KEYSTORE_B64 }}" | base64 -d > ${{ github.workspace }}/dsh-release.p12
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build signed release APK
+        if: ${{ secrets.DSH_RELEASE_KEYSTORE_B64 != '' && secrets.DSH_KEYSTORE_PASSWORD != '' }}
+        run: |
+          ./gradlew :app:assembleRelease \
+            -PDSH_ANDROID_STORE_FILE="${{ github.workspace }}/dsh-release.p12" \
+            -PDSH_ANDROID_STORE_PASSWORD="${{ secrets.DSH_KEYSTORE_PASSWORD }}" \
+            -PDSH_ANDROID_KEY_ALIAS="${{ secrets.DSH_KEY_ALIAS }}" \
+            -PDSH_ANDROID_KEY_PASSWORD="${{ secrets.DSH_KEY_PASSWORD }}" \
+            --no-daemon
+
+      - name: Upload release APK
+        if: ${{ secrets.DSH_RELEASE_KEYSTORE_B64 != '' && secrets.DSH_KEYSTORE_PASSWORD != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsh-android-release
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') && github.event.inputs.artifacts == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          gh release create "$VERSION" \
+            --title "DeepSeek Harness ${VERSION}" \
+            --notes "DeepSeek Harness Android 正式版 ${VERSION}。\n\n安装：下载 APK，允许「未知来源」安装即可；同版本号更新可直接覆盖安装，无需卸载。" \
+            app/build/outputs/apk/release/*.apk
