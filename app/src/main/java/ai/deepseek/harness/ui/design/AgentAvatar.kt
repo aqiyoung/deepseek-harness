@@ -1,6 +1,5 @@
 package ai.deepseek.harness.ui.design
 
-
 import ai.deepseek.harness.ui.image.RemoteImageResult
 import ai.deepseek.harness.ui.image.decodeRemoteImageBitmap
 import ai.deepseek.harness.ui.image.safeRemoteImageStore
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,10 +20,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
-import coil3.compose.AsyncImagePainter
-import coil3.compose.LocalPlatformContext
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -78,7 +72,8 @@ internal fun DshAgentAvatar(
   when (source) {
     is AgentAvatarSource.Data ->
       if (source.mimeType == "image/svg+xml") {
-        SvgAgentAvatar(base64 = source.base64, size = size, shape = shape, fallback = fallback)
+        // SVG rendering is not supported without the SVG decoder library; use fallback.
+        fallback()
       } else {
         RasterDataAgentAvatar(source = source, size = size, shape = shape, fallback = fallback)
       }
@@ -138,61 +133,8 @@ private fun RemoteAgentAvatar(
         modifier = Modifier.size(size).clip(shape),
         contentScale = ContentScale.Crop,
       )
-    is RemoteImageResult.Svg -> SvgAgentAvatar(bytes = image.bytes, size = size, shape = shape, fallback = fallback)
-    RemoteImageResult.Failed, null -> fallback()
+    is RemoteImageResult.Svg, RemoteImageResult.Failed, null -> fallback()
   }
-}
-
-@Composable
-private fun SvgAgentAvatar(
-  base64: String,
-  size: Dp,
-  shape: Shape,
-  fallback: @Composable () -> Unit,
-) {
-  var bytes by remember(base64) { mutableStateOf<ByteArray?>(null) }
-  LaunchedEffect(base64) {
-    bytes =
-      withContext(Dispatchers.Default) {
-        decodeAgentAvatarBase64(base64)
-      }
-  }
-  val resolved = bytes
-  if (resolved == null) {
-    fallback()
-  } else {
-    SvgAgentAvatar(bytes = resolved, size = size, shape = shape, fallback = fallback)
-  }
-}
-
-@Composable
-private fun SvgAgentAvatar(
-  bytes: ByteArray,
-  size: Dp,
-  shape: Shape,
-  fallback: @Composable () -> Unit,
-) {
-  val context = LocalPlatformContext.current
-  val request =
-    remember(bytes, context) {
-      ImageRequest
-        .Builder(context)
-        .data(bytes)
-        .size(AGENT_AVATAR_MAX_DIMENSION)
-        .build()
-    }
-  val painter = rememberAsyncImagePainter(model = request, contentScale = ContentScale.Crop)
-  val painterState by painter.state.collectAsState()
-  if (painterState !is AsyncImagePainter.State.Success) {
-    fallback()
-    return
-  }
-  Image(
-    painter = painter,
-    contentDescription = null,
-    modifier = Modifier.size(size).clip(shape),
-    contentScale = ContentScale.Crop,
-  )
 }
 
 private fun decodeAgentAvatarBase64(base64: String): ByteArray? =

@@ -1,6 +1,8 @@
 package ai.deepseek.harness.ui.chat
 
 import ai.deepseek.harness.MainViewModel
+import ai.deepseek.harness.chat.ChatMessage
+import ai.deepseek.harness.chat.ChatMessageContent
 import ai.deepseek.harness.dsh.DshConnectionState
 import ai.deepseek.harness.ui.design.DshScaffold
 import ai.deepseek.harness.ui.design.DshTheme
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState

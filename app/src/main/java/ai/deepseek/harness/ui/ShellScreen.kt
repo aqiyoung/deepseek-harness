@@ -47,8 +47,8 @@ fun ShellScreen(
     modifier = modifier,
     contentPadding = PaddingValues(0.dp),
     contentWindowInsets = WindowInsets.systemBars,
-  ) { padding ->
-    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
       // Top bar
       DshTopBar(
         title = "DeepSeek Harness",

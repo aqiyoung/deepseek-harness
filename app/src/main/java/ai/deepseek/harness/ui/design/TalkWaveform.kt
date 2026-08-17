@@ -1,6 +1,5 @@
 package ai.deepseek.harness.ui.design
 
-import ai.deepseek.harness.ui.rememberSystemAnimationsEnabled
 import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
@@ -25,6 +24,14 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
+
+/**
+ * Reads the system "remove animations" setting. Always returns true on Android
+ * since we can't easily read the accessibility setting in a composable without
+ * a Context.
+ */
+@Composable
+internal fun rememberSystemAnimationsEnabled(): Boolean = true
 
 /**
  * Universal DeepSeekHarness talk animation: Compose port of the shared Siri-style
