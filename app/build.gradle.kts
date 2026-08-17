@@ -33,8 +33,8 @@ android {
   if (hasSigning) {
     signingConfigs {
       create("release") {
-        keyStoreFile = file(releaseStoreFile)
-        keyStorePassword = releaseStorePassword
+        storeFile = file(releaseStoreFile)
+        storePassword = releaseStorePassword
         keyAlias = releaseKeyAlias
         keyPassword = releaseKeyPassword
       }
