@@ -1,16 +1,18 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlin.serialization)
 }
 
-// Version properties loaded from Config/Version.properties (synced from version.json)
+// Version properties loaded from Config/Version.properties
 val dshAndroidVersionFile = rootProject.file("Config/Version.properties")
-val dshAndroidVersionProperties = java.util.Properties().apply {
+val dshAndroidVersionProperties = Properties().apply {
   if (!dshAndroidVersionFile.isFile) {
-    error("Missing Android version properties at $dshAndroidVersionFile. Run version sync.")
+    error("Missing Android version properties at ${dshAndroidVersionFile.absolutePath}")
   }
-  dshAndroidVersionFile.inputStream().use(::load)
+  dshAndroidVersionFile.inputStream().use { load(it) }
 }
 val dshAndroidVersionName = dshAndroidVersionProperties.getProperty("DSH_ANDROID_VERSION_NAME")?.trim()
   ?: error("Missing DSH_ANDROID_VERSION_NAME in Config/Version.properties")
@@ -22,19 +24,19 @@ android {
   compileSdk = 36
 
   // Release signing: configured via Gradle properties (set by GitHub Actions from secrets)
-  val storeFile = project.findProperty("DSH_ANDROID_STORE_FILE") as String?
-  val storePassword = project.findProperty("DSH_ANDROID_STORE_PASSWORD") as String?
-  val keyAlias = project.findProperty("DSH_ANDROID_KEY_ALIAS") as String?
-  val keyPassword = project.findProperty("DSH_ANDROID_KEY_PASSWORD") as String?
-  val hasSigning = storeFile != null && storePassword != null && keyAlias != null && keyPassword != null
+  val releaseStoreFile = project.findProperty("DSH_ANDROID_STORE_FILE") as String?
+  val releaseStorePassword = project.findProperty("DSH_ANDROID_STORE_PASSWORD") as String?
+  val releaseKeyAlias = project.findProperty("DSH_ANDROID_KEY_ALIAS") as String?
+  val releaseKeyPassword = project.findProperty("DSH_ANDROID_KEY_PASSWORD") as String?
+  val hasSigning = releaseStoreFile != null && releaseStorePassword != null && releaseKeyAlias != null && releaseKeyPassword != null
 
   if (hasSigning) {
     signingConfigs {
       create("release") {
-        storeFile = file(storeFile)
-        storePassword = storePassword
-        keyAlias = keyAlias
-        keyPassword = keyPassword
+        keyStoreFile = file(releaseStoreFile)
+        keyStorePassword = releaseStorePassword
+        keyAlias = releaseKeyAlias
+        keyPassword = releaseKeyPassword
       }
     }
   }
