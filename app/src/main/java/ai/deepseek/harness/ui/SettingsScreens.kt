@@ -3,8 +3,10 @@
 package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.AppearanceThemeMode
+import ai.deepseek.harness.AppLanguage
 import ai.deepseek.harness.BuildConfig
 import ai.deepseek.harness.MainViewModel
+import ai.deepseek.harness.currentSystemLanguageTag
 import ai.deepseek.harness.ui.design.DshListItem
 import ai.deepseek.harness.ui.design.DshPanel
 import ai.deepseek.harness.ui.design.DshTheme
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 enum class SettingsRoute {
   Home,
   Appearance,
+  Language,
   About,
   Licenses,
 }
@@ -52,6 +55,7 @@ fun SettingsScreens(
   when (route) {
     SettingsRoute.Home -> SettingsHomeScreen(viewModel, onNavigateTo)
     SettingsRoute.Appearance -> AppearanceSettingsScreen(viewModel, onNavigateBack)
+    SettingsRoute.Language -> LanguageSettingsScreen(viewModel, onNavigateBack)
     SettingsRoute.About -> AboutSettingsScreen(onNavigateBack)
     SettingsRoute.Licenses -> LicensesSettingsScreen(onNavigateBack)
   }
@@ -79,6 +83,14 @@ private fun SettingsHomeScreen(
     Spacer(modifier = Modifier.height(16.dp))
 
     DshPanel {
+      DshListItem(
+        title = "Language",
+        subtitle = "System",
+        leading = { Icon(Icons.Default.Info, contentDescription = null) },
+        trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+        onClick = { onNavigateTo(SettingsRoute.Language) },
+      )
+
       DshListItem(
         title = "Appearance",
         subtitle = "Theme",
@@ -137,6 +149,45 @@ private fun AppearanceSettingsScreen(
           trailing = { if (themeMode == AppearanceThemeMode.System) Text("✓", color = DshTheme.colors.primary) },
           onClick = { viewModel.setAppearanceThemeMode(AppearanceThemeMode.System) },
         )
+      }
+    }
+  }
+}
+
+@Composable
+private fun LanguageSettingsScreen(
+  viewModel: MainViewModel,
+  onBack: () -> Unit,
+) {
+  val currentLang by viewModel.appLanguage.collectAsState()
+  val context = androidx.compose.ui.platform.LocalContext.current
+  val systemTag = currentSystemLanguageTag(context)
+
+  SettingsScaffold(title = "Language", onBack = onBack) {
+    Column(modifier = Modifier.padding(DshTheme.spacing.lg)) {
+      Text(text = "App Language", style = DshTheme.type.section, color = DshTheme.colors.text)
+      Spacer(modifier = Modifier.height(12.dp))
+
+      DshPanel {
+        AppLanguage.entries.forEach { lang ->
+          DshListItem(
+            title = lang.displayName,
+            subtitle = lang.let { L -> appLanguageRowSubtitle(L, systemTag) },
+            trailing = {
+              if (currentLang == lang) Text("✓", color = DshTheme.colors.primary)
+            },
+            onClick = { viewModel.setAppLanguage(lang) },
+          )
+        }
+      }
+    }
+  }
+} {
+  SettingsScaffold(title = "About", onBack = onBack) {
+    Column(modifier = Modifier.padding(DshTheme.spacing.lg)) {
+      DshPanel {
+        DshListItem(title = "Version", subtitle = BuildConfig.VERSION_NAME)
+        DshListItem(title = "Build", subtitle = "${BuildConfig.VERSION_CODE}")
       }
     }
   }

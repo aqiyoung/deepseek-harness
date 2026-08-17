@@ -95,7 +95,23 @@ class SecurePrefs(context: Context) {
     _appearanceThemeMode.value = mode
   }
 
-  // ── Model Favorites / Recents ──
+  // ── Language / i18n ──
+
+  private val _appLanguage = MutableStateFlow(
+    AppLanguage.fromLanguageTag(plainPrefs.getString("ui.language", null)),
+  )
+  val appLanguage: StateFlow<AppLanguage> = _appLanguage
+
+  fun saveAppLanguage(language: AppLanguage) {
+    plainPrefs.edit {
+      if (language != AppLanguage.System) {
+        putString("ui.language", language.languageTag ?: "")
+      } else {
+        remove("ui.language")
+      }
+    }
+    _appLanguage.value = language
+  }
 
   private val _modelFavorites = MutableStateFlow(loadStringList("chat.modelFavorites"))
   val modelFavorites: StateFlow<List<String>> = _modelFavorites

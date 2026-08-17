@@ -64,11 +64,22 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val prefsServerUrl: StateFlow<String> = prefs.serverUrl
   val appearanceThemeMode: StateFlow<AppearanceThemeMode> = prefs.appearanceThemeMode
 
+  // ── Language / i18n ──
+
+  val appLanguage: StateFlow<AppLanguage> = prefs.appLanguage
+
+  fun setAppLanguage(language: AppLanguage) {
+    prefs.saveAppLanguage(language)
+    setAppLanguage(language)
+  }
+
   // ── Sessions ──
 
   val sessions: StateFlow<List<DshSessionManager.SessionInfo>> = dsh.sessions
   val hostInfo: StateFlow<DshSessionManager.HostInfo?> = dsh.hostInfo
   val modelGroups: StateFlow<List<DshSessionManager.ModelGroup>> = dsh.modelGroups
+  val presets: StateFlow<List<DshSessionManager.PresetInfo>> = dsh.presets
+  val providers: StateFlow<List<DshSessionManager.ProviderInfo>> = dsh.providers
 
   // ── Chat Messages ──
 
@@ -155,20 +166,41 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
   }
 
-  /** Send a prompt to a session. */
-  fun sendPrompt(sessionId: String, text: String) {
+  /** Send a prompt to a session with optional model override. */
+  fun sendPrompt(sessionId: String, text: String, model: String? = null) {
     viewModelScope.launch {
-      dsh.prompt(sessionId, text)
+      dsh.prompt(sessionId, text, model = model)
       // Refresh history after sending
       loadSessionHistory(sessionId)
     }
   }
 
-  /** Create a new session. */
-  fun createSession(cwd: String? = null, agentPreset: String? = null) {
+  /** Create a new session with optional model preset. */
+  fun createSession(cwd: String? = null, agentPreset: String? = null, model: String? = null) {
     viewModelScope.launch {
-      dsh.createSession(cwd, agentPreset)
+      val id = dsh.createSession(cwd, agentPreset)
       dsh.loadSessions()
+      if (id != null) {
+        _activeDshSessionId.value = id
+        viewModelScope.launch {
+          dsh.history(id)
+        }
+      }
+    }
+  }
+
+  /** Create session and send prompt with model override. */
+  fun createSessionAndSend(cwd: String? = null, agentPreset: String? = null, model: String? = null, prompt: String = "") {
+    viewModelScope.launch {
+      val id = dsh.createSession(cwd, agentPreset)
+      dsh.loadSessions()
+      if (id != null) {
+        _activeDshSessionId.value = id
+        if (prompt.isNotBlank()) {
+          dsh.prompt(id, prompt, model = model)
+        }
+        dsh.history(id)
+      }
     }
   }
 

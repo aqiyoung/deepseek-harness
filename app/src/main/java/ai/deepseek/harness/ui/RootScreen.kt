@@ -1,17 +1,30 @@
 package ai.deepseek.harness.ui
 
 import ai.deepseek.harness.MainViewModel
+import ai.deepseek.harness.appLanguageRowSubtitle
+import ai.deepseek.harness.currentAppLanguage
+import ai.deepseek.harness.currentSystemLanguageTag
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 
 /** Chooses the login gate or the authenticated app shell. */
 @Composable
 fun RootScreen(viewModel: MainViewModel) {
+  val context = LocalContext.current
   val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+
+  // Apply saved language on startup
+  LaunchedEffect(Unit) {
+    val saved = viewModel.appLanguage.value
+    if (saved == currentAppLanguage()) return@LaunchedEffect
+    viewModel.setAppLanguage(saved)
+  }
 
   // Auto-connect on startup if logged in
   LaunchedEffect(isLoggedIn) {
