@@ -116,12 +116,17 @@ data class TrajectoryStep(
             val c = DshApiClient(normalizedUrl, effectiveCookie, scope)
             client = c
 
-            // Start WebSocket connection (may fail independently)
+            // Start WebSocket connection (may fail independently). Observe its state in a
+            // SEPARATE coroutine: `StateFlow.collect` is a suspend call that never returns, so
+            // awaiting it here would block `loadAll()` forever and leave the app showing an empty
+            // "framework" — no sessions/models loaded and the status stuck on Connecting/Offline.
             c.connect()
-            c.connectionState.collect { state ->
-                _connectionState.value = state
-                if (state == DshConnectionState.Connected) {
-                    collectEvents(c)
+            scope.launch {
+                c.connectionState.collect { state ->
+                    _connectionState.value = state
+                    if (state == DshConnectionState.Connected) {
+                        collectEvents(c)
+                    }
                 }
             }
 
