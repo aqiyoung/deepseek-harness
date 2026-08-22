@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -43,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -166,6 +166,8 @@ private fun HarnessShell(prefs: SecurePrefs) {
       Text("⌄", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
   }
+
+  var lastBackPress by remember { mutableStateOf(0L) }
 
   BackHandler(enabled = true) {
     if (webView.canGoBack()) {
@@ -304,7 +306,7 @@ private fun LicensesDialog(onDismiss: () -> Unit) {
           )
           Text(
             notice.text,
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = Typeface.MONOSPACE),
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = MaterialTheme.colorScheme.onSurface,
           )
         }
