@@ -83,6 +83,17 @@ class SecurePrefs(context: Context) {
 
   fun getSessionCookie(): String? = securePrefs.getString("auth.sessionCookie", null)
 
+  // ── Remembered credentials（可选：记住密码，加密存储） ──
+
+  fun setRememberedPassword(value: String?) {
+    securePrefs.edit {
+      if (value.isNullOrEmpty()) remove("auth.rememberedPassword")
+      else putString("auth.rememberedPassword", value)
+    }
+  }
+
+  fun getRememberedPassword(): String? = securePrefs.getString("auth.rememberedPassword", null)
+
   // ── Theme ──
 
   private val _appearanceThemeMode = MutableStateFlow(
