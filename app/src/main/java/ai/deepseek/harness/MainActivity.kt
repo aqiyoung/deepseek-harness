@@ -71,6 +71,14 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    // targetSdk 36 强制 edge-to-edge：为状态栏/导航栏预留空间，WebView 不再顶到状态栏底下
+    androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(
+      window.decorView,
+    ) { view, insets ->
+      val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+      view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+      androidx.core.view.WindowInsetsCompat.CONSUMED
+    }
     setContent {
       MaterialTheme {
         HarnessShell(prefs = prefs)
