@@ -1,419 +1,376 @@
 package ai.deepseek.harness
 
-import ai.deepseek.harness.i18n.nativeString
-import ai.deepseek.harness.ui.DeepSeekHarnessTheme
-import ai.deepseek.harness.ui.RootScreen
+import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.WindowManager
-import java.io.File
+import android.os.Environment
+import android.webkit.CookieManager
+import android.webkit.URLUtil
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 
 /**
- * Main Android activity that owns Compose UI attachment and runtime UI wiring.
+ * DeepSeek Harness 安卓客户端：WebView 壳（Kotlin + Jetpack Compose，与 OpenClaw app 同栈）。
+ *
+ * 完整承载 Web 手机界面（含 dsh-web-ui-mobile 移动适配插件）：
+ * 登录走站点自带登录页，会话 Cookie 由 CookieManager 持久化；
+ * 原生层仅提供：服务器切换 / 清除登录 / 刷新 / 开源许可证 / 下载与文件选择。
  */
-class MainActivity : AppCompatActivity() {
-  private val viewModel: MainViewModel by viewModels()
-  private val permissionRequester: PermissionRequester
-    get() = (application as NodeApp).permissionRequester
-  private var initializedViewModel: MainViewModel? = null
-  private var didStartViewModelCollectors = false
-  private var foreground = false
-  private val pendingIntentRouter = MainActivityPendingIntentRouter()
-  private val runtimeUiStarter = MainActivityRuntimeUiStarter()
-  private var screenshotScene: AndroidScreenshotScene? = null
+class MainActivity : ComponentActivity() {
 
-  /**
-   * 把未捕获崩溃堆栈落盘到应用文件目录 crash.txt，方便无 adb 环境时定位闪退。
-   * 同时保留系统默认处理器（仍会弹出“已停止”）。
-   */
-  private fun installCrashLogger() {
-    val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-      try {
-        val dir = getExternalFilesDir(null) ?: filesDir
-        val file = File(dir, "crash.txt")
-        file.appendText(
-          "==== crash @ ${System.currentTimeMillis()} on ${thread.name} ====\n" +
-            Log.getStackTraceString(throwable) + "\n\n",
-        )
-      } catch (_: Throwable) {
-      }
-      defaultHandler?.uncaughtException(thread, throwable)
-    }
-  }
+  private val prefs by lazy { (application as NodeApp).prefs }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    installCrashLogger()
-    pendingIntentRouter.setInitialIntent(intent)
-    WindowCompat.setDecorFitsSystemWindows(window, false)
-    permissionRequester.attach(this)
-    if (BuildConfig.DEBUG) {
-      screenshotScene = parseAndroidScreenshotModeIntent(intent)
-      if (screenshotScene != null) hideScreenshotModeStatusBar()
-    }
-
     setContent {
-      var activeViewModel by remember { mutableStateOf<MainViewModel?>(null) }
-
-      LaunchedEffect(Unit) {
-        withFrameNanos { }
-        withContext(Dispatchers.Default) {
-          (application as NodeApp).prefs
-        }
-        val readyViewModel = viewModel
-        screenshotScene?.let(readyViewModel::enterScreenshotFixtureMode)
-        activateViewModel(readyViewModel)
-        activeViewModel = readyViewModel
+      MaterialTheme {
+        HarnessShell(prefs = prefs)
       }
+    }
+  }
+}
 
-      val currentViewModel = activeViewModel
-      if (currentViewModel == null) {
-        DeepSeekHarnessTheme {
-          StartupSurface()
+private const val DEFAULT_SERVER_URL = "https://dsh.threel.site"
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HarnessShell(prefs: SecurePrefs) {
+  val context = LocalContext.current
+  val serverUrl by prefs.serverUrl.collectAsState()
+  var showSheet by remember { mutableStateOf(false) }
+  var showServerDialog by remember { mutableStateOf(false) }
+  var showLicenses by remember { mutableStateOf(false) }
+  var reloadTick by remember { mutableIntStateOf(0) }
+  var clearedTick by remember { mutableIntStateOf(0) }
+
+  var filePathCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+  val fileChooserLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    val callback = filePathCallback
+    filePathCallback = null
+    val uris: Array<Uri> = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data) ?: arrayOf()
+    callback?.onReceiveValue(uris)
+  }
+
+  val webView = remember {
+    WebView(context).apply {
+      layoutParams = android.view.ViewGroup.LayoutParams(
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+      )
+      configureWebSettings(settings)
+      CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+      webViewClient = object : WebViewClient() {
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+          handleExternalNavigation(context, prefs.serverUrl.value, request.url)
+
+        override fun onPageFinished(view: WebView, url: String) {
+          CookieManager.getInstance().flush()
         }
+      }
+      webChromeClient = object : WebChromeClient() {
+        override fun onShowFileChooser(
+          view: WebView,
+          callback: ValueCallback<Array<Uri>>,
+          params: FileChooserParams,
+        ): Boolean {
+          filePathCallback?.onReceiveValue(arrayOf())
+          filePathCallback = callback
+          val intent = params.createIntent().apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+          }
+          return try {
+            fileChooserLauncher.launch(intent)
+            true
+          } catch (e: Exception) {
+            filePathCallback = null
+            Toast.makeText(context, "无法打开文件选择器", Toast.LENGTH_SHORT).show()
+            false
+          }
+        }
+      }
+      setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
+        startDownload(context, url, userAgent, contentDisposition, mimeType)
+      }
+    }
+  }
+
+  // 服务器变更 / 清除登录 / 手动刷新时重新加载
+  LaunchedEffect(serverUrl, reloadTick, clearedTick) {
+    CookieManager.getInstance().flush()
+    webView.loadUrl(serverUrl.ifBlank { DEFAULT_SERVER_URL })
+  }
+
+  Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    AndroidView(factory = { webView }, modifier = Modifier.fillMaxSize())
+
+    Box(
+      modifier = Modifier
+        .align(Alignment.TopEnd)
+        .padding(top = 10.dp, end = 10.dp)
+        .size(width = 30.dp, height = 18.dp)
+        .alpha(0.55f)
+        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+        .clickable { showSheet = true }
+        .zIndex(2f),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text("⌄", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+  }
+
+  BackHandler(enabled = true) {
+    if (webView.canGoBack()) {
+      webView.goBack()
+    } else {
+      val now = System.currentTimeMillis()
+      if (now - lastBackPress < 2000L) {
+        (context as? ComponentActivity)?.finish()
       } else {
-        val appearanceThemeMode by currentViewModel.appearanceThemeMode.collectAsState()
-        DeepSeekHarnessTheme(themeMode = appearanceThemeMode) {
-          RootScreen(viewModel = currentViewModel)
-        }
+        lastBackPress = now
+        Toast.makeText(context, "再按一次返回退出", Toast.LENGTH_SHORT).show()
       }
     }
   }
 
-  private fun hideScreenshotModeStatusBar() {
-    WindowCompat
-      .getInsetsController(window, window.decorView)
-      .apply {
-        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        hide(WindowInsetsCompat.Type.statusBars())
-      }
-  }
-
-  override fun onStart() {
-    super.onStart()
-    foreground = true
-    initializedViewModel?.setForeground(true)
-  }
-
-  override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
-    super.onTopResumedActivityChanged(isTopResumedActivity)
-    // minSdk 31 guarantees this callback and lets multi-resume select the actually interactive task.
-    updateTopResumedPermissionHost(
-      isTopResumedActivity = isTopResumedActivity,
-      activate = { permissionRequester.activate(this) },
-      deactivate = { permissionRequester.deactivate(this) },
-      refreshPermissionSurface = { initializedViewModel?.refreshNodePermissionSurface() },
-    )
-  }
-
-  override fun onStop() {
-    // Top-resumed ownership normally clears first; this also covers abnormal lifecycle ordering.
-    permissionRequester.deactivate(this)
-    foreground = false
-    if (shouldNotifyRuntimeBackgrounded(isChangingConfigurations)) {
-      initializedViewModel?.setForeground(false)
+  if (showSheet) {
+    ModalBottomSheet(
+      onDismissRequest = { showSheet = false },
+      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+      SheetContent(
+        onRefresh = { showSheet = false; reloadTick++ },
+        onChangeServer = { showSheet = false; showServerDialog = true },
+        onClearLogin = {
+          showSheet = false
+          clearedTick++
+          CookieManager.getInstance().removeAllCookies(null)
+          CookieManager.getInstance().flush()
+          Toast.makeText(context, "已清除登录，请重新登录", Toast.LENGTH_SHORT).show()
+        },
+        onLicenses = { showSheet = false; showLicenses = true },
+        versionName = BuildConfig.VERSION_NAME,
+      )
     }
-    super.onStop()
   }
 
-  override fun onDestroy() {
-    permissionRequester.detach(this)
-    super.onDestroy()
-  }
-
-  override fun onNewIntent(intent: android.content.Intent) {
-    super.onNewIntent(intent)
-    setIntent(intent)
-    val accepted =
-      pendingIntentRouter.onNewIntent(intent) { routedIntent ->
-        initializedViewModel?.let { handleLaunchIntent(viewModel = it, intent = routedIntent) }
-      }
-    if (!accepted) return
-  }
-
-  override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<String>,
-    grantResults: IntArray,
-  ) {
-    // AppCompatActivity marks this callback @CallSuper; it preserves Fragment and ActivityResult dispatch.
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    permissionRequester.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    initializedViewModel?.refreshNodePermissionSurface()
-  }
-
-  /**
-   * Wires MainViewModel only after Activity first draw and background prefs warm-up.
-   */
-  private fun activateViewModel(readyViewModel: MainViewModel) {
-    if (initializedViewModel != null) return
-    initializedViewModel = readyViewModel
-    readyViewModel.setForeground(foreground)
-    startViewModelCollectors(readyViewModel)
-    if (!readyViewModel.claimInitialIntentRouting()) {
-      pendingIntentRouter.discardInitialIntent()
-    }
-    pendingIntentRouter.activate { initialIntent ->
-      handleLaunchIntent(viewModel = readyViewModel, intent = initialIntent)
-    }
-    readyViewModel.reportShareLaunchOverflow(pendingIntentRouter.takeShareOverflowCount())
-  }
-
-  /**
-   * Starts lifecycle collectors after ViewModel construction so they cannot force early startup.
-   */
-  private fun startViewModelCollectors(readyViewModel: MainViewModel) {
-    if (didStartViewModelCollectors) return
-    didStartViewModelCollectors = true
-
-    lifecycleScope.launch {
-      repeatOnLifecycle(Lifecycle.State.STARTED) {
-        readyViewModel.preventSleep.collect { enabled ->
-          if (enabled) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-          } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-          }
-        }
+  if (showServerDialog) {
+    ServerDialog(current = serverUrl) { newValue ->
+      showServerDialog = false
+      val normalized = newValue.trim().removeSuffix("/").let { if (it.startsWith("http")) it else "https://$it" }
+      if (normalized.isNotBlank() && normalized != serverUrl) {
+        prefs.setServerUrl(normalized)
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
       }
     }
-
-    lifecycleScope.launch {
-      repeatOnLifecycle(Lifecycle.State.STARTED) {
-        readyViewModel.runtimeInitialized.collect { ready ->
-          runtimeUiStarter.onRuntimeInitialized(
-            ready = ready,
-            startRuntimeUi = screenshotScene == null,
-            attachRuntimeUi = {
-              // Runtime UI helpers need an Activity owner, so attach once after NodeRuntime is ready.
-              readyViewModel.attachRuntimeUi(owner = this@MainActivity, permissionRequester = permissionRequester)
-            },
-            startNodeService = {
-              NodeForegroundService.start(this@MainActivity)
-            },
-          )
-        }
-      }
-    }
-
-    lifecycleScope.launch {
-      repeatOnLifecycle(Lifecycle.State.STARTED) {
-        readyViewModel.shareLaunchOverflowRevision.collect { revision ->
-          if (revision == 0L) return@collect
-          repeat(readyViewModel.takeShareLaunchOverflowCount()) {
-            Toast
-              .makeText(
-                this@MainActivity,
-                nativeString("Too many shares are waiting to be added."),
-                Toast.LENGTH_SHORT,
-              ).show()
-          }
-        }
-      }
-    }
-
-    // 启动后稍候自动检查更新（受"启动时检查更新"开关约束，仅发现新版本才弹窗）。
-    lifecycleScope.launch {
-      delay(600)
-      readyViewModel.maybeAutoCheckForUpdates()
-    }
   }
 
-  /**
-   * Routes assistant/app-action intents into ViewModel state without recreating the activity.
-   */
-  private fun handleLaunchIntent(
-    viewModel: MainViewModel,
-    intent: Intent?,
-  ) {
-    if (intent?.isShareLaunchIntent() == true) {
-      viewModel.handleShareLaunchIntent(intent)
-      return
-    }
-    parseConversationNotificationLaunchIntent(
-      intent = intent,
-      takeTarget = (application as NodeApp).conversationNotificationLaunchStore::take,
-    )?.let { target ->
-      viewModel.openConversationNotification(target)
-      return
-    }
-    parseHomeDestinationIntent(intent)?.let { destination ->
-      viewModel.requestHomeDestination(destination)
-      return
-    }
-    val request = parseAssistantLaunchIntent(intent) ?: return
-    viewModel.handleAssistantLaunch(request)
-  }
-}
-
-/** Queues shares until ViewModel activation while retaining only the latest ordinary launch intent. */
-internal class MainActivityPendingIntentRouter {
-  private data class PendingLaunchIntent(
-    val sequence: Long,
-    val intent: Intent,
-    val initial: Boolean,
-  )
-
-  private var activated = false
-  private var sequence = 0L
-  private val pendingShareIntents = ArrayDeque<PendingLaunchIntent>()
-  private var pendingNonShareIntent: PendingLaunchIntent? = null
-  private var shareOverflowCount = 0
-
-  fun setInitialIntent(intent: Intent?) {
-    if (!activated && intent != null) store(intent = intent, initial = true)
-  }
-
-  fun onNewIntent(
-    intent: Intent,
-    routeIntent: (Intent) -> Unit,
-  ): Boolean {
-    if (activated) {
-      routeIntent(intent)
-      return true
-    }
-    return store(intent = intent, initial = false)
-  }
-
-  fun discardInitialIntent() {
-    if (activated) return
-    pendingShareIntents.removeAll { it.initial }
-    if (pendingNonShareIntent?.initial == true) pendingNonShareIntent = null
-  }
-
-  fun activate(routeIntent: (Intent) -> Unit): Boolean {
-    if (activated) return false
-    activated = true
-    (pendingShareIntents + listOfNotNull(pendingNonShareIntent))
-      .sortedBy(PendingLaunchIntent::sequence)
-      .forEach { pending -> routeIntent(pending.intent) }
-    pendingShareIntents.clear()
-    pendingNonShareIntent = null
-    return true
-  }
-
-  fun takeShareOverflowCount(): Int =
-    shareOverflowCount.also {
-      shareOverflowCount = 0
-    }
-
-  private fun store(
-    intent: Intent,
-    initial: Boolean,
-  ): Boolean {
-    val pending = PendingLaunchIntent(sequence = sequence++, intent = intent, initial = initial)
-    if (!intent.isShareLaunchIntent()) {
-      pendingNonShareIntent = pending
-      return true
-    }
-    if (pendingShareIntents.size >= MAX_PENDING_CHAT_SHARES) {
-      shareOverflowCount += 1
-      return false
-    }
-    pendingShareIntents.addLast(pending)
-    return true
-  }
-}
-
-private fun Intent.isShareLaunchIntent(): Boolean = action == Intent.ACTION_SEND || action == Intent.ACTION_SEND_MULTIPLE
-
-/** Keeps launch intents one-shot across same-process Activity recreation, but not process death. */
-internal class MainActivityInitialIntentGate {
-  private var claimed = false
-
-  fun claim(): Boolean {
-    if (claimed) return false
-    claimed = true
-    return true
-  }
-}
-
-internal fun shouldNotifyRuntimeBackgrounded(isChangingConfigurations: Boolean): Boolean = !isChangingConfigurations
-
-internal fun updateTopResumedPermissionHost(
-  isTopResumedActivity: Boolean,
-  activate: () -> Unit,
-  deactivate: () -> Unit,
-  refreshPermissionSurface: () -> Unit,
-) {
-  if (isTopResumedActivity) {
-    activate()
-    refreshPermissionSurface()
-  } else {
-    deactivate()
-  }
-}
-
-/** Preserves one-shot runtime UI startup while allowing screenshot fixtures to skip side effects. */
-internal class MainActivityRuntimeUiStarter {
-  private var completed = false
-
-  fun onRuntimeInitialized(
-    ready: Boolean,
-    startRuntimeUi: Boolean,
-    attachRuntimeUi: () -> Unit,
-    startNodeService: () -> Unit,
-  ) {
-    if (!ready || completed) return
-    if (!startRuntimeUi) {
-      completed = true
-      return
-    }
-    attachRuntimeUi()
-    completed = true
-    startNodeService()
+  if (showLicenses) {
+    LicensesDialog(onDismiss = { showLicenses = false })
   }
 }
 
 @Composable
-private fun StartupSurface() {
-  Surface(
-    modifier = Modifier.fillMaxSize(),
-    color = Color.Black,
-    contentColor = Color.White,
-  ) {
-    Box(
-      modifier = Modifier.fillMaxSize(),
-      contentAlignment = Alignment.Center,
-    ) {
-      Text(
-        text = "DeepSeek Harness",
-        fontSize = 22.sp,
-        fontWeight = FontWeight.Medium,
+private fun SheetContent(
+  onRefresh: () -> Unit,
+  onChangeServer: () -> Unit,
+  onClearLogin: () -> Unit,
+  onLicenses: () -> Unit,
+  versionName: String,
+) {
+  Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
+    Text(
+      "DeepSeek Harness",
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(start = 6.dp, bottom = 4.dp),
+    )
+    SheetItem("刷新页面", onRefresh)
+    SheetItem("切换服务器…", onChangeServer)
+    SheetItem("清除登录状态", onClearLogin)
+    Text(
+      "关于",
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 4.dp),
+    )
+    SheetItem("软件许可证", onLicenses)
+    SheetItem("版本 " + versionName, onClick = {})
+  }
+}
+
+@Composable
+private fun SheetItem(label: String, onClick: () -> Unit) {
+  Text(
+    label,
+    style = MaterialTheme.typography.bodyMedium,
+    color = MaterialTheme.colorScheme.onSurface,
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { onClick() }
+      .padding(horizontal = 14.dp, vertical = 13.dp),
+  )
+}
+
+@Composable
+private fun ServerDialog(current: String, onConfirm: (String) -> Unit) {
+  var value by remember { mutableStateOf(current) }
+  AlertDialog(
+    onDismissRequest = {},
+    title = { Text("切换服务器") },
+    text = {
+      OutlinedTextField(
+        value = value,
+        onValueChange = { value = it },
+        singleLine = true,
+        placeholder = { Text("https://dsh.example.com") },
+        modifier = Modifier.fillMaxWidth(),
       )
+    },
+    confirmButton = { TextButton(onClick = { onConfirm(value) }) { Text("保存") } },
+    dismissButton = { TextButton(onClick = {}) { Text("取消") } },
+  )
+}
+
+@Composable
+private fun LicensesDialog(onDismiss: () -> Unit) {
+  val context = LocalContext.current
+  val notices = remember { loadAndroidLicenseNotices(context.assets) }
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    title = { Text("软件许可证") },
+    text = {
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .heightIn(max = 480.dp)
+          .verticalScroll(rememberScrollState()),
+      ) {
+        notices.forEach { notice ->
+          Text(
+            "── " + notice.title + " ──",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
+          )
+          Text(
+            notice.text,
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = Typeface.MONOSPACE),
+            color = MaterialTheme.colorScheme.onSurface,
+          )
+        }
+      }
+    },
+    confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
+  )
+}
+
+// ── WebView 配置与工具 ──
+
+@SuppressLint("SetJavaScriptEnabled")
+private fun configureWebSettings(settings: WebSettings) {
+  settings.javaScriptEnabled = true
+  settings.domStorageEnabled = true
+  settings.useWideViewPort = true
+  settings.loadWithOverviewMode = true
+  settings.mediaPlaybackRequiresUserGesture = false
+  settings.cacheMode = WebSettings.LOAD_DEFAULT
+  settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+  settings.allowFileAccess = false
+}
+
+private fun handleExternalNavigation(context: Context, serverUrl: String, url: Uri): Boolean {
+  val serverHost = Uri.parse(serverUrl.ifBlank { DEFAULT_SERVER_URL }).host ?: return false
+  val targetHost = url.host
+  val sameHost = targetHost != null && targetHost.equals(serverHost, ignoreCase = true)
+  if (sameHost && (url.scheme == "https" || url.scheme == "http")) return false
+  when (url.scheme) {
+    "http", "https" -> {
+      runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url)) }
+        .onFailure { Toast.makeText(context, "没有可打开的应用", Toast.LENGTH_SHORT).show() }
+      return true
     }
+    "intent" -> {
+      runCatching {
+        Intent.parseUri(url.toString(), Intent.URI_INTENT_SCHEME)?.let { context.startActivity(it) }
+      }
+      return true
+    }
+  }
+  return false
+}
+
+private fun startDownload(
+  context: Context,
+  url: String,
+  userAgent: String,
+  contentDisposition: String,
+  mimeType: String,
+) {
+  val name = URLUtil.guessFileName(url, contentDisposition, mimeType)
+  val cookie = CookieManager.getInstance().getCookie(url)
+  val request = DownloadManager.Request(Uri.parse(url)).apply {
+    setMimeType(mimeType)
+    setTitle(name)
+    setDescription("DeepSeek Harness")
+    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+    addRequestHeader("User-Agent", userAgent)
+    if (!cookie.isNullOrEmpty()) addRequestHeader("Cookie", cookie)
+    setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
+  }
+  runCatching {
+    (context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+    Toast.makeText(context, "开始下载：" + name, Toast.LENGTH_SHORT).show()
+  }.onFailure {
+    Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show()
   }
 }

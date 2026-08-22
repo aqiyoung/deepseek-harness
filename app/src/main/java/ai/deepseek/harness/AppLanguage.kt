@@ -11,7 +11,7 @@ import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
 /** Keep these tags aligned with androidResources.localeFilters so Android never offers an unsupported locale. */
-internal enum class AppLanguage(
+enum class AppLanguage(
   val languageTag: String?,
   val displayName: String,
 ) {
