@@ -104,12 +104,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // 为状态栏/导航栏预留空间：WebView 不再顶到状态栏底下
-    androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, insets ->
-      val bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-      view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-      androidx.core.view.WindowInsetsCompat.CONSUMED
-    }
+    // 沉浸式：与 OpenClaw app 一致，内容延伸到透明状态栏底下
 
     if (loggedInState.value == null) {
       val hasCookie = !prefs.getSessionCookie().isNullOrEmpty()
