@@ -105,6 +105,8 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     // 沉浸式：与 OpenClaw app 一致，内容延伸到透明状态栏底下
+    WindowCompat.getInsetsController(window, window.decorView)
+      .isAppearanceLightStatusBars = true
 
     if (loggedInState.value == null) {
       val hasCookie = !prefs.getSessionCookie().isNullOrEmpty()
