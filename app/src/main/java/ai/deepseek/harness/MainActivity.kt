@@ -19,6 +19,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -37,7 +38,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       MaterialTheme {
         val loggedIn by loggedInState
-        if (loggedIn) {
+        if (loggedIn == true) {
           ShellScreen(
             bridge = bridge,
             onNeedLogin = { expired -> performLogout(expired) },
@@ -400,7 +400,7 @@ class MainActivity : ComponentActivity() {
       inputType = InputType.TYPE_TEXT_VARIATION_URI
       setSingleLine(true)
     }
-    AlertDialog.Builder(this)
+    android.app.AlertDialog.Builder(this)
       .setTitle("切换服务器")
       .setView(input)
       .setPositiveButton("保存") { _, _ ->
@@ -442,7 +442,7 @@ class MainActivity : ComponentActivity() {
       setPadding(40, 30, 40, 30)
       text = notices.joinToString("\n\n") { n -> "── " + n.title + " ──\n" + n.text }
     }
-    AlertDialog.Builder(this)
+    android.app.AlertDialog.Builder(this)
       .setTitle("软件许可证")
       .setView(text)
       .setPositiveButton("关闭", null)
