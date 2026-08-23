@@ -166,7 +166,7 @@ class MainActivity : ComponentActivity() {
                   fileChooserLauncher.launch(intent)
                 } catch (e: Exception) {
                   filePathCallback = null
-                  Toast.makeText(this, "无法打开文件选择器", Toast.LENGTH_SHORT).show()
+                  Toast.makeText(applicationContext, "无法打开文件选择器", Toast.LENGTH_SHORT).show()
                 }
               },
               onDownload = { url, ua, disposition, mime ->
@@ -430,7 +430,7 @@ class MainActivity : ComponentActivity() {
     }
     runCatching {
       (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
-      Toast.makeText(this, "开始下载：" + name, Toast.LENGTH_SHORT).show()
+      Toast.makeText(applicationContext, "开始下载：" + name, Toast.LENGTH_SHORT).show()
     }
   }
 
