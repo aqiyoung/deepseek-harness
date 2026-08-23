@@ -36,7 +36,9 @@ class SecurePrefs(context: Context) {
       .build()
   }
 
-  private val securePrefs: SharedPreferences by lazy {
+  private val securePrefs: SharedPreferences by lazy { createSecurePrefs() }
+
+  private fun openSecurePrefs(): SharedPreferences =
     EncryptedSharedPreferences.create(
       appContext,
       securePrefsName,
@@ -44,7 +46,19 @@ class SecurePrefs(context: Context) {
       EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
-  }
+
+  private fun createSecurePrefs(): SharedPreferences =
+    try {
+      openSecurePrefs()
+    } catch (_: Exception) {
+      // KeyStore/加密文件损坏不能变成启动崩溃循环：重置一次，仍失败则降级为明文 prefs。
+      appContext.deleteSharedPreferences(securePrefsName)
+      try {
+        openSecurePrefs()
+      } catch (_: Exception) {
+        plainPrefs
+      }
+    }
 
   // ── DSH Login ──
 
