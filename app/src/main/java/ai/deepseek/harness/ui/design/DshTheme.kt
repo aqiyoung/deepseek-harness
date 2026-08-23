@@ -1,14 +1,9 @@
 package ai.deepseek.harness.ui.design
 
-import ai.deepseek.harness.ui.LocalMobileColors
-import ai.deepseek.harness.ui.darkMobileColors
-import ai.deepseek.harness.ui.lightMobileColors
-import ai.deepseek.harness.ui.mobileFontFamily
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -16,15 +11,24 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ai.deepseek.harness.R
 
-/**
- * App color tokens consumed by DshTheme and bridged into Material components.
- */
+// Design tokens ported from the OpenClaw Android "Claw" design system,
+// forced dark to match its visual language.
+internal val dshFontFamily =
+  FontFamily(
+    Font(resId = R.font.manrope_400_regular, weight = FontWeight.Normal),
+    Font(resId = R.font.manrope_500_medium, weight = FontWeight.Medium),
+    Font(resId = R.font.manrope_600_semibold, weight = FontWeight.SemiBold),
+    Font(resId = R.font.manrope_700_bold, weight = FontWeight.Bold),
+  )
+
 @Immutable
 internal data class DshColors(
   val canvas: Color,
@@ -46,9 +50,6 @@ internal data class DshColors(
   val dangerSoft: Color,
 )
 
-/**
- * App spacing scale for Compose screens and shared controls.
- */
 @Immutable
 internal data class DshSpacing(
   val xxxs: Dp = 4.dp,
@@ -62,9 +63,6 @@ internal data class DshSpacing(
   val touchTarget: Dp = 48.dp,
 )
 
-/**
- * Radius scale for rows, panels, controls, sheets, and status pills.
- */
 @Immutable
 internal data class DshRadii(
   val row: Dp = 4.dp,
@@ -75,9 +73,6 @@ internal data class DshRadii(
   val pill: Dp = 12.dp,
 )
 
-/**
- * App text styles kept independent from Material typography names.
- */
 @Immutable
 internal data class DshTypography(
   val display: TextStyle,
@@ -86,6 +81,7 @@ internal data class DshTypography(
   val body: TextStyle,
   val label: TextStyle,
   val caption: TextStyle,
+  val captionSmall: TextStyle,
   val mono: TextStyle,
 )
 
@@ -110,35 +106,11 @@ private val DshDarkColors =
     dangerSoft = Color(0xFF2C1414),
   )
 
-private val DshLightColors =
-  DshColors(
-    canvas = Color(0xFFFAFBFC),
-    surface = Color(0xFFFFFEFB),
-    surfaceRaised = Color(0xFFFFFFFF),
-    surfacePressed = Color(0xFFE9EDF3),
-    border = Color(0xFFDDE3EC),
-    borderStrong = Color(0xFFC7D0DC),
-    text = Color(0xFF111318),
-    textMuted = Color(0xFF505865),
-    textSubtle = Color(0xFF8993A2),
-    primary = Color(0xFF111827),
-    primaryText = Color(0xFFFFFFFF),
-    success = Color(0xFF217747),
-    successSoft = Color(0xFFE9F7EF),
-    warning = Color(0xFFA56F17),
-    warningSoft = Color(0xFFFFF3DC),
-    danger = Color(0xFFB82929),
-    dangerSoft = Color(0xFFFFE9E9),
-  )
-
 private val LocalDshColors = staticCompositionLocalOf { DshDarkColors }
 private val LocalDshSpacing = staticCompositionLocalOf { DshSpacing() }
 private val LocalDshRadii = staticCompositionLocalOf { DshRadii() }
-private val LocalDshTypography = staticCompositionLocalOf { dshTypography(mobileFontFamily) }
+private val LocalDshTypography = staticCompositionLocalOf { dshTypography(dshFontFamily) }
 
-/**
- * Composition-local access point for DeepSeekHarness Android design tokens.
- */
 internal object DshTheme {
   val colors: DshColors
     @Composable
@@ -161,27 +133,31 @@ internal object DshTheme {
     get() = LocalDshTypography.current
 }
 
-/**
- * Installs DeepSeekHarness design tokens and maps them into MaterialTheme for Material3 controls.
- */
 @Composable
-internal fun DshDesignTheme(
-  dark: Boolean = true,
-  content: @Composable () -> Unit,
-) {
-  val colors = if (dark) DshDarkColors else DshLightColors
-  val mobileColors = if (dark) darkMobileColors() else lightMobileColors()
-  val typography = dshTypography(mobileFontFamily)
+internal fun DshDesignTheme(content: @Composable () -> Unit) {
+  val colors = DshDarkColors
+  val typography = dshTypography(dshFontFamily)
 
   CompositionLocalProvider(
     LocalDshColors provides colors,
-    LocalMobileColors provides mobileColors,
     LocalDshSpacing provides DshSpacing(),
     LocalDshRadii provides DshRadii(),
     LocalDshTypography provides typography,
   ) {
     MaterialTheme(
-      colorScheme = dshMaterialColorScheme(colors, dark),
+      colorScheme = darkColorScheme(
+        primary = colors.primary,
+        onPrimary = colors.primaryText,
+        background = colors.canvas,
+        onBackground = colors.text,
+        surface = colors.surface,
+        onSurface = colors.text,
+        surfaceVariant = colors.surfaceRaised,
+        onSurfaceVariant = colors.textMuted,
+        outline = colors.border,
+        error = colors.danger,
+        onError = colors.primaryText,
+      ),
       typography = materialTypography(typography),
       shapes = Shapes(),
       content = content,
@@ -239,6 +215,14 @@ private fun dshTypography(fontFamily: FontFamily) =
         lineHeight = 16.sp,
         letterSpacing = 0.sp,
       ),
+    captionSmall =
+      TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 14.sp,
+        letterSpacing = 0.4.sp,
+      ),
     mono =
       TextStyle(
         fontFamily = FontFamily.Monospace,
@@ -258,36 +242,3 @@ private fun materialTypography(type: DshTypography) =
     labelLarge = type.label,
     labelSmall = type.caption,
   )
-
-private fun dshMaterialColorScheme(
-  colors: DshColors,
-  dark: Boolean,
-) = if (dark) {
-  darkColorScheme(
-    primary = colors.primary,
-    onPrimary = colors.primaryText,
-    background = colors.canvas,
-    onBackground = colors.text,
-    surface = colors.surface,
-    onSurface = colors.text,
-    surfaceVariant = colors.surfaceRaised,
-    onSurfaceVariant = colors.textMuted,
-    outline = colors.border,
-    error = colors.danger,
-    onError = colors.primaryText,
-  )
-} else {
-  lightColorScheme(
-    primary = colors.primary,
-    onPrimary = colors.primaryText,
-    background = colors.canvas,
-    onBackground = colors.text,
-    surface = colors.surface,
-    onSurface = colors.text,
-    surfaceVariant = colors.surfaceRaised,
-    onSurfaceVariant = colors.textMuted,
-    outline = colors.border,
-    error = colors.danger,
-    onError = colors.primaryText,
-  )
-}
