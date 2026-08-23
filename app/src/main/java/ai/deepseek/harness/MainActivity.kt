@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -131,7 +132,7 @@ class MainActivity : ComponentActivity() {
         val loggedIn by loggedInState
         if (loggedIn == true) {
           // 原生顶栏 + WebView（顶栏写死在 App，不依赖服务器）
-          Column(modifier = Modifier.fillMaxSize()) {
+          Column(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
             Row(
               modifier = Modifier
                 .fillMaxWidth()
