@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -106,6 +107,27 @@ private val DshDarkColors =
     dangerSoft = Color(0xFF2C1414),
   )
 
+private val DshLightColors =
+  DshColors(
+    canvas = Color(0xFFFAFBFC),
+    surface = Color(0xFFFFFEFB),
+    surfaceRaised = Color(0xFFFFFFFF),
+    surfacePressed = Color(0xFFE9EDF3),
+    border = Color(0xFFDDE3EC),
+    borderStrong = Color(0xFFC7D0DC),
+    text = Color(0xFF111318),
+    textMuted = Color(0xFF505865),
+    textSubtle = Color(0xFF8993A2),
+    primary = Color(0xFF111827),
+    primaryText = Color(0xFFFFFFFF),
+    success = Color(0xFF217747),
+    successSoft = Color(0xFFE9F7EF),
+    warning = Color(0xFFA56F17),
+    warningSoft = Color(0xFFFFF3DC),
+    danger = Color(0xFFB82929),
+    dangerSoft = Color(0xFFFFE9E9),
+  )
+
 private val LocalDshColors = staticCompositionLocalOf { DshDarkColors }
 private val LocalDshSpacing = staticCompositionLocalOf { DshSpacing() }
 private val LocalDshRadii = staticCompositionLocalOf { DshRadii() }
@@ -134,8 +156,11 @@ internal object DshTheme {
 }
 
 @Composable
-internal fun DshDesignTheme(content: @Composable () -> Unit) {
-  val colors = DshDarkColors
+internal fun DshDesignTheme(
+  dark: Boolean,
+  content: @Composable () -> Unit,
+) {
+  val colors = if (dark) DshDarkColors else DshLightColors
   val typography = dshTypography(dshFontFamily)
 
   CompositionLocalProvider(
@@ -145,19 +170,35 @@ internal fun DshDesignTheme(content: @Composable () -> Unit) {
     LocalDshTypography provides typography,
   ) {
     MaterialTheme(
-      colorScheme = darkColorScheme(
-        primary = colors.primary,
-        onPrimary = colors.primaryText,
-        background = colors.canvas,
-        onBackground = colors.text,
-        surface = colors.surface,
-        onSurface = colors.text,
-        surfaceVariant = colors.surfaceRaised,
-        onSurfaceVariant = colors.textMuted,
-        outline = colors.border,
-        error = colors.danger,
-        onError = colors.primaryText,
-      ),
+      colorScheme = if (dark) {
+        darkColorScheme(
+          primary = colors.primary,
+          onPrimary = colors.primaryText,
+          background = colors.canvas,
+          onBackground = colors.text,
+          surface = colors.surface,
+          onSurface = colors.text,
+          surfaceVariant = colors.surfaceRaised,
+          onSurfaceVariant = colors.textMuted,
+          outline = colors.border,
+          error = colors.danger,
+          onError = colors.primaryText,
+        )
+      } else {
+        lightColorScheme(
+          primary = colors.primary,
+          onPrimary = colors.primaryText,
+          background = colors.canvas,
+          onBackground = colors.text,
+          surface = colors.surface,
+          onSurface = colors.text,
+          surfaceVariant = colors.surfaceRaised,
+          onSurfaceVariant = colors.textMuted,
+          outline = colors.border,
+          error = colors.danger,
+          onError = colors.primaryText,
+        )
+      },
       typography = materialTypography(typography),
       shapes = Shapes(),
       content = content,

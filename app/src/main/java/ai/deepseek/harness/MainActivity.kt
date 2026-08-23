@@ -27,66 +27,59 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -99,6 +92,8 @@ import ai.deepseek.harness.ui.design.DshDesignTheme
 import ai.deepseek.harness.ui.design.DshPlainIconButton
 import ai.deepseek.harness.ui.design.DshPrimaryButton
 import ai.deepseek.harness.ui.design.DshScaffold
+import ai.deepseek.harness.ui.design.DshSectionLabel
+import ai.deepseek.harness.ui.design.DshSettingsRow
 import ai.deepseek.harness.ui.design.DshSoftPanel
 import ai.deepseek.harness.ui.design.DshStatus
 import ai.deepseek.harness.ui.design.DshStatusPill
@@ -110,7 +105,7 @@ import ai.deepseek.harness.ui.design.DshTheme
  * 原生登录页（服务器地址/账号/密码/记住密码）
  *   → 会话 Cookie 注入 WebView
  *   → 完整承载 Web 手机界面（dsh-web-ui-mobile 自适应插件）。
- * 外壳视觉移植自 OpenClaw Android 的 Claw 设计系统：强制暗色、Manrope、小圆角面板。
+ * 顶栏 ☰ 打开 Web 会话列表侧边栏，右上 ⚙ 进入原生气泡设置页。
  */
 class MainActivity : ComponentActivity() {
 
@@ -143,7 +138,13 @@ class MainActivity : ComponentActivity() {
     }
 
     setContent {
-      DshDesignTheme {
+      val themeMode by prefs.appearanceThemeMode.collectAsState()
+      val dark = themeMode.isDark(systemDark = isSystemInDarkTheme())
+      SideEffect {
+        WindowCompat.getInsetsController(window, window.decorView)
+          .isAppearanceLightStatusBars = !dark
+      }
+      DshDesignTheme(dark = dark) {
         val loggedIn by loggedInState
         if (loggedIn == true) {
           ShellRoot(
@@ -168,7 +169,7 @@ class MainActivity : ComponentActivity() {
     }
   }
 
-  // ── 登录页（OpenClaw 引导页风格）──
+  // ── 登录页 ──
 
   @Composable
   private fun LoginScreen() {
@@ -195,11 +196,11 @@ class MainActivity : ComponentActivity() {
             border = BorderStroke(1.dp, DshTheme.colors.border),
           ) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-              Icon(
-                imageVector = Icons.Default.Hub,
+              Image(
+                painter = painterResource(R.drawable.login_logo_black),
                 contentDescription = null,
-                modifier = Modifier.size(36.dp),
-                tint = DshTheme.colors.success,
+                modifier = Modifier.size(44.dp),
+                colorFilter = ColorFilter.tint(DshTheme.colors.text),
               )
             }
           }
@@ -328,7 +329,7 @@ class MainActivity : ComponentActivity() {
     loggedInState.value = false
   }
 
-  // ── Web 壳（抽屉侧边栏 + 原生顶栏 + WebView）──
+  // ── Web 壳（原生顶栏 + WebView + 设置覆盖层）──
 
   @Composable
   private fun ShellRoot(
@@ -336,151 +337,188 @@ class MainActivity : ComponentActivity() {
     onFileChoose: (ValueCallback<Array<Uri>>, Intent) -> Unit,
     onDownload: (String, String, String, String) -> Unit,
   ) {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    var showSettings by remember { mutableStateOf(false) }
 
-    ModalNavigationDrawer(
-      drawerState = drawerState,
-      drawerContent = {
-        ModalDrawerSheet(
-          drawerContainerColor = Color.Black,
-          windowInsets = WindowInsets(0.dp),
-        ) {
-          DshSidebar(
-            onClose = { scope.launch { drawerState.close() } },
-            onRefresh = { scope.launch { drawerState.close() }; refreshShell() },
-            onChangeServer = { scope.launch { drawerState.close() }; showChangeServerDialog(silentRelogin = true) },
-            onLicenses = { showLicensesDialog() },
-            onLogout = { performLogout(expired = false) },
-          )
-        }
-      },
-    ) {
-      Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .padding(start = 4.dp, end = 12.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          DshPlainIconButton(
-            icon = Icons.Default.Menu,
-            contentDescription = "打开菜单",
-            onClick = { scope.launch { drawerState.open() } },
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = "DeepSeek Harness",
-            style = DshTheme.type.title,
-            color = DshTheme.colors.text,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-          )
-        }
-        HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+    Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .heightIn(min = 48.dp)
+          .padding(start = 4.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        DshPlainIconButton(
+          icon = Icons.Default.Menu,
+          contentDescription = "打开会话列表",
+          onClick = { toggleWebSidebar() },
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+          text = "DeepSeek Harness",
+          style = DshTheme.type.title,
+          color = DshTheme.colors.text,
+          modifier = Modifier.weight(1f),
+          maxLines = 1,
+        )
+        DshPlainIconButton(
+          icon = Icons.Default.Settings,
+          contentDescription = "打开设置",
+          onClick = { showSettings = true },
+        )
+      }
+      HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+
+      Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
+          backEnabled = !showSettings,
           onNeedLogin = onNeedLogin,
           onFileChoose = onFileChoose,
           onDownload = onDownload,
         )
+        if (showSettings) {
+          SettingsScreen(
+            onClose = { showSettings = false },
+            onRefresh = {
+              showSettings = false
+              refreshShell()
+            },
+            onChangeServer = { showChangeServerDialog(silentRelogin = true) },
+            onLogout = { performLogout(expired = false) },
+            onLicenses = { showLicensesDialog() },
+          )
+        }
       }
     }
+
+    BackHandler(enabled = showSettings) { showSettings = false }
   }
 
+  /** 打开 Web UI 自带的侧边栏（含会话列表），与 v1.0.52 行为一致。 */
+  private fun toggleWebSidebar() {
+    webViewRef?.evaluateJavascript(
+      "(function(){ var sb=document.querySelector('.hHd-Xa_root'); var t=sb&&sb.querySelector('.hHd-Xa_toggle'); if(t){t.click()} })()",
+      null,
+    )
+  }
+
+  // ── 设置页（DSH 配置）──
+
   @Composable
-  private fun DshSidebar(
+  private fun SettingsScreen(
     onClose: () -> Unit,
     onRefresh: () -> Unit,
     onChangeServer: () -> Unit,
-    onLicenses: () -> Unit,
     onLogout: () -> Unit,
+    onLicenses: () -> Unit,
   ) {
     val serverUrl by prefs.serverUrl.collectAsState()
+    val sessionUser by prefs.sessionUser.collectAsState()
+    val themeMode by prefs.appearanceThemeMode.collectAsState()
 
     Column(
       modifier = Modifier
         .fillMaxSize()
-        .background(Color.Black)
-        .windowInsetsPadding(WindowInsets.safeDrawing)
-        .padding(horizontal = 14.dp, vertical = 10.dp),
+        .background(DshTheme.colors.canvas)
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 20.dp),
     ) {
-      Column(
-        modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+      Spacer(modifier = Modifier.height(8.dp))
+      Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Default.Hub,
-            contentDescription = null,
-            tint = DshTheme.colors.success,
-            modifier = Modifier.size(24.dp),
-          )
-          Text(
-            text = "DeepSeek Harness",
-            style = DshTheme.type.title.copy(fontSize = 18.sp, lineHeight = 22.sp),
-            color = Color(0xFFEDEDED),
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-          )
-          DshPlainIconButton(icon = Icons.Default.Close, contentDescription = "关闭侧边栏", onClick = onClose)
-        }
+        DshPlainIconButton(
+          icon = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "返回",
+          onClick = onClose,
+        )
+        Text(text = "设置", style = DshTheme.type.title, color = DshTheme.colors.text)
+      }
 
-        Spacer(modifier = Modifier.height(10.dp))
+      Spacer(modifier = Modifier.height(10.dp))
 
-        Surface(
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(DshTheme.radii.panel),
-          color = Color(0xFF1A1A1A),
-          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
-        ) {
+      DshSectionLabel("连接")
+      DshSoftPanel {
+        Column {
+          DshSettingsRow(title = "服务器地址", value = serverUrl.removePrefix("https://").removePrefix("http://"), onClick = onChangeServer)
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
           ) {
-            Column(modifier = Modifier.weight(1f)) {
-              Text(text = "当前服务器", style = DshTheme.type.captionSmall, color = Color(0xFF8F8F8F))
-              Spacer(modifier = Modifier.height(2.dp))
-              Text(
-                text = serverUrl.removePrefix("https://").removePrefix("http://").ifBlank { "-" },
-                style = DshTheme.type.body,
-                color = Color(0xFFEDEDED),
-                maxLines = 1,
-              )
-            }
+            Text(text = "状态", style = DshTheme.type.body, color = DshTheme.colors.text, modifier = Modifier.weight(1f))
             DshStatusPill(text = "已连接", status = DshStatus.Success)
           }
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(title = "刷新页面", onClick = onRefresh)
         }
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        SidebarActionRow(icon = Icons.Default.Refresh, label = "刷新页面", onClick = onRefresh)
-        SidebarActionRow(icon = Icons.Default.SwapHoriz, label = "切换服务器", onClick = onChangeServer)
-        SidebarActionRow(icon = Icons.Default.Description, label = "软件许可证", onClick = onLicenses)
-        SidebarActionRow(icon = Icons.AutoMirrored.Filled.Logout, label = "退出登录", onClick = onLogout)
       }
+
+      Spacer(modifier = Modifier.height(18.dp))
+
+      DshSectionLabel("账户")
+      DshSoftPanel {
+        Column {
+          DshSettingsRow(title = "账号", value = sessionUser.ifBlank { "-" })
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(title = "退出登录", danger = true, onClick = onLogout)
+        }
+      }
+
+      Spacer(modifier = Modifier.height(18.dp))
+
+      DshSectionLabel("外观")
+      DshSoftPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          Text(text = "主题", style = DshTheme.type.body, color = DshTheme.colors.text)
+          ThemeSegmented(selected = themeMode, onSelect = { prefs.setAppearanceThemeMode(it) })
+        }
+      }
+
+      Spacer(modifier = Modifier.height(18.dp))
+
+      DshSectionLabel("关于")
+      DshSoftPanel {
+        Column {
+          DshSettingsRow(title = "版本", value = BuildConfig.VERSION_NAME)
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(title = "软件许可证", onClick = onLicenses)
+        }
+      }
+
+      Spacer(modifier = Modifier.height(24.dp))
     }
   }
 
   @Composable
-  private fun SidebarActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
-    Surface(
-      onClick = onClick,
-      modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-      shape = RoundedCornerShape(DshTheme.radii.row),
-      color = Color.Transparent,
-    ) {
-      Row(
-        modifier = Modifier.heightIn(min = 54.dp).padding(horizontal = 6.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-      ) {
-        Icon(imageVector = icon, contentDescription = null, tint = Color(0xFFEDEDED), modifier = Modifier.size(20.dp))
-        Text(text = label, style = DshTheme.type.body, color = Color(0xFFEDEDED))
+  private fun ThemeSegmented(
+    selected: AppearanceThemeMode,
+    onSelect: (AppearanceThemeMode) -> Unit,
+  ) {
+    val options = listOf(
+      AppearanceThemeMode.System to "跟随系统",
+      AppearanceThemeMode.Light to "浅色",
+      AppearanceThemeMode.Dark to "深色",
+    )
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      options.forEach { (mode, label) ->
+        val selectedHere = mode == selected
+        Surface(
+          onClick = { onSelect(mode) },
+          shape = RoundedCornerShape(DshTheme.radii.control),
+          color = if (selectedHere) DshTheme.colors.surfacePressed else Color.Transparent,
+          border = BorderStroke(1.dp, if (selectedHere) DshTheme.colors.borderStrong else DshTheme.colors.border),
+          modifier = Modifier.weight(1f).heightIn(min = 40.dp),
+        ) {
+          Box(contentAlignment = Alignment.Center) {
+            Text(
+              text = label,
+              style = DshTheme.type.label,
+              color = if (selectedHere) DshTheme.colors.text else DshTheme.colors.textMuted,
+              maxLines = 1,
+            )
+          }
+        }
       }
     }
   }
@@ -488,6 +526,7 @@ class MainActivity : ComponentActivity() {
   @SuppressLint("SetJavaScriptEnabled")
   @Composable
   private fun ShellScreen(
+    backEnabled: Boolean,
     onNeedLogin: (Boolean) -> Unit,
     onFileChoose: (ValueCallback<Array<Uri>>, Intent) -> Unit,
     onDownload: (String, String, String, String) -> Unit,
@@ -576,14 +615,12 @@ class MainActivity : ComponentActivity() {
       webView.loadUrl(serverUrl)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-      AndroidView(
-        factory = { webViewRef = webView; webView },
-        modifier = Modifier.fillMaxSize(),
-      )
-    }
+    AndroidView(
+      factory = { webViewRef = webView; webView },
+      modifier = Modifier.fillMaxSize(),
+    )
 
-    BackHandler(enabled = true) {
+    BackHandler(enabled = backEnabled) {
       if (webView.canGoBack()) webView.goBack() else finish()
     }
   }

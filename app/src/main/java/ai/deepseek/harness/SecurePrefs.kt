@@ -111,7 +111,9 @@ class SecurePrefs(context: Context) {
   // ── Theme ──
 
   private val _appearanceThemeMode = MutableStateFlow(
-    AppearanceThemeMode.fromRawValue(plainPrefs.getString("appearance.themeMode", null)),
+    plainPrefs.getString("appearance.themeMode", null)
+      ?.let { AppearanceThemeMode.fromRawValue(it) }
+      ?: AppearanceThemeMode.System,
   )
   val appearanceThemeMode: StateFlow<AppearanceThemeMode> = _appearanceThemeMode
 

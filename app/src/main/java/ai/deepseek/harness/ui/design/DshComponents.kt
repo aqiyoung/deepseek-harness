@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -158,5 +160,67 @@ internal fun DshStatusPill(
       )
       Text(text = text, style = DshTheme.type.caption.copy(fontSize = 13.sp, lineHeight = 17.sp), color = colors.textMuted, maxLines = 1)
     }
+  }
+}
+
+/** Uppercase muted caption above a grouped settings panel. */
+@Composable
+internal fun DshSectionLabel(
+  text: String,
+  modifier: Modifier = Modifier,
+) {
+  Text(
+    text = text,
+    style = DshTheme.type.captionSmall,
+    color = DshTheme.colors.textSubtle,
+    modifier = modifier.padding(start = 4.dp, bottom = 6.dp),
+  )
+}
+
+/** Grouped settings list row with optional trailing value and chevron disclosure. */
+@Composable
+internal fun DshSettingsRow(
+  title: String,
+  modifier: Modifier = Modifier,
+  value: String? = null,
+  danger: Boolean = false,
+  onClick: (() -> Unit)? = null,
+) {
+  val rowContent: @Composable () -> Unit = {
+    Row(
+      modifier =
+        Modifier
+          .fillMaxWidth()
+          .heightIn(min = 54.dp)
+          .padding(horizontal = 14.dp, vertical = 10.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(
+        text = title,
+        style = DshTheme.type.body,
+        color = if (danger) DshTheme.colors.danger else DshTheme.colors.text,
+        modifier = Modifier.weight(1f),
+      )
+      value?.let {
+        Text(text = it, style = DshTheme.type.caption, color = DshTheme.colors.textSubtle, maxLines = 1)
+        Spacer(modifier = Modifier.width(8.dp))
+      }
+      if (onClick != null) {
+        Icon(
+          imageVector = Icons.Default.ChevronRight,
+          contentDescription = null,
+          tint = DshTheme.colors.textSubtle,
+          modifier = Modifier.size(18.dp),
+        )
+      }
+    }
+  }
+
+  if (onClick != null) {
+    Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), color = Color.Transparent) {
+      rowContent()
+    }
+  } else {
+    Box(modifier = modifier.fillMaxWidth()) { rowContent() }
   }
 }
