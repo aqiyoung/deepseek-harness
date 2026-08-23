@@ -94,6 +94,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import ai.deepseek.harness.ui.design.DshDetailFrame
 import ai.deepseek.harness.ui.design.DshDesignTheme
 import ai.deepseek.harness.ui.design.DshPlainIconButton
 import ai.deepseek.harness.ui.design.DshPrimaryButton
@@ -427,11 +428,6 @@ class MainActivity : ComponentActivity() {
               settingsRoute = null
               refreshShell()
             },
-            onOpenWebSettings = { aliases ->
-              showSettings = false
-              settingsRoute = null
-              openWebSettings(aliases)
-            },
           )
         }
       }
@@ -450,18 +446,9 @@ class MainActivity : ComponentActivity() {
     )
   }
 
-  /** 深链：打开 Web 设置弹窗并切换到别名匹配的标签页（由冻结插件内的 DshNativeOpenSettings 实现）。 */
-  private fun openWebSettings(aliases: List<String>) {
-    val arr = aliases.joinToString(",") { "\"" + it.replace("\\", "\\\\").replace("\"", "\\\"") + "\"" }
-    webViewRef?.evaluateJavascript(
-      "(function(){ if (window.DshNativeOpenSettings) DshNativeOpenSettings([$arr]); })()",
-      null,
-    )
-  }
-
   // ── 设置页（OpenClaw 分组样式：首页 + 二级详情页）──
 
-  private enum class SettingRoute { Server, Theme, Language, Licenses }
+  private enum class SettingRoute { Server, Models, Plugins, Presets, Theme, Language, Licenses }
 
   @Composable
   private fun SettingsOverlay(
@@ -469,7 +456,6 @@ class MainActivity : ComponentActivity() {
     onRouteChange: (SettingRoute?) -> Unit,
     onClose: () -> Unit,
     onRefresh: () -> Unit,
-    onOpenWebSettings: (List<String>) -> Unit,
   ) {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
@@ -483,6 +469,9 @@ class MainActivity : ComponentActivity() {
             onOpenWebSettings = onOpenWebSettings,
           )
           SettingRoute.Server -> ServerDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Models -> ai.deepseek.harness.ui.ModelsDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Plugins -> ai.deepseek.harness.ui.PluginsDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Presets -> ai.deepseek.harness.ui.PresetsDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Theme -> ThemeDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Language -> LanguageDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Licenses -> LicensesDetailPage(onBack = { onRouteChange(null) })
@@ -515,12 +504,30 @@ class MainActivity : ComponentActivity() {
     onOpenRoute: (SettingRoute) -> Unit,
     onRefresh: () -> Unit,
     onLogoutRequest: () -> Unit,
-    onOpenWebSettings: (List<String>) -> Unit,
   ) {
     val serverUrl by prefs.serverUrl.collectAsState()
     val sessionUser by prefs.sessionUser.collectAsState()
     val themeMode by prefs.appearanceThemeMode.collectAsState()
     val appLanguage by prefs.appLanguage.collectAsState()
+
+    // DSH 服务摘要（当前模型 / 插件启用数 / 默认预设），失败静默显示 "-"
+    var dshSummary by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    LaunchedEffect(Unit) {
+      val r = withContext(Dispatchers.IO) {
+        runCatching {
+          val dsh = (application as NodeApp).dsh
+          val models = runCatching { dsh.models() }.getOrNull()
+          val plugins = runCatching { dsh.plugins() }.getOrNull()
+          val presets = runCatching { dsh.presets() }.getOrNull()
+          Triple(
+            models?.let { it.currentModel.ifBlank { "未选择" } } ?: "-",
+            plugins?.let { list -> list.count { p -> p.enabled }.toString() + "/" + list.size.toString() + " 启用" } ?: "-",
+            presets?.let { list -> list.firstOrNull { it.isDefault }?.name ?: if (list.isEmpty()) "无" else "-" } ?: "-",
+          )
+        }
+      }
+      r.getOrNull()?.let { dshSummary = it }
+    }
 
     Column(
       modifier = Modifier
@@ -561,27 +568,25 @@ class MainActivity : ComponentActivity() {
 
       Spacer(modifier = Modifier.height(18.dp))
 
-      DshSectionLabel("DSH 网页设置")
+      DshSectionLabel("DSH 服务")
       DshSoftPanel {
         Column {
           DshSettingsRow(
-            title = "通用设置",
-            onClick = { onOpenWebSettings(listOf("通用", "General")) },
-          )
-          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
-          DshSettingsRow(
             title = "模型",
-            onClick = { onOpenWebSettings(listOf("模型", "Models")) },
+            value = dshSummary?.first ?: "-",
+            onClick = { onOpenRoute(SettingRoute.Models) },
           )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(
             title = "插件",
-            onClick = { onOpenWebSettings(listOf("插件", "Plugin", "扩展", "Extension")) },
+            value = dshSummary?.second ?: "-",
+            onClick = { onOpenRoute(SettingRoute.Plugins) },
           )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(
             title = "Agent 预设",
-            onClick = { onOpenWebSettings(listOf("预设", "Preset", "Agent", "智能体")) },
+            value = dshSummary?.third ?: "-",
+            onClick = { onOpenRoute(SettingRoute.Presets) },
           )
         }
       }
@@ -631,44 +636,13 @@ class MainActivity : ComponentActivity() {
     }
   }
 
-  /** 二级页统一框架：返回键 + 标题。 */
-  @Composable
-  private fun SettingDetailFrame(
-    title: String,
-    onBack: () -> Unit,
-    content: @Composable () -> Unit,
-  ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        DshPlainIconButton(
-          icon = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "返回",
-          onClick = onBack,
-        )
-        Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text)
-      }
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .verticalScroll(rememberScrollState())
-          .padding(horizontal = 20.dp),
-      ) {
-        content()
-        Spacer(modifier = Modifier.height(24.dp))
-      }
-    }
-  }
-
   @Composable
   private fun ServerDetailPage(onBack: () -> Unit) {
     val current = prefs.serverUrl.collectAsState().value
     var serverValue by remember(current) { mutableStateOf(current) }
     val changed = serverValue.trim().removeSuffix("/") != current
 
-    SettingDetailFrame(title = "服务器地址", onBack = onBack) {
+    DshDetailFrame(title = "服务器地址", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
       DshSoftPanel {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -704,7 +678,7 @@ class MainActivity : ComponentActivity() {
   private fun ThemeDetailPage(onBack: () -> Unit) {
     val themeMode by prefs.appearanceThemeMode.collectAsState()
 
-    SettingDetailFrame(title = "主题", onBack = onBack) {
+    DshDetailFrame(title = "主题", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
       DshSoftPanel {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -723,7 +697,7 @@ class MainActivity : ComponentActivity() {
   private fun LanguageDetailPage(onBack: () -> Unit) {
     val appLanguage by prefs.appLanguage.collectAsState()
 
-    SettingDetailFrame(title = "语言", onBack = onBack) {
+    DshDetailFrame(title = "语言", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
       DshSoftPanel {
         Column {
@@ -768,7 +742,7 @@ class MainActivity : ComponentActivity() {
   private fun LicensesDetailPage(onBack: () -> Unit) {
     val notices = remember { loadAndroidLicenseNotices(assets) }
 
-    SettingDetailFrame(title = "开源许可证", onBack = onBack) {
+    DshDetailFrame(title = "开源许可证", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
       notices.forEach { notice ->
         DshSectionLabel(notice.title)

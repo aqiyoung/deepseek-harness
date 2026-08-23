@@ -12,14 +12,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -222,5 +225,64 @@ internal fun DshSettingsRow(
     }
   } else {
     Box(modifier = modifier.fillMaxWidth()) { rowContent() }
+  }
+}
+
+/** Secondary action button for non-default commands. */
+@Composable
+internal fun DshSecondaryButton(
+  text: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+) {
+  Surface(
+    onClick = onClick,
+    enabled = enabled,
+    modifier = modifier.heightIn(min = DshTheme.spacing.touchTarget),
+    shape = RoundedCornerShape(DshTheme.radii.button),
+    color = if (enabled) DshTheme.colors.surfaceRaised else DshTheme.colors.surface,
+    contentColor = if (enabled) DshTheme.colors.text else DshTheme.colors.textSubtle,
+    border = BorderStroke(1.dp, if (enabled) DshTheme.colors.borderStrong else DshTheme.colors.border),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center,
+    ) {
+      Text(text = text, style = DshTheme.type.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+  }
+}
+
+/** 设置二级页统一框架：返回键 + 标题 + 滚动内容区。 */
+@Composable
+internal fun DshDetailFrame(
+  title: String,
+  onBack: () -> Unit,
+  content: @Composable () -> Unit,
+) {
+  Column(modifier = Modifier.fillMaxSize()) {
+    Row(
+      modifier = Modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      DshPlainIconButton(
+        icon = Icons.AutoMirrored.Filled.ArrowBack,
+        contentDescription = "返回",
+        onClick = onBack,
+      )
+      Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text)
+    }
+    Column(
+      modifier =
+        Modifier
+          .fillMaxSize()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 20.dp),
+    ) {
+      content()
+      Spacer(modifier = Modifier.height(DshTheme.spacing.xl))
+    }
   }
 }

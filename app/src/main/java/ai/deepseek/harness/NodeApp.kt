@@ -12,6 +12,7 @@ import android.os.StrictMode
  */
 class NodeApp : Application() {
   val prefs: SecurePrefs by lazy { SecurePrefs(this) }
+  val dsh: ai.deepseek.harness.dsh.DshRepo by lazy { ai.deepseek.harness.dsh.DshRepo(this) }
 
   override fun onCreate() {
     super.onCreate()
