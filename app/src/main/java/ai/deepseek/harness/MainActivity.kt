@@ -331,6 +331,17 @@ class MainActivity : ComponentActivity() {
         CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
 
         webViewClient = object : WebViewClient() {
+          override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): android.webkit.WebResourceResponse? {
+            // 冻结版：App 内的移动 UI 适配插件使用 APK 内置副本，不受服务器更新影响
+            if (request.url.toString().contains("dsh-web-ui-mobile/client.js")) {
+              try {
+                val input = assets.open("dsh-mobile-client.js")
+                return android.webkit.WebResourceResponse("application/javascript", "utf-8", input)
+              } catch (_: Exception) { /* fallback to server */ }
+            }
+            return null
+          }
+
           override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             return handleExternalNavigation(context, serverUrl, request.url)
           }
