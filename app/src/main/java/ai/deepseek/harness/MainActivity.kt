@@ -111,7 +111,8 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // 沉浸式：与 OpenClaw app 一致，内容延伸到透明状态栏底下
+    // 状态栏白底深色图标：确保可见
+    window.statusBarColor = android.graphics.Color.WHITE
     WindowCompat.getInsetsController(window, window.decorView)
       .isAppearanceLightStatusBars = true
 
