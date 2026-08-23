@@ -270,9 +270,7 @@ window.__ModuleLoader__.load({
     function syncOverlay(open) {
       var ov = document.getElementById("dsh-mobile-ov");
       if (ov) ov.style.display = open ? "block" : "none";
-      var hb = document.querySelector(".dsh-mobile-hb");
-      if (hb) hb.classList.toggle("open", open);
-
+      try { if (window.DshAppBridge) window.DshAppBridge.setSidebarOpen(!!open); } catch (e) {}
     }
 
 
@@ -322,7 +320,20 @@ window.__ModuleLoader__.load({
       /* 官方 logoRow 直接优化：安全区留白 + 发丝分隔线，内容保持网页原样 */
       var logoRow = sb.querySelector('.hHd-Xa_logoRow');
       if (logoRow) {
-        logoRow.style.cssText = "display:flex !important;width:100% !important;align-items:center !important;justify-content:flex-end !important;padding:calc(10px + env(safe-area-inset-top)) 14px 10px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;border-bottom:1px solid rgba(127,127,127,0.18) !important;";
+        logoRow.style.cssText = "display:flex !important;width:100% !important;align-items:center !important;justify-content:flex-end !important;padding:calc(10px + env(safe-area-inset-top)) 14px 10px 12px !important;box-sizing:border-box !important;flex-shrink:0 !important;";
+        var toggleBtn = logoRow.querySelector('.hHd-Xa_toggle');
+        if (toggleBtn && !logoRow.querySelector('.dsh-side-gear')) {
+          var gear = document.createElement('button');
+          gear.type = 'button';
+          gear.className = 'dsh-side-gear';
+          gear.setAttribute('aria-label', '打开设置');
+          gear.innerHTML = '&#9881;';
+          gear.addEventListener('click', function(e) {
+            e.stopPropagation();
+            try { if (window.DshAppBridge) window.DshAppBridge.openAppSettings(); } catch (err) {}
+          });
+          logoRow.insertBefore(gear, toggleBtn);
+        }
       }
       /* newSession 按钮展开 */
       var ns = sb.querySelector('.hHd-Xa_newSession');
@@ -576,7 +587,9 @@ window.__ModuleLoader__.load({
       st.textContent =
         ".dsh-mobile-active .hHd-Xa_logoRow{display:none !important}" +
         ".dsh-mobile-active .hHd-Xa_settingsArea{display:none !important}" +
-        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}";
+        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}" +
+        ".dsh-side-gear{width:38px;height:38px;border-radius:19px;border:none;background:transparent;color:inherit;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin-right:6px;}" +
+        ".dsh-side-gear:active{background:rgba(127,127,127,0.18)}";
                                                                       document.head.appendChild(st);
     }
 
