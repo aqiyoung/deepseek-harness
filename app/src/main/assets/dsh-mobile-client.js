@@ -30,7 +30,7 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed){",
           "transform:translateX(0) !important;width:100vw !important;max-width:100vw !important;",
           "box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;",
-          "--dsw-alias-bg-base:#050505;--dsw-alias-label-primary:#EDEDED;--dsw-alias-label-secondary:#8F8F8F;background:#050505 !important;color:#EDEDED !important;",
+          "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
         /* 隐藏应用自带的 rail toggle 按钮 */
         /* toggle \u6309\u94ae\u4fdd\u7559\uff0c\u539f\u751f\u6253\u5f00\u4fa7\u680f */
@@ -138,7 +138,7 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active ._7KE1Ra_groups{",
           "max-height:none !important;overflow:visible !important;",
         "}",
-          "--dsw-alias-bg-base:#050505;--dsw-alias-label-primary:#EDEDED;--dsw-alias-label-secondary:#8F8F8F;background:#050505 !important;color:#EDEDED !important;",
+          "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
           "border-radius:14px !important;border:1px solid var(--dsw-alias-border-l2,rgba(127,127,127,0.25)) !important;",
           "box-shadow:0 12px 32px rgba(0,0,0,0.18) !important;",
           "-webkit-overflow-scrolling:touch !important;",
@@ -315,41 +315,15 @@ window.__ModuleLoader__.load({
       } catch(e) {}
     }
 
-    /* 侧边栏头部：OpenClaw 风格（点标 + 标题 + ⚙ 原生设置 + ✕ 关闭） */
-    function ensureSideHead(sb) {
-      var head = document.getElementById("dsh-side-head");
-      if (head && head.parentNode !== sb) {
-        head.parentNode.removeChild(head);
-        head = null;
-      }
-      if (!head) {
-        head = document.createElement("div");
-        head.id = "dsh-side-head";
-        var dot = document.createElement("span"); dot.className = "dsh-sh-dot";
-        var title = document.createElement("span"); title.className = "dsh-sh-title"; title.textContent = "DeepSeek Harness";
-        var gear = document.createElement("button"); gear.type = "button"; gear.textContent = "\u2699"; gear.setAttribute("aria-label", "打开设置");
-        gear.addEventListener("click", function(e) {
-          e.stopPropagation();
-          try { if (window.DshAppBridge) window.DshAppBridge.openAppSettings(); } catch (err) {}
-        });
-        var close = document.createElement("button"); close.type = "button"; close.textContent = "\u2715"; close.setAttribute("aria-label", "关闭侧边栏");
-        close.addEventListener("click", function(e) {
-          e.stopPropagation();
-          doToggle(sb);
-        });
-        head.appendChild(dot); head.appendChild(title); head.appendChild(gear); head.appendChild(close);
-        sb.insertBefore(head, sb.firstChild);
-      }
-    }
-
     /* 打开抽屉时：用内联样式强制修正布局（比 CSS !important 更可靠） */
     function applyDrawerStyles(sb) {
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
-      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;--dsw-alias-bg-base:#050505;--dsw-alias-label-primary:#EDEDED;--dsw-alias-label-secondary:#8F8F8F;background:#050505 !important;color:#EDEDED !important;";
-      /* 对齐 OpenClaw：隐藏网页侧边栏自带的顶栏样式行，注入原生风格头部 */
+      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;";
+      /* 官方 logoRow 直接优化：安全区留白 + 发丝分隔线，内容保持网页原样 */
       var logoRow = sb.querySelector('.hHd-Xa_logoRow');
-      if (logoRow) logoRow.style.display = "none";
-      ensureSideHead(sb);
+      if (logoRow) {
+        logoRow.style.cssText = "display:flex !important;width:100% !important;align-items:center !important;justify-content:flex-end !important;padding:calc(10px + env(safe-area-inset-top)) 14px 10px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;border-bottom:1px solid rgba(127,127,127,0.18) !important;";
+      }
       /* newSession 按钮展开 */
       var ns = sb.querySelector('.hHd-Xa_newSession');
       if (ns) {
@@ -418,14 +392,7 @@ window.__ModuleLoader__.load({
         ov.addEventListener("click", function() { doToggle(findSidebar()); });
         document.body.appendChild(ov);
       }
-      if (!document.getElementById("dsh-mobile-ham")) {
-        var ham = document.createElement("div");
-        ham.id = "dsh-mobile-ham";
-        ham.className = "dsh-mobile-hb";
-        ham.textContent = "\u2630";
-        ham.addEventListener("click", function() { doToggle(findSidebar()); });
-        document.body.appendChild(ham);
-      }
+      /* 侧边栏入口由原生顶栏 ☰ 承担，不再创建悬浮按钮 */
     }
 
     /* 手机上跳过「Model →」中间层：菜单挂载后自动下钻到模型列表 */
@@ -609,16 +576,8 @@ window.__ModuleLoader__.load({
       st.textContent =
         ".dsh-mobile-active .hHd-Xa_logoRow{display:none !important}" +
         ".dsh-mobile-active .hHd-Xa_settingsArea{display:none !important}" +
-        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}" +
-        "#dsh-side-head{display:flex;align-items:center;gap:10px;width:100%;padding:calc(12px + env(safe-area-inset-top)) 14px 10px 16px;box-sizing:border-box;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);}" +
-        "#dsh-side-head .dsh-sh-dot{width:9px;height:9px;border-radius:50%;background:#3EDB82;flex-shrink:0;}" +
-        "#dsh-side-head .dsh-sh-title{flex:1;font-size:16px;font-weight:600;color:#EDEDED;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
-        "#dsh-side-head button{width:38px;height:38px;border-radius:19px;border:none;background:transparent;color:#EDEDED;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}" +
-        "#dsh-side-head button:active{background:rgba(255,255,255,0.12);}" +
-        "#dsh-mobile-ham{position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;width:40px;height:40px;border-radius:20px;background:rgba(8,8,8,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.14);z-index:9997;display:flex;align-items:center;justify-content:center;color:#F2F2F2;font-size:17px;line-height:1;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .25s;}" +
-        "#dsh-mobile-ham.open{opacity:0 !important;pointer-events:none !important}" +
-        "body.dsh-app-dialog-open #dsh-mobile-ham{opacity:0 !important;pointer-events:none !important}";
-      document.head.appendChild(st);
+        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}";
+                                                                      document.head.appendChild(st);
     }
 
     function init() {

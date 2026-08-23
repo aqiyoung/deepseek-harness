@@ -120,7 +120,6 @@ class MainActivity : ComponentActivity() {
   private val prefs by lazy { (application as NodeApp).prefs }
 
   private val loggedInState = mutableStateOf<Boolean?>(null)
-  private val settingsOpenTick = mutableStateOf(0)
   private val loginError = mutableStateOf<String?>(null)
   private val loggingIn = mutableStateOf(false)
 
@@ -383,12 +382,41 @@ class MainActivity : ComponentActivity() {
   ) {
     var showSettings by remember { mutableStateOf(false) }
     var settingsRoute by remember { mutableStateOf<SettingRoute?>(null) }
-    LaunchedEffect(settingsOpenTick.value) {
-      if (settingsOpenTick.value > 0) showSettings = true
-    }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-      // 无常驻顶栏（对齐 OpenClaw）：悬浮 ☰ 开侧边栏，侧边栏头部 ⚙ 进设置
+    Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .heightIn(min = 48.dp)
+          .padding(start = 4.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        DshPlainIconButton(
+          icon = Icons.Default.Menu,
+          contentDescription = "打开会话列表",
+          onClick = { toggleWebSidebar() },
+        )
+        Image(
+          painter = painterResource(R.drawable.login_logo_black),
+          contentDescription = null,
+          modifier = Modifier.size(22.dp),
+          colorFilter = ColorFilter.tint(DshTheme.colors.text),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+          text = "DeepSeek Harness",
+          style = DshTheme.type.title,
+          color = DshTheme.colors.text,
+          modifier = Modifier.weight(1f),
+          maxLines = 1,
+        )
+        DshPlainIconButton(
+          icon = Icons.Default.Settings,
+          contentDescription = "打开设置",
+          onClick = { showSettings = true },
+        )
+      }
+      HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
 
       Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
@@ -988,7 +1016,5 @@ class MainActivity : ComponentActivity() {
     @JavascriptInterface
     fun refreshPage() = onRefresh()
 
-    @JavascriptInterface
-    fun openAppSettings() = runOnUiThread { settingsOpenTick.value += 1 }
   }
 }
