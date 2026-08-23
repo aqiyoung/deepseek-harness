@@ -2,7 +2,7 @@ name: Android CI (DSH Client)
 
 on:
   push:
-    branches: ["android-dsh"]
+    branches: ["android-dsh", "native-ui"]
     tags: ["v*"]
 
 permissions:
