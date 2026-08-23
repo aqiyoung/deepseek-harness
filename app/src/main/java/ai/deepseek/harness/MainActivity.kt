@@ -494,7 +494,10 @@ class MainActivity : ComponentActivity() {
   }
 
   fun toggleDrawer() {
-    webViewRef?.evaluateJavascript("(function(){ var b=document.querySelector('.dsh-tb-btn'); if(b) b.click(); })()", null)
+    webViewRef?.evaluateJavascript(
+      "(function(){ var sb=document.querySelector('.hHd-Xa_root'); var t=sb&&sb.querySelector('.hHd-Xa_toggle'); if(t){t.click()} })()",
+      null,
+    )
   }
 
   fun refreshShell() {
