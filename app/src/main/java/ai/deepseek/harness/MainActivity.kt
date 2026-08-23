@@ -69,7 +69,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -107,6 +107,16 @@ class MainActivity : ComponentActivity() {
         WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data) ?: arrayOf()
       callback?.onReceiveValue(uris)
     }
+
+  override fun onDestroy() {
+    webViewRef?.apply {
+      stopLoading()
+      loadUrl("about:blank")
+      destroy()
+    }
+    webViewRef = null
+    super.onDestroy()
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -240,9 +250,9 @@ class MainActivity : ComponentActivity() {
           val srv = serverValue.trim().removeSuffix("/")
           val usr = userValue.trim()
           val pwd = passValue
-          MainScope().launch(Dispatchers.IO) {
+          lifecycleScope.launch(Dispatchers.IO) {
             val cookie = sessionLogin(srv, usr, pwd)
-            MainScope().launch(Dispatchers.Main) {
+            lifecycleScope.launch(Dispatchers.Main) {
               loggingIn.value = false
               if (cookie != null) {
                 prefs.setServerUrl(srv)
@@ -455,9 +465,9 @@ class MainActivity : ComponentActivity() {
           val usr = prefs.sessionUser.value
           val pwd = prefs.getRememberedPassword() ?: ""
           if (silentRelogin && usr.isNotEmpty() && pwd.isNotEmpty()) {
-            MainScope().launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.IO) {
               val ck = sessionLogin(raw, usr, pwd)
-              MainScope().launch(Dispatchers.Main) {
+              lifecycleScope.launch(Dispatchers.Main) {
                 if (ck != null) {
                   prefs.setSessionCookie(ck)
                   CookieManager.getInstance().setCookie(raw, "dsh_session=" + ck)
