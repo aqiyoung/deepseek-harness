@@ -112,7 +112,6 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     // 状态栏白底深色图标：确保可见
-    window.statusBarColor = android.graphics.Color.WHITE
     WindowCompat.getInsetsController(window, window.decorView)
       .isAppearanceLightStatusBars = true
 
