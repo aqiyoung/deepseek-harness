@@ -466,7 +466,6 @@ class MainActivity : ComponentActivity() {
             onOpenRoute = onRouteChange,
             onRefresh = onRefresh,
             onLogoutRequest = { showLogoutConfirm = true },
-            onOpenWebSettings = onOpenWebSettings,
           )
           SettingRoute.Server -> ServerDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Models -> ai.deepseek.harness.ui.ModelsDetailPage(onBack = { onRouteChange(null) })
