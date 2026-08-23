@@ -26,6 +26,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -58,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -125,22 +128,50 @@ class MainActivity : ComponentActivity() {
       MaterialTheme {
         val loggedIn by loggedInState
         if (loggedIn == true) {
-          ShellScreen(
-            bridge = bridge,
-            onNeedLogin = { expired -> performLogout(expired) },
-            onFileChoose = { callback, intent ->
-              filePathCallback = callback
-              try {
-                fileChooserLauncher.launch(intent)
-              } catch (e: Exception) {
-                filePathCallback = null
-                Toast.makeText(this, "无法打开文件选择器", Toast.LENGTH_SHORT).show()
-              }
-            },
-            onDownload = { url, ua, disposition, mime ->
-              startDownload(url, ua, disposition, mime)
-            },
-          )
+          // 原生顶栏 + WebView（顶栏写死在 App，不依赖服务器）
+          Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+              modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .padding(horizontal = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Text(
+                "☰",
+                fontSize = 20.sp,
+                modifier = Modifier.clickable { toggleDrawer() },
+              )
+              Text(
+                "DeepSeek Harness",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.04.em,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+              )
+            }
+            HorizontalDivider(thickness = 0.5.dp)
+            // WebView 填满剩余空间
+            ShellScreen(
+              bridge = bridge,
+              onNeedLogin = { expired -> performLogout(expired) },
+              onFileChoose = { callback, intent ->
+                filePathCallback = callback
+                try {
+                  fileChooserLauncher.launch(intent)
+                } catch (e: Exception) {
+                  filePathCallback = null
+                  Toast.makeText(this, "无法打开文件选择器", Toast.LENGTH_SHORT).show()
+                }
+              },
+              onDownload = { url, ua, disposition, mime ->
+                startDownload(url, ua, disposition, mime)
+              },
+            )
+          }
         } else {
           LoginScreenComposable()
         }
@@ -446,6 +477,10 @@ class MainActivity : ComponentActivity() {
       .setView(text)
       .setPositiveButton("关闭", null)
       .show()
+  }
+
+  fun toggleDrawer() {
+    webViewRef?.evaluateJavascript("(function(){ var b=document.querySelector('.dsh-tb-btn'); if(b) b.click(); })()", null)
   }
 
   fun refreshShell() {
