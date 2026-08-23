@@ -427,6 +427,11 @@ class MainActivity : ComponentActivity() {
               settingsRoute = null
               refreshShell()
             },
+            onOpenWebSettings = { aliases ->
+              showSettings = false
+              settingsRoute = null
+              openWebSettings(aliases)
+            },
           )
         }
       }
@@ -445,6 +450,15 @@ class MainActivity : ComponentActivity() {
     )
   }
 
+  /** 深链：打开 Web 设置弹窗并切换到别名匹配的标签页（由冻结插件内的 DshNativeOpenSettings 实现）。 */
+  private fun openWebSettings(aliases: List<String>) {
+    val arr = aliases.joinToString(",") { "\"" + it.replace("\\", "\\\\").replace("\"", "\\\"") + "\"" }
+    webViewRef?.evaluateJavascript(
+      "(function(){ if (window.DshNativeOpenSettings) DshNativeOpenSettings([$arr]); })()",
+      null,
+    )
+  }
+
   // ── 设置页（OpenClaw 分组样式：首页 + 二级详情页）──
 
   private enum class SettingRoute { Server, Theme, Language, Licenses }
@@ -455,6 +469,7 @@ class MainActivity : ComponentActivity() {
     onRouteChange: (SettingRoute?) -> Unit,
     onClose: () -> Unit,
     onRefresh: () -> Unit,
+    onOpenWebSettings: (List<String>) -> Unit,
   ) {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
@@ -465,6 +480,7 @@ class MainActivity : ComponentActivity() {
             onOpenRoute = onRouteChange,
             onRefresh = onRefresh,
             onLogoutRequest = { showLogoutConfirm = true },
+            onOpenWebSettings = onOpenWebSettings,
           )
           SettingRoute.Server -> ServerDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Theme -> ThemeDetailPage(onBack = { onRouteChange(null) })
@@ -499,6 +515,7 @@ class MainActivity : ComponentActivity() {
     onOpenRoute: (SettingRoute) -> Unit,
     onRefresh: () -> Unit,
     onLogoutRequest: () -> Unit,
+    onOpenWebSettings: (List<String>) -> Unit,
   ) {
     val serverUrl by prefs.serverUrl.collectAsState()
     val sessionUser by prefs.sessionUser.collectAsState()
@@ -539,6 +556,33 @@ class MainActivity : ComponentActivity() {
           }
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(title = "刷新页面", onClick = onRefresh)
+        }
+      }
+
+      Spacer(modifier = Modifier.height(18.dp))
+
+      DshSectionLabel("DSH 网页设置")
+      DshSoftPanel {
+        Column {
+          DshSettingsRow(
+            title = "通用设置",
+            onClick = { onOpenWebSettings(listOf("通用", "General")) },
+          )
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(
+            title = "模型",
+            onClick = { onOpenWebSettings(listOf("模型", "Models")) },
+          )
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(
+            title = "插件",
+            onClick = { onOpenWebSettings(listOf("插件", "Plugin", "扩展", "Extension")) },
+          )
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(
+            title = "Agent 预设",
+            onClick = { onOpenWebSettings(listOf("预设", "Preset", "Agent", "智能体")) },
+          )
         }
       }
 

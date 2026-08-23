@@ -613,4 +613,80 @@ window.__ModuleLoader__.load({
     return { apply: apply };
   }
 });
+})();/* ===== 原生设置页深链：打开 Web 设置弹窗并切换到指定标签 =====
+   由安卓原生设置页经 evaluateJavascript 调用：
+   DshNativeOpenSettings(["模型","Models"])
+   匹配规则：按顺序对标签文本做大小写不敏感的包含匹配，命中即点击。 */
+(function () {
+  function q(sel, root) { return (root || document).querySelector(sel); }
+  function textOf(el) { return ((el && el.textContent) || "").trim(); }
+  function clickLeaf(el) {
+    var target = el;
+    while (target.children.length > 0 && textOf(target.children[0]) === textOf(target)) {
+      target = target.children[0];
+    }
+    try { target.click(); } catch (e) {}
+  }
+
+  function openDrawerIfNeeded(done) {
+    var sb = q(".hHd-Xa_root");
+    if (!sb || !sb.classList.contains("hHd-Xa_collapsed")) return done();
+    var t = sb.querySelector(".hHd-Xa_toggle");
+    if (!t) return done();
+    try { t.click(); } catch (e) {}
+    setTimeout(done, 280);
+  }
+
+  function clickSettingsEntry() {
+    var area = q(".hHd-Xa_settingsArea") || q(".hHd-Xa_root");
+    if (!area) return false;
+    var leaves = area.querySelectorAll("*");
+    for (var i = 0; i < leaves.length; i++) {
+      var el = leaves[i];
+      if (el.children.length > 0) continue;
+      var tx = textOf(el);
+      if (tx === "设置" || /^settings$/i.test(tx)) {
+        try { el.click(); return true; } catch (e) { return false; }
+      }
+    }
+    return false;
+  }
+
+  function waitForDialog(cb, tries) {
+    var dlg = q(".VOzbGW_content");
+    if (dlg) return cb(dlg);
+    if (tries <= 0) return cb(null);
+    setTimeout(function () { waitForDialog(cb, tries - 1); }, 150);
+  }
+
+  function switchTab(dlg, aliases) {
+    var norm = [];
+    for (var a = 0; a < aliases.length; a++) norm.push(String(aliases[a]).toLowerCase());
+    var all = dlg.querySelectorAll("*");
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (el.children.length > 0) continue;
+      var tx = textOf(el).toLowerCase();
+      if (!tx) continue;
+      for (var j = 0; j < norm.length; j++) {
+        if (tx.indexOf(norm[j]) >= 0) {
+          clickLeaf(el);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  window.DshNativeOpenSettings = function (aliases) {
+    try {
+      if (!Object.prototype.toString.call(aliases).includes("Array")) aliases = ["通用", "General"];
+      openDrawerIfNeeded(function () {
+        clickSettingsEntry();
+        waitForDialog(function (dlg) {
+          if (dlg) switchTab(dlg, aliases);
+        }, 26);
+      });
+    } catch (e) { /* 静默失败：用户可自行从网页侧边栏进入设置 */ }
+  };
 })();
