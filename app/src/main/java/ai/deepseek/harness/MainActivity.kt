@@ -71,6 +71,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,6 +120,7 @@ class MainActivity : ComponentActivity() {
   private val prefs by lazy { (application as NodeApp).prefs }
 
   private val loggedInState = mutableStateOf<Boolean?>(null)
+  private val settingsOpenTick = mutableStateOf(0)
   private val loginError = mutableStateOf<String?>(null)
   private val loggingIn = mutableStateOf(false)
 
@@ -381,35 +383,12 @@ class MainActivity : ComponentActivity() {
   ) {
     var showSettings by remember { mutableStateOf(false) }
     var settingsRoute by remember { mutableStateOf<SettingRoute?>(null) }
+    LaunchedEffect(settingsOpenTick.value) {
+      if (settingsOpenTick.value > 0) showSettings = true
+    }
 
-    Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .heightIn(min = 48.dp)
-          .padding(start = 4.dp, end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        DshPlainIconButton(
-          icon = Icons.Default.Menu,
-          contentDescription = "打开会话列表",
-          onClick = { toggleWebSidebar() },
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-          text = "DeepSeek Harness",
-          style = DshTheme.type.title,
-          color = DshTheme.colors.text,
-          modifier = Modifier.weight(1f),
-          maxLines = 1,
-        )
-        DshPlainIconButton(
-          icon = Icons.Default.Settings,
-          contentDescription = "打开设置",
-          onClick = { showSettings = true },
-        )
-      }
-      HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+    Column(modifier = Modifier.fillMaxSize()) {
+      // 无常驻顶栏（对齐 OpenClaw）：悬浮 ☰ 开侧边栏，侧边栏头部 ⚙ 进设置
 
       Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
@@ -592,7 +571,7 @@ class MainActivity : ComponentActivity() {
 
       Spacer(modifier = Modifier.height(18.dp))
 
-      DshSectionLabel("外观")
+      DshSectionLabel("通用设置")
       DshSoftPanel {
         Column {
           DshSettingsRow(
@@ -677,11 +656,22 @@ class MainActivity : ComponentActivity() {
   private fun ThemeDetailPage(onBack: () -> Unit) {
     val themeMode by prefs.appearanceThemeMode.collectAsState()
 
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     DshDetailFrame(title = "主题", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
       DshSoftPanel {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-          ThemeSegmented(selected = themeMode, onSelect = { prefs.setAppearanceThemeMode(it) })
+          ThemeSegmented(
+            selected = themeMode,
+            onSelect = { mode ->
+              prefs.setAppearanceThemeMode(mode)
+              scope.launch {
+                runCatching { (context.applicationContext as NodeApp).dsh.updateThemePreference(mode.rawValue) }
+              }
+            },
+          )
           Text(
             text = "跟随系统：亮暗随系统深色模式自动切换。仅影响 App 原生界面（登录页、顶栏、设置），网页内容由服务器主题决定。",
             style = DshTheme.type.caption,
@@ -997,5 +987,8 @@ class MainActivity : ComponentActivity() {
 
     @JavascriptInterface
     fun refreshPage() = onRefresh()
+
+    @JavascriptInterface
+    fun openAppSettings() = runOnUiThread { settingsOpenTick.value += 1 }
   }
 }

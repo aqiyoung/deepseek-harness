@@ -194,6 +194,17 @@ class DshRepo(context: Context) {
       )
     }
 
+  /** 主题偏好同步到服务端 ui-theme 命名空间，网页端外观跟随 App 选择。 */
+  suspend fun updateThemePreference(preference: String) {
+    call(
+      "settings.update",
+      buildJsonObject {
+        put("ns", "ui-theme")
+        put("patch", buildJsonObject { put("preference", preference) })
+      },
+    )
+  }
+
   /** 把某个预设设为部署默认（新会话无预设时使用），与网页端 settings.update 同路径。 */
   suspend fun setDefaultPreset(presetId: String) {
     call(
