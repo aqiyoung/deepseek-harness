@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,14 +52,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -79,6 +83,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.lifecycleScope
@@ -143,6 +149,12 @@ class MainActivity : ComponentActivity() {
       SideEffect {
         WindowCompat.getInsetsController(window, window.decorView)
           .isAppearanceLightStatusBars = !dark
+      }
+      LaunchedEffect(prefs.appLanguage.collectAsState().value) {
+        val tag = prefs.appLanguage.value.languageTag
+        AppCompatDelegate.setApplicationLocales(
+          if (tag == null) LocaleListCompat.getEmptyLocaleList() else LocaleListCompat.forLanguageTags(tag),
+        )
       }
       DshDesignTheme(dark = dark) {
         val loggedIn by loggedInState
@@ -329,6 +341,35 @@ class MainActivity : ComponentActivity() {
     loggedInState.value = false
   }
 
+  /** 应用服务器切换：清 cookie → 记住密码时静默重登，否则刷新到登录页。 */
+  fun applyServerChange(rawInput: String) {
+    val raw = rawInput.trim().removeSuffix("/")
+    val current = prefs.serverUrl.value
+    if (raw.isEmpty() || raw == current) return
+    prefs.setServerUrl(raw)
+    CookieManager.getInstance().removeAllCookies(null)
+    val usr = prefs.sessionUser.value
+    val pwd = prefs.getRememberedPassword() ?: ""
+    if (usr.isNotEmpty() && pwd.isNotEmpty()) {
+      lifecycleScope.launch(Dispatchers.IO) {
+        val ck = sessionLogin(raw, usr, pwd)
+        lifecycleScope.launch(Dispatchers.Main) {
+          if (ck != null) {
+            prefs.setSessionCookie(ck)
+            CookieManager.getInstance().setCookie(raw, "dsh_session=" + ck)
+            refreshShell()
+            Toast.makeText(this@MainActivity, "已切换并登录：" + raw, Toast.LENGTH_SHORT).show()
+          } else {
+            performLogout(expired = false)
+            Toast.makeText(this@MainActivity, "已切换服务器，请重新登录", Toast.LENGTH_SHORT).show()
+          }
+        }
+      }
+    } else {
+      refreshShell()
+    }
+  }
+
   // ── Web 壳（原生顶栏 + WebView + 设置覆盖层）──
 
   @Composable
@@ -338,6 +379,7 @@ class MainActivity : ComponentActivity() {
     onDownload: (String, String, String, String) -> Unit,
   ) {
     var showSettings by remember { mutableStateOf(false) }
+    var settingsRoute by remember { mutableStateOf<SettingRoute?>(null) }
 
     Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
       Row(
@@ -376,21 +418,23 @@ class MainActivity : ComponentActivity() {
           onDownload = onDownload,
         )
         if (showSettings) {
-          SettingsScreen(
+          SettingsOverlay(
+            route = settingsRoute,
+            onRouteChange = { settingsRoute = it },
             onClose = { showSettings = false },
             onRefresh = {
               showSettings = false
+              settingsRoute = null
               refreshShell()
             },
-            onChangeServer = { showChangeServerDialog(silentRelogin = true) },
-            onLogout = { performLogout(expired = false) },
-            onLicenses = { showLicensesDialog() },
           )
         }
       }
     }
 
-    BackHandler(enabled = showSettings) { showSettings = false }
+    BackHandler(enabled = showSettings) {
+      if (settingsRoute != null) settingsRoute = null else showSettings = false
+    }
   }
 
   /** 打开 Web UI 自带的侧边栏（含会话列表），与 v1.0.52 行为一致。 */
@@ -401,24 +445,69 @@ class MainActivity : ComponentActivity() {
     )
   }
 
-  // ── 设置页（DSH 配置）──
+  // ── 设置页（OpenClaw 分组样式：首页 + 二级详情页）──
+
+  private enum class SettingRoute { Server, Theme, Language, Licenses }
 
   @Composable
-  private fun SettingsScreen(
+  private fun SettingsOverlay(
+    route: SettingRoute?,
+    onRouteChange: (SettingRoute?) -> Unit,
     onClose: () -> Unit,
     onRefresh: () -> Unit,
-    onChangeServer: () -> Unit,
-    onLogout: () -> Unit,
-    onLicenses: () -> Unit,
+  ) {
+    var showLogoutConfirm by remember { mutableStateOf(false) }
+
+    Surface(modifier = Modifier.fillMaxSize(), color = DshTheme.colors.canvas) {
+      Column(modifier = Modifier.fillMaxSize()) {
+        when (route) {
+          null -> SettingsHome(
+            onOpenRoute = onRouteChange,
+            onRefresh = onRefresh,
+            onLogoutRequest = { showLogoutConfirm = true },
+          )
+          SettingRoute.Server -> ServerDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Theme -> ThemeDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Language -> LanguageDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.Licenses -> LicensesDetailPage(onBack = { onRouteChange(null) })
+        }
+      }
+    }
+
+    if (showLogoutConfirm) {
+      AlertDialog(
+        onDismissRequest = { showLogoutConfirm = false },
+        title = { Text("退出登录") },
+        text = { Text("将清除本机的会话与登录状态。") },
+        confirmButton = {
+          TextButton(onClick = {
+            showLogoutConfirm = false
+            performLogout(expired = false)
+          }) { Text("退出", color = DshTheme.colors.danger) }
+        },
+        dismissButton = {
+          TextButton(onClick = { showLogoutConfirm = false }) {
+            Text("取消")
+          }
+        },
+      )
+    }
+  }
+
+  @Composable
+  private fun SettingsHome(
+    onOpenRoute: (SettingRoute) -> Unit,
+    onRefresh: () -> Unit,
+    onLogoutRequest: () -> Unit,
   ) {
     val serverUrl by prefs.serverUrl.collectAsState()
     val sessionUser by prefs.sessionUser.collectAsState()
     val themeMode by prefs.appearanceThemeMode.collectAsState()
+    val appLanguage by prefs.appLanguage.collectAsState()
 
     Column(
       modifier = Modifier
         .fillMaxSize()
-        .background(DshTheme.colors.canvas)
         .verticalScroll(rememberScrollState())
         .padding(horizontal = 20.dp),
     ) {
@@ -427,11 +516,6 @@ class MainActivity : ComponentActivity() {
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        DshPlainIconButton(
-          icon = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "返回",
-          onClick = onClose,
-        )
         Text(text = "设置", style = DshTheme.type.title, color = DshTheme.colors.text)
       }
 
@@ -440,7 +524,11 @@ class MainActivity : ComponentActivity() {
       DshSectionLabel("连接")
       DshSoftPanel {
         Column {
-          DshSettingsRow(title = "服务器地址", value = serverUrl.removePrefix("https://").removePrefix("http://"), onClick = onChangeServer)
+          DshSettingsRow(
+            title = "服务器地址",
+            value = serverUrl.removePrefix("https://").removePrefix("http://"),
+            onClick = { onOpenRoute(SettingRoute.Server) },
+          )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
@@ -456,22 +544,31 @@ class MainActivity : ComponentActivity() {
 
       Spacer(modifier = Modifier.height(18.dp))
 
-      DshSectionLabel("账户")
+      DshSectionLabel("外观")
       DshSoftPanel {
         Column {
-          DshSettingsRow(title = "账号", value = sessionUser.ifBlank { "-" })
+          DshSettingsRow(
+            title = "主题",
+            value = themeDisplayLabel(themeMode),
+            onClick = { onOpenRoute(SettingRoute.Theme) },
+          )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
-          DshSettingsRow(title = "退出登录", danger = true, onClick = onLogout)
+          DshSettingsRow(
+            title = "语言",
+            value = languageDisplayLabel(appLanguage),
+            onClick = { onOpenRoute(SettingRoute.Language) },
+          )
         }
       }
 
       Spacer(modifier = Modifier.height(18.dp))
 
-      DshSectionLabel("外观")
+      DshSectionLabel("账户")
       DshSoftPanel {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-          Text(text = "主题", style = DshTheme.type.body, color = DshTheme.colors.text)
-          ThemeSegmented(selected = themeMode, onSelect = { prefs.setAppearanceThemeMode(it) })
+        Column {
+          DshSettingsRow(title = "账号", value = sessionUser.ifBlank { "-" })
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(title = "退出登录", danger = true, onClick = onLogoutRequest)
         }
       }
 
@@ -482,13 +579,175 @@ class MainActivity : ComponentActivity() {
         Column {
           DshSettingsRow(title = "版本", value = BuildConfig.VERSION_NAME)
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
-          DshSettingsRow(title = "软件许可证", onClick = onLicenses)
+          DshSettingsRow(title = "开源许可证", onClick = { onOpenRoute(SettingRoute.Licenses) })
         }
       }
 
       Spacer(modifier = Modifier.height(24.dp))
     }
   }
+
+  /** 二级页统一框架：返回键 + 标题。 */
+  @Composable
+  private fun SettingDetailFrame(
+    title: String,
+    onBack: () -> Unit,
+    content: @Composable () -> Unit,
+  ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        DshPlainIconButton(
+          icon = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "返回",
+          onClick = onBack,
+        )
+        Text(text = title, style = DshTheme.type.title, color = DshTheme.colors.text)
+      }
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .verticalScroll(rememberScrollState())
+          .padding(horizontal = 20.dp),
+      ) {
+        content()
+        Spacer(modifier = Modifier.height(24.dp))
+      }
+    }
+  }
+
+  @Composable
+  private fun ServerDetailPage(onBack: () -> Unit) {
+    val current = prefs.serverUrl.collectAsState().value
+    var serverValue by remember(current) { mutableStateOf(current) }
+    val changed = serverValue.trim().removeSuffix("/") != current
+
+    SettingDetailFrame(title = "服务器地址", onBack = onBack) {
+      Spacer(modifier = Modifier.height(6.dp))
+      DshSoftPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          OutlinedTextField(
+            value = serverValue,
+            onValueChange = { serverValue = it },
+            label = { Text("DSH 服务器地址") },
+            placeholder = { Text("https://dsh.example.com") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+          )
+          Text(
+            text = "保存后会清除当前会话；若已记住密码将自动重新登录，否则需要重新登录。",
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textSubtle,
+          )
+        }
+      }
+      Spacer(modifier = Modifier.height(16.dp))
+      DshPrimaryButton(
+        text = "保存并重连",
+        enabled = changed,
+        onClick = {
+          applyServerChange(serverValue)
+          onBack()
+        },
+        modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
+
+  @Composable
+  private fun ThemeDetailPage(onBack: () -> Unit) {
+    val themeMode by prefs.appearanceThemeMode.collectAsState()
+
+    SettingDetailFrame(title = "主题", onBack = onBack) {
+      Spacer(modifier = Modifier.height(6.dp))
+      DshSoftPanel {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          ThemeSegmented(selected = themeMode, onSelect = { prefs.setAppearanceThemeMode(it) })
+          Text(
+            text = "跟随系统：亮暗随系统深色模式自动切换。仅影响 App 原生界面（登录页、顶栏、设置），网页内容由服务器主题决定。",
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textSubtle,
+          )
+        }
+      }
+    }
+  }
+
+  @Composable
+  private fun LanguageDetailPage(onBack: () -> Unit) {
+    val appLanguage by prefs.appLanguage.collectAsState()
+
+    SettingDetailFrame(title = "语言", onBack = onBack) {
+      Spacer(modifier = Modifier.height(6.dp))
+      DshSoftPanel {
+        Column {
+          AppLanguage.entries.forEachIndexed { index, language ->
+            if (index > 0) HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+            Row(
+              modifier = Modifier
+                .fillMaxWidth()
+                .clickable { prefs.saveAppLanguage(language) }
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = languageDisplayLabel(language),
+                style = DshTheme.type.body,
+                color = DshTheme.colors.text,
+                modifier = Modifier.weight(1f),
+              )
+              if (language == appLanguage) {
+                Icon(
+                  imageVector = Icons.Default.Check,
+                  contentDescription = null,
+                  tint = DshTheme.colors.success,
+                  modifier = Modifier.size(18.dp),
+                )
+              }
+            }
+          }
+        }
+      }
+      Spacer(modifier = Modifier.height(12.dp))
+      Text(
+        text = "切换语言后界面会立即应用并重启当前页面。",
+        style = DshTheme.type.caption,
+        color = DshTheme.colors.textSubtle,
+        modifier = Modifier.padding(horizontal = 4.dp),
+      )
+    }
+  }
+
+  @Composable
+  private fun LicensesDetailPage(onBack: () -> Unit) {
+    val notices = remember { loadAndroidLicenseNotices(assets) }
+
+    SettingDetailFrame(title = "开源许可证", onBack = onBack) {
+      Spacer(modifier = Modifier.height(6.dp))
+      notices.forEach { notice ->
+        DshSectionLabel(notice.title)
+        DshSoftPanel {
+          Text(
+            text = notice.text,
+            style = DshTheme.type.mono.copy(fontSize = 11.sp, lineHeight = 15.sp),
+            color = DshTheme.colors.textMuted,
+          )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+      }
+    }
+  }
+
+  private fun themeDisplayLabel(mode: AppearanceThemeMode): String = when (mode) {
+    AppearanceThemeMode.System -> "跟随系统"
+    AppearanceThemeMode.Light -> "浅色"
+    AppearanceThemeMode.Dark -> "深色"
+  }
+
+  private fun languageDisplayLabel(language: AppLanguage): String =
+    if (language == AppLanguage.System) "跟随系统" else language.displayName
 
   @Composable
   private fun ThemeSegmented(
@@ -663,45 +922,18 @@ class MainActivity : ComponentActivity() {
     }
   }
 
-  // ── 原生对话框 ──
+  // ── 原生对话框（供 Web Bridge 调用）──
 
   fun showChangeServerDialog(silentRelogin: Boolean) {
-    val current = prefs.serverUrl.value
     val input = EditText(this).apply {
-      setText(current)
+      setText(prefs.serverUrl.value)
       inputType = InputType.TYPE_TEXT_VARIATION_URI
       setSingleLine(true)
     }
     android.app.AlertDialog.Builder(this)
       .setTitle("切换服务器")
       .setView(input)
-      .setPositiveButton("保存") { _, _ ->
-        val raw = input.text.toString().trim().removeSuffix("/")
-        if (raw.isNotEmpty() && raw != current) {
-          prefs.setServerUrl(raw)
-          CookieManager.getInstance().removeAllCookies(null)
-          val usr = prefs.sessionUser.value
-          val pwd = prefs.getRememberedPassword() ?: ""
-          if (silentRelogin && usr.isNotEmpty() && pwd.isNotEmpty()) {
-            lifecycleScope.launch(Dispatchers.IO) {
-              val ck = sessionLogin(raw, usr, pwd)
-              lifecycleScope.launch(Dispatchers.Main) {
-                if (ck != null) {
-                  prefs.setSessionCookie(ck)
-                  CookieManager.getInstance().setCookie(raw, "dsh_session=" + ck)
-                  refreshShell()
-                  Toast.makeText(this@MainActivity, "已切换并登录：" + raw, Toast.LENGTH_SHORT).show()
-                } else {
-                  performLogout(expired = false)
-                  Toast.makeText(this@MainActivity, "已切换服务器，请重新登录", Toast.LENGTH_SHORT).show()
-                }
-              }
-            }
-          } else {
-            refreshShell()
-          }
-        }
-      }
+      .setPositiveButton("保存") { _, _ -> applyServerChange(input.text.toString()) }
       .setNegativeButton("取消", null)
       .show()
   }
