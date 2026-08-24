@@ -53,7 +53,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Menu
@@ -585,7 +584,7 @@ class MainActivity : ComponentActivity() {
         verticalAlignment = Alignment.CenterVertically,
       ) {
         DshPlainIconButton(
-          icon = Icons.Filled.Close,
+          icon = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = "关闭",
           onClick = onClose,
         )
@@ -917,6 +916,8 @@ class MainActivity : ComponentActivity() {
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         settings.allowFileAccess = false
         settings.userAgentString = settings.userAgentString + " DshAndroid/" + BuildConfig.VERSION_NAME
+        // 网页内容深色模式：跟随系统深色主题自动切换（API 29+），避免网页永远强制亮色
+        settings.forceDark = android.webkit.WebSettings.FORCE_DARK_AUTO
         // 会话凭据是第一方 Cookie；关闭第三方 Cookie 收窄 CSRF/跟踪暴露面。
         CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
 
