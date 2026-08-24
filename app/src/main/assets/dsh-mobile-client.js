@@ -322,23 +322,8 @@ window.__ModuleLoader__.load({
       }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
       sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
-      /* 官方 logoRow（logo+标题）恢复显示 + 注入原生设置齿轮（顶栏齿轮已移除，设置入口下移到侧边栏头部） */
-      var lr = sb.querySelector('.hHd-Xa_logoRow');
-      if (lr) {
-        if (!lr.querySelector('.dsh-side-gear')) {
-          var g = document.createElement('button');
-          g.type = 'button';
-          g.className = 'dsh-side-gear';
-          g.setAttribute('aria-label', '打开原生设置');
-          g.textContent = '\u2699';
-          g.style.cssText = 'width:34px;height:34px;border-radius:17px;border:none;background:transparent;color:inherit;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;';
-          g.addEventListener('click', function(e) {
-            e.stopPropagation();
-            try { if (window.DshAppBridge && window.DshAppBridge.openAppSettings) window.DshAppBridge.openAppSettings(); } catch (err) {}
-          });
-          lr.appendChild(g);
-        }
-      }
+      /* 官方 logoRow（logo+标题）恢复显示 — 不再注入任何控件, 头部保持干净
+         (原生设置入口已下移到侧边栏底部 .dsh-native-settings-entry, 见下方) */
       /* newSession 大按钮已用 CSS 隐藏，不再注入内联展开样式 */
       /* 入口按钮：图标+文字横排 */
       var entries = sb.querySelectorAll('[class$=_entry]');
@@ -551,8 +536,9 @@ window.__ModuleLoader__.load({
       observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    /* v1.0.68: 侧边栏底部固定一行「原生设置」入口, 调 DshAppBridge.openAppSettings()
-       打开原生设置覆盖层（联机状态 / 退出app / 退出登录）。 */
+    /* v1.0.68 起: 侧边栏底部固定一行「原生设置」入口, 调 DshAppBridge.openAppSettings()
+       打开原生设置覆盖层（联机状态 / 退出登录）。v1.0.72 UI 精修: 圆形图标容器 +
+       分隔线 + hover/active 背景反馈, 与上方入口列表视觉一致。 */
     function injectSidebarSettingsEntry() {
       var sb = findSidebar();
       if (!sb || !window.DshAppBridge) return;
@@ -560,15 +546,22 @@ window.__ModuleLoader__.load({
       var entry = document.createElement('div');
       entry.className = 'dsh-native-settings-entry';
       entry.style.cssText =
-        'border-top:1px solid rgba(127,127,127,0.25);padding:14px;' +
-        'display:flex;align-items:center;gap:10px;cursor:pointer;' +
-        'flex:0 0 auto;min-height:48px;box-sizing:border-box;' +
+        'border-top:1px solid var(--dsw-alias-border-l2,rgba(127,127,127,0.18));' +
+        'margin-top:auto;padding:12px 16px;' +
+        'display:flex;align-items:center;gap:12px;cursor:pointer;' +
+        'flex:0 0 auto;min-height:52px;box-sizing:border-box;' +
+        'border-radius:10px;transition:background-color .15s ease;' +
         '-webkit-tap-highlight-color:transparent;';
       entry.innerHTML =
-        '<span style="font-size:18px;line-height:1;">⚙\uFE0F</span>' +
-        '<span style="font-size:14px;color:var(--dsw-alias-label-primary,#111);">原生设置</span>';
-      entry.addEventListener('mouseenter', function() { entry.style.background = 'rgba(127,127,127,0.12)'; });
-      entry.addEventListener('mouseleave', function() { entry.style.background = 'transparent'; });
+        '<span style="width:34px;height:34px;border-radius:50%;' +
+        'background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,0.15));' +
+        'display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;flex-shrink:0;">⚙\uFE0F</span>' +
+        '<span style="font-size:14px;font-weight:500;color:var(--dsw-alias-label-primary,#111);">原生设置</span>';
+      /* hover / active 反馈 (移动端用 :active 模拟) */
+      entry.addEventListener('mouseenter', function() { entry.style.backgroundColor = 'var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,0.15))'; });
+      entry.addEventListener('mouseleave', function() { entry.style.backgroundColor = 'transparent'; });
+      entry.addEventListener('touchstart', function() { entry.style.backgroundColor = 'var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,0.22))'; }, { passive: true });
+      entry.addEventListener('touchend', function() { entry.style.backgroundColor = 'transparent'; }, { passive: true });
       var lock = false;
       function fire() {
         if (lock) return;
@@ -686,118 +679,8 @@ window.__ModuleLoader__.load({
                                                                       document.head.appendChild(st);
     }
 
-/* 把 URL 面包屑放到「会话标题」(对话/轨迹) tab 行最左侧, 同时**整体隐藏原面包屑行**
-       再在 tabBar 左侧**合成一个新的、唯一的** URL 节点 (.dsh-url-leaf).
-       旧算法搬运 DOM 节点会被 React 重渲染/多兄弟节点污染 — tabBar 内出现 N 个截断
-       的 http... 副本就是它的副作用 (v1.0.67 引入).  v1.0.70 改为"隐藏+合成", 幂等. */
-    function _dshFindUrlAnchor() {
-      /* 从原面包屑或整页 DOM 抓一个可见的 https:// 文本作为参考 (用于合成新节点的 fallback) */
-      var all = document.querySelectorAll("*");
-      for (var i = 0; i < all.length; i++) {
-        var el = all[i];
-        if (el.children.length !== 0) continue;
-        var tx = (el.textContent || "").trim();
-        if (/^https?:\/\/[^\s]+/.test(tx) && el.offsetParent !== null) {
-          return tx.length > 48 ? tx.substring(0, 45) + "…" : tx;
-        }
-      }
-      return null;
-    }
-    function _dshHideOriginalBreadcrumb() {
-      /* 整体隐藏原面包屑行: 含 session log 但已不含 https:// 的最具体祖先
-         (因为我们已经把所有 https:// 节点*隐藏*在父级 display:none 里) */
-      var btns = document.querySelectorAll("button, a, [role=\"button\"]");
-      var sl = null;
-      for (var k = 0; k < btns.length; k++) {
-        var t2 = (btns[k].textContent || "").trim().toLowerCase();
-        if (t2.indexOf("session log") >= 0) { sl = btns[k]; break; }
-      }
-      if (!sl) return;
-      var p = sl.parentElement;
-      var hop = 0;
-      while (p && p !== document.body && hop++ < 8) {
-        var txt = (p.textContent || "").trim();
-        /* 只有当 session log 文本所在的祖先**已经被我们隐藏过整行**才停止, 否则继续向上找.
-           利用 dataset 标记避免重复隐藏后再次撞到原节点. */
-        if (p.dataset && p.dataset.dshBreadcrumbHidden === "1") return;
-        if (/session\s*log/i.test(txt) && p.children.length > 0 && p.children.length <= 12) {
-          p.style.setProperty("display", "none", "important");
-          try { p.dataset.dshBreadcrumbHidden = "1"; } catch (e) {}
-          return;
-        }
-        p = p.parentElement;
-      }
-    }
-    function alignUrlToSessionTitle() {
-      try {
-        /* 1) 找 tab (对话 / 轨迹) — 必须是**精确**文本的容器, 取其父链作为 tabBar */
-        var tabEl = null;
-        var cand = document.querySelectorAll("button, a, [role=\"tab\"], div, span, li");
-        for (var j = 0; j < cand.length; j++) {
-          var t = (cand[j].textContent || "").trim();
-          if (t === "对话" || t === "轨迹") { tabEl = cand[j]; break; }
-        }
-        if (!tabEl || !tabEl.parentElement) return false;
-        var tabBar = tabEl.parentElement;
-
-        /* 2) 清理上一次合成的 URL 节点 + 隐藏原面包屑行 (幂等) */
-        var stale = tabBar.querySelectorAll(".dsh-url-leaf");
-        for (var s = 0; s < stale.length; s++) {
-          try { stale[s].parentNode.removeChild(stale[s]); } catch (e) {}
-        }
-        _dshHideOriginalBreadcrumb();
-
-        /* 3) 合成一个新的、唯一的 URL 节点插到 tabBar 最左侧.
-           内容来源优先级:
-           a) window.location.origin (WebView 加载的就是官方服务器)
-           b) DOM 中搜到的 https:// 文本 */
-        var origin = "";
-        try { origin = (window.location && window.location.origin) ? window.location.origin : ""; } catch (e) {}
-        var text = origin && /^https?:\/\//.test(origin)
-          ? origin
-          : (_dshFindUrlAnchor() || "");
-        if (!text) return false;
-
-        var leaf = document.createElement("div");
-        leaf.className = "dsh-url-leaf";
-        leaf.textContent = text;
-        leaf.style.cssText = [
-          "order:-1",
-          "flex:1 1 auto",
-          "min-width:0",
-          "max-width:60%",
-          "overflow:hidden",
-          "text-overflow:ellipsis",
-          "white-space:nowrap",
-          "font-size:13px",
-          "color:var(--dsw-alias-text-muted,#8a8f98)",
-          "padding:0 6px",
-          "user-select:none",
-          "-webkit-user-select:none",
-        ].join(";");
-        try {
-          tabBar.insertBefore(leaf, tabBar.firstChild);
-        } catch (e) { return false; }
-
-        /* 4) tabBar flex 布局对齐 */
-        var cs = window.getComputedStyle(tabBar);
-        if (cs.display !== "flex" && cs.display !== "inline-flex") tabBar.style.display = "flex";
-        tabBar.style.alignItems = "center";
-        tabBar.style.gap = "8px";
-        return true;
-      } catch (e) { return false; }
-    }
-    /* 持续观察 DOM, 应对官方 React 重渲染/切对话回弹 (debounce 500ms) */
-    var _tbTimer = null;
-    var _tbObserver = null;
-    function startToolbarObserver() {
-      if (_tbObserver || typeof MutationObserver === "undefined") return;
-      _tbObserver = new MutationObserver(function() {
-        if (_tbTimer) return;
-        _tbTimer = setTimeout(function() { _tbTimer = null; alignUrlToSessionTitle(); }, 500);
-      });
-      _tbObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
-    }
+    /* 面包屑 / URL 行：保留官方默认行为, 不注入、不隐藏、不合成任何节点.
+       官方原本的「URL + session log」面包屑行会自然显示 (产品要求: 不要额外加域名). */
 
     var INIT_TRIES = 0;
     var INIT_MAX_TRIES = 24; /* 约 12 秒后放弃，避免登录页等无侧边栏场景常驻定时器耗电；后续靠 MutationObserver 恢复 */
@@ -826,7 +709,6 @@ window.__ModuleLoader__.load({
         console.error("[dsh-mobile] init error:", e);
       }
       MOBILE_READY = true;
-      try { alignUrlToSessionTitle(); startToolbarObserver(); } catch (e) {}
       window.__DSH_MOBILE__ = { initialized: true, toggle: function() { doToggle(findSidebar()); } };
     }
 
