@@ -46,7 +46,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import java.util.Locale
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -444,7 +445,7 @@ class MainActivity : ComponentActivity() {
       if (settingsOpenTick.value > 0) showSettings = true
     }
 
-    Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
+    Column(modifier = Modifier.fillMaxSize().navigationBarsPadding().background(DshTheme.colors.canvas)) {
       // 完全无顶栏（v1.0.67）— 侧边栏通过 Web 边缘左滑打开（setupTouch 已支持），原生设置可从侧边栏 logoRow 齿轮进入
       Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
@@ -495,7 +496,7 @@ class MainActivity : ComponentActivity() {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = DshTheme.colors.canvas) {
-      Column(modifier = Modifier.fillMaxSize()) {
+      Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         when (route) {
           null -> SettingsHome(
             onOpenRoute = onRouteChange,
