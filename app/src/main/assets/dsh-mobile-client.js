@@ -32,8 +32,7 @@ window.__ModuleLoader__.load({
           "box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;",
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
-        /* 隐藏应用自带的 rail toggle 按钮 */
-        /* toggle \u6309\u94ae\u4fdd\u7559\uff0c\u539f\u751f\u6253\u5f00\u4fa7\u680f */
+        /* logoRow（logo+标题）按产品要求整体隐藏；设置入口在原生顶栏齿轮 */
         ".dsh-mobile-active .hHd-Xa_root .hHd-Xa_logoRow{",
           "display:none !important;",
         "}",
@@ -97,13 +96,7 @@ window.__ModuleLoader__.load({
           "overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;",
           "padding:0 8px !important;box-sizing:border-box !important;",
         "}",
-        /* 设置入口固定在可视区底边上方（安全区 - 2px，即约再低 30px）：
-           有安全区的机型由 env 兜底，不会贴进手势条 */
-        /* 设置区放到顶部（logo 边），会话/工作区列表占据其余空间 */
-        /* logo 行下探避开状态栏（沉浸式：内容延伸到状态栏底下） */
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_logoRow{",
-          "padding-top:10px !important;",
-        "}",
+        /* logo 行安全区留白由 dsh-shell-css 统一提供 */
 
         /* 设置区保持可见、可点：作为抽屉底部的正常入口 */
         /* 折叠态：完全隐藏 rail（0宽度） */
@@ -285,15 +278,21 @@ window.__ModuleLoader__.load({
       if (!tgl) return;
       try { tgl.click(); } catch(e) {}
       if (opening) {
-        setTimeout(function() {
+        /* 轮询等待 App 真正展开（替代固定 60ms 与动画竞速），上限 ~1.2s */
+        var waits = 0;
+        var iv = setInterval(function() {
+          waits++;
           var cur = findSidebar();
-          if (cur && drawerOpen(cur)) {
-            applyDrawerStyles(cur);
-            /* 自动展开官方搜索（窄屏默认折叠成图标） */
-            var sbtn = cur.querySelector('.qDHVXG_searchButton');
-            if (sbtn && sbtn.getAttribute('aria-expanded') === 'false') { try { sbtn.click(); } catch(e) {} }
+          if ((cur && drawerOpen(cur)) || waits > 24) {
+            clearInterval(iv);
+            if (cur && drawerOpen(cur)) {
+              applyDrawerStyles(cur);
+              /* 自动展开官方搜索（窄屏默认折叠成图标） */
+              var sbtn = cur.querySelector('.qDHVXG_searchButton');
+              if (sbtn && sbtn.getAttribute('aria-expanded') === 'false') { try { sbtn.click(); } catch(e) {} }
+            }
           }
-        }, 60);
+        }, 50);
       } else {
         clearDrawerStyles(sb);
       }
@@ -312,13 +311,21 @@ window.__ModuleLoader__.load({
       } catch(e) {}
     }
 
-    /* 打开抽屉时：用内联样式强制修正布局（比 CSS !important 更可靠） */
+    /* 打开抽屉时：用内联样式强制修正布局（比 CSS !important 更可靠）。
+       首次写入前对抽屉内所有节点做内联样式快照，关闭时精确还原，
+       不再清空后代全部 cssText（避免抹掉 Web 应用自身设置的动态样式）。 */
+    var DRAWER_SNAPSHOTS = null;
     function applyDrawerStyles(sb) {
+      if (!DRAWER_SNAPSHOTS) {
+        DRAWER_SNAPSHOTS = [[sb, sb.getAttribute("style")]];
+        var descendants = sb.querySelectorAll("*");
+        for (var q = 0; q < descendants.length; q++) {
+          DRAWER_SNAPSHOTS.push([descendants[q], descendants[q].getAttribute("style")]);
+        }
+      }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
       sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
-      /* 官方 logoRow（logo + 标题 + 齿轮）按需求隐藏，设置入口上移到原生顶栏齿轮 */
-      var logoRow = sb.querySelector('.hHd-Xa_logoRow');
-      if (logoRow) { logoRow.style.display = 'none'; }
+      /* 官方 logoRow（logo + 标题）按需求隐藏，设置入口在原生顶栏齿轮 */
       /* newSession 按钮展开 */
       var ns = sb.querySelector('.hHd-Xa_newSession');
       if (ns) {
@@ -374,9 +381,23 @@ window.__ModuleLoader__.load({
     }
 
     function clearDrawerStyles(sb) {
-      sb.style.cssText = "";
-      var all = sb.querySelectorAll('*');
-      for (var i = 0; i < all.length; i++) all[i].style.cssText = "";
+      /* 移除插件注入的节点（如设置齿轮） */
+      var marked = sb.querySelectorAll("[data-dsh-node]");
+      for (var m = 0; m < marked.length; m++) {
+        try { marked[m].parentNode && marked[m].parentNode.removeChild(marked[m]); } catch (e) {}
+      }
+      /* 按快照精确还原本插件改写过的内联样式；未改动的后代不受影响 */
+      if (DRAWER_SNAPSHOTS) {
+        for (var i = 0; i < DRAWER_SNAPSHOTS.length; i++) {
+          var el = DRAWER_SNAPSHOTS[i][0], prev = DRAWER_SNAPSHOTS[i][1];
+          try {
+            if (!el.isConnected) continue;
+            if (prev === null) el.removeAttribute("style");
+            else el.setAttribute("style", prev);
+          } catch (e) {}
+        }
+        DRAWER_SNAPSHOTS = null;
+      }
     }
 
     function setupSidebar() {
@@ -455,9 +476,20 @@ window.__ModuleLoader__.load({
         return r;
       }
       var verRow = row("版本 v" + ver + "　·　检查更新");
+      /* 更新端点优先由原生层提供（可配置），避免页面上下文硬编码第三方出网地址 */
+      function updateEndpoint() {
+        var fallback = "https://api.github.com/repos/aqiyoung/deepseek-harness/releases/latest";
+        try {
+          if (window.DshAppBridge && typeof window.DshAppBridge.updateCheckUrl === "function") {
+            var u = window.DshAppBridge.updateCheckUrl();
+            if (u) return u;
+          }
+        } catch (e) {}
+        return fallback;
+      }
       verRow.addEventListener("click", function() {
         verRow.textContent = "检查更新中…";
-        fetch("https://api.github.com/repos/aqiyoung/deepseek-harness/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+        fetch(updateEndpoint(), { headers: { Accept: "application/vnd.github+json" } })
           .then(function(r2) { return r2.json(); })
           .then(function(j) {
             var tag = ((j && j.tag_name) || "").replace(/^v/, "");
@@ -571,12 +603,12 @@ window.__ModuleLoader__.load({
       st.textContent =
         ".dsh-mobile-active .hHd-Xa_logoRow{display:none !important}" +
         ".dsh-mobile-active .hHd-Xa_settingsArea{display:none !important}" +
-        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}" +
-        ".dsh-side-gear{width:38px;height:38px;border-radius:19px;border:none;background:transparent;color:inherit;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin-right:6px;}" +
-        ".dsh-side-gear:active{background:rgba(127,127,127,0.18)}";
+        ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}";
                                                                       document.head.appendChild(st);
     }
 
+    var INIT_TRIES = 0;
+    var INIT_MAX_TRIES = 24; /* 约 12 秒后放弃，避免登录页等无侧边栏场景常驻定时器耗电；后续靠 MutationObserver 恢复 */
     function init() {
       if (MOBILE_READY) return;
       ensureShellCss();
@@ -586,7 +618,11 @@ window.__ModuleLoader__.load({
       if (!isMobile && !isSmall) return;
       document.body.classList.add("dsh-mobile-active");
       var sb = findSidebar();
-      if (!sb) { setTimeout(init, 500); return; }
+      if (!sb) {
+        INIT_TRIES++;
+        if (INIT_TRIES <= INIT_MAX_TRIES) setTimeout(init, 500);
+        return;
+      }
       try {
         setupSidebar();
         setupTouch();
@@ -603,10 +639,11 @@ window.__ModuleLoader__.load({
     function apply(ctx) {
       injectCss();
       if (typeof MutationObserver !== "undefined") {
-        var observer = new MutationObserver(function(mutations) {
-          if (!MOBILE_READY && findSidebar()) init();
+        var bootObserver = new MutationObserver(function() {
+          if (MOBILE_READY) { bootObserver.disconnect(); return; } /* 初始化完成后停止常驻观察 */
+          if (findSidebar()) init();
         });
-        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        bootObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
       }
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);
@@ -639,7 +676,16 @@ window.__ModuleLoader__.load({
     var t = sb.querySelector(".hHd-Xa_toggle");
     if (!t) return done();
     try { t.click(); } catch (e) {}
-    setTimeout(done, 280);
+    /* 轮询等待展开完成（替代固定 280ms 竞速），上限 ~1s */
+    var waits = 0;
+    var iv = setInterval(function() {
+      waits++;
+      var cur = q(".hHd-Xa_root");
+      if (!cur || !cur.classList.contains("hHd-Xa_collapsed") || waits > 16) {
+        clearInterval(iv);
+        done();
+      }
+    }, 60);
   }
 
   function clickSettingsEntry() {
@@ -668,18 +714,37 @@ window.__ModuleLoader__.load({
     var norm = [];
     for (var a = 0; a < aliases.length; a++) norm.push(String(aliases[a]).toLowerCase());
     var all = dlg.querySelectorAll("*");
-    for (var i = 0; i < all.length; i++) {
-      var el = all[i];
-      if (el.children.length > 0) continue;
-      var tx = textOf(el).toLowerCase();
-      if (!tx) continue;
-      for (var j = 0; j < norm.length; j++) {
-        if (tx.indexOf(norm[j]) >= 0) {
-          clickLeaf(el);
-          return true;
-        }
+    var leaves = [];
+    for (var i = 0; i < all.length; i++) if (all[i].children.length === 0) leaves.push(all[i]);
+    var hit;
+    /* 第一轮：aria-label / role=tab 的精确匹配（最可靠） */
+    for (var p = 0; p < all.length && !hit; p++) {
+      var elp = all[p];
+      if (!elp.getAttribute) continue;
+      var aria = (elp.getAttribute("aria-label") || "").trim().toLowerCase();
+      var isTab = elp.getAttribute("role") === "tab";
+      if (!aria && !isTab) continue;
+      var base = isTab ? textOf(elp).toLowerCase() : aria;
+      for (var j0 = 0; j0 < norm.length; j0++) {
+        if ((aria && aria === norm[j0]) || (isTab && base === norm[j0])) { hit = elp; break; }
       }
     }
+    /* 第二轮：叶子节点文本精确相等 */
+    for (var x = 0; x < leaves.length && !hit; x++) {
+      var tx2 = textOf(leaves[x]).toLowerCase();
+      for (var j1 = 0; j1 < norm.length; j1++) {
+        if (tx2 && tx2 === norm[j1]) { hit = leaves[x]; break; }
+      }
+    }
+    /* 兜底：文本包含匹配（旧行为，误点风险最高） */
+    for (var y = 0; y < leaves.length && !hit; y++) {
+      var tx = textOf(leaves[y]).toLowerCase();
+      if (!tx) continue;
+      for (var j2 = 0; j2 < norm.length; j2++) {
+        if (tx.indexOf(norm[j2]) >= 0) { hit = leaves[y]; break; }
+      }
+    }
+    if (hit) { clickLeaf(hit); return true; }
     return false;
   }
 
