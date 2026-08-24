@@ -403,19 +403,11 @@ class MainActivity : ComponentActivity() {
             contentDescription = "打开会话列表",
             onClick = { toggleWebSidebar() },
           )
-          Image(
-            painter = painterResource(R.drawable.login_logo_black),
-            contentDescription = null,
-            modifier = Modifier.size(22.dp),
-            colorFilter = ColorFilter.tint(DshTheme.colors.text),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(
-            text = "DeepSeek Harness",
-            style = DshTheme.type.title,
-            color = DshTheme.colors.text,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
+          Spacer(modifier = Modifier.weight(1f))
+          DshPlainIconButton(
+            icon = Icons.Default.Settings,
+            contentDescription = "设置",
+            onClick = { settingsOpenTick.value += 1 },
           )
         }
       }
@@ -518,6 +510,15 @@ class MainActivity : ComponentActivity() {
     val themeMode by prefs.appearanceThemeMode.collectAsState()
     val appLanguage by prefs.appLanguage.collectAsState()
 
+    // 联机状态：探测服务器连通性（HEAD 根地址，能拿到任意 HTTP 响应即视为在线）
+    var online by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(serverUrl) {
+      online = withContext(Dispatchers.IO) {
+        runCatching { (application as NodeApp).dsh.ping() }.getOrDefault(false)
+      }
+    }
+    var showExitConfirm by remember { mutableStateOf(false) }
+
     // DSH 服务摘要（当前模型 / 插件启用数 / 默认预设），失败静默显示 "-"
     var dshSummary by remember { mutableStateOf<Triple<String, String, String>?>(null) }
     LaunchedEffect(Unit) {
@@ -566,8 +567,11 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            Text(text = "状态", style = DshTheme.type.body, color = DshTheme.colors.text, modifier = Modifier.weight(1f))
-            DshStatusPill(text = "已连接", status = DshStatus.Success)
+            Text(text = "联机状态", style = DshTheme.type.body, color = DshTheme.colors.text, modifier = Modifier.weight(1f))
+            DshStatusPill(
+              text = if (online == null) "检测中…" else if (online == true) "已连接" else "未连接",
+              status = if (online == null) DshStatus.Neutral else if (online == true) DshStatus.Success else DshStatus.Danger,
+            )
           }
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(title = "刷新页面", onClick = onRefresh)
@@ -640,7 +644,33 @@ class MainActivity : ComponentActivity() {
         }
       }
 
+      Spacer(modifier = Modifier.height(18.dp))
+
+      DshSectionLabel("应用")
+      DshSoftPanel {
+        Column {
+          DshSettingsRow(title = "退出app", danger = true, onClick = { showExitConfirm = true })
+        }
+      }
+
       Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (showExitConfirm) {
+      AlertDialog(
+        onDismissRequest = { showExitConfirm = false },
+        title = { Text("退出应用") },
+        text = { Text("将关闭 DeepSeek Harness。") },
+        confirmButton = {
+          TextButton(onClick = {
+            showExitConfirm = false
+            finishAffinity()
+          }) { Text("退出", color = DshTheme.colors.danger) }
+        },
+        dismissButton = {
+          TextButton(onClick = { showExitConfirm = false }) { Text("取消") }
+        },
+      )
     }
   }
 

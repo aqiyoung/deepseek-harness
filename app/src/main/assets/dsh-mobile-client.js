@@ -35,8 +35,7 @@ window.__ModuleLoader__.load({
         /* 隐藏应用自带的 rail toggle 按钮 */
         /* toggle \u6309\u94ae\u4fdd\u7559\uff0c\u539f\u751f\u6253\u5f00\u4fa7\u680f */
         ".dsh-mobile-active .hHd-Xa_root .hHd-Xa_logoRow{",
-          "display:flex !important;width:100% !important;justify-content:flex-end !important;",
-          "padding:8px !important;box-sizing:border-box !important;",
+          "display:none !important;",
         "}",
         /* newSession 按钮展开 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
@@ -316,25 +315,10 @@ window.__ModuleLoader__.load({
     /* 打开抽屉时：用内联样式强制修正布局（比 CSS !important 更可靠） */
     function applyDrawerStyles(sb) {
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
-      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;";
-      /* 官方 logoRow 直接优化：安全区留白 + 发丝分隔线，内容保持网页原样 */
+      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
+      /* 官方 logoRow（logo + 标题 + 齿轮）按需求隐藏，设置入口上移到原生顶栏齿轮 */
       var logoRow = sb.querySelector('.hHd-Xa_logoRow');
-      if (logoRow) {
-        logoRow.style.cssText = "display:flex !important;width:100% !important;align-items:center !important;justify-content:flex-end !important;padding:calc(10px + env(safe-area-inset-top)) 14px 10px 12px !important;box-sizing:border-box !important;flex-shrink:0 !important;";
-        var toggleBtn = logoRow.querySelector('.hHd-Xa_toggle');
-        if (toggleBtn && !logoRow.querySelector('.dsh-side-gear')) {
-          var gear = document.createElement('button');
-          gear.type = 'button';
-          gear.className = 'dsh-side-gear';
-          gear.setAttribute('aria-label', '打开设置');
-          gear.innerHTML = '&#9881;';
-          gear.addEventListener('click', function(e) {
-            e.stopPropagation();
-            try { if (window.DshAppBridge) window.DshAppBridge.openAppSettings(); } catch (err) {}
-          });
-          logoRow.insertBefore(gear, toggleBtn);
-        }
-      }
+      if (logoRow) { logoRow.style.display = 'none'; }
       /* newSession 按钮展开 */
       var ns = sb.querySelector('.hHd-Xa_newSession');
       if (ns) {

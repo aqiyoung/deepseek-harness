@@ -215,4 +215,16 @@ class DshRepo(context: Context) {
       },
     )
   }
+
+  /** 轻量连通性探测：HEAD 服务器根地址，能拿到任意 HTTP 响应即视为在线；网络异常为离线。 */
+  suspend fun ping(): Boolean = withContext(Dispatchers.IO) {
+    val base = prefs.serverUrl.value.trimEnd('/')
+    if (base.isEmpty()) return@withContext false
+    try {
+      val req = Request.Builder().url(base).method("HEAD", null).build()
+      http.newCall(req).execute().use { resp -> resp.code in 200..599 }
+    } catch (e: Exception) {
+      false
+    }
+  }
 }
