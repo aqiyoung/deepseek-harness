@@ -49,10 +49,27 @@ private fun <T> DshAsyncPage(
   content: @Composable (T, () -> Unit) -> Unit,
 ) {
   var result by remember { mutableStateOf<Result<T>?>(null) }
+  var refreshing by remember { mutableStateOf(false) }
+  var refreshFailed by remember { mutableStateOf(false) }
   var tick by remember { mutableStateOf(0) }
   LaunchedEffect(tick) {
-    result = null
-    result = runCatching { load() }
+    refreshing = true
+    refreshFailed = false
+    try {
+      val r = runCatching { load() }
+      // 取消不是"加载失败"，必须放行以遵守结构化并发。
+      val ce = r.exceptionOrNull()
+      if (ce is kotlin.coroutines.cancellation.CancellationException) throw ce
+      // 首次加载失败才进错误态；已有数据时保留旧数据原地刷新。
+      if (r.isSuccess || result == null) {
+        result = r
+        refreshFailed = r.isFailure && result != null
+      } else {
+        refreshFailed = true
+      }
+    } finally {
+      refreshing = false
+    }
   }
   val current = result
   when {
@@ -72,7 +89,20 @@ private fun <T> DshAsyncPage(
       )
       DshPrimaryButton(text = "重试", onClick = { tick++ })
     }
-    else -> content(current.getOrThrow()) { tick++ }
+    else -> Column {
+      if (refreshing || refreshFailed) {
+        Text(
+          text = when {
+            refreshing -> "刷新中…"
+            else -> "刷新失败，显示的是上次结果"
+          },
+          style = DshTheme.type.captionSmall,
+          color = if (refreshFailed) DshTheme.colors.warning else DshTheme.colors.textSubtle,
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        )
+      }
+      content(current.getOrThrow()) { tick++ }
+    }
   }
 }
 
@@ -121,14 +151,15 @@ fun ModelsDetailPage(onBack: () -> Unit) {
                 onClick = {
                   if (!selected) {
                     scope.launch {
-                      runCatching { repo(context).selectModel(pid, option.modelId) }
-                        .onSuccess {
-                          Toast.makeText(context, "已切换到 ${option.modelName}", Toast.LENGTH_SHORT).show()
-                          reload()
-                        }
-                        .onFailure { e ->
-                          Toast.makeText(context, "切换失败：${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+                      try {
+                        repo(context).selectModel(pid, option.modelId)
+                        Toast.makeText(context, "已切换到 ${option.modelName}", Toast.LENGTH_SHORT).show()
+                        reload()
+                      } catch (ce: kotlin.coroutines.cancellation.CancellationException) {
+                        throw ce
+                      } catch (e: Exception) {
+                        Toast.makeText(context, "切换失败：${e.message}", Toast.LENGTH_SHORT).show()
+                      }
                     }
                   }
                 },
@@ -251,14 +282,15 @@ fun PresetsDetailPage(onBack: () -> Unit) {
                   text = if (preset.trust == "system") "设为默认" else "设为默认（本地预设）",
                   onClick = {
                     scope.launch {
-                      runCatching { repo(context).setDefaultPreset(preset.id) }
-                        .onSuccess {
-                          Toast.makeText(context, "默认预设已设为 ${preset.name}", Toast.LENGTH_SHORT).show()
-                          reload()
-                        }
-                        .onFailure { e ->
-                          Toast.makeText(context, "设置失败：${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+                      try {
+                        repo(context).setDefaultPreset(preset.id)
+                        Toast.makeText(context, "默认预设已设为 ${preset.name}", Toast.LENGTH_SHORT).show()
+                        reload()
+                      } catch (ce: kotlin.coroutines.cancellation.CancellationException) {
+                        throw ce
+                      } catch (e: Exception) {
+                        Toast.makeText(context, "设置失败：${e.message}", Toast.LENGTH_SHORT).show()
+                      }
                     }
                   },
                   modifier = Modifier.fillMaxWidth(),

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config xmlns:tools="http://schemas.android.com/tools">
   <!--
-    Private LAN gateway addresses are user-selected and cannot be expressed as NSC domain rules.
-    OkHttp enforces NSC for ws://, so a false base-config would break arbitrary RFC1918 gateways.
-    GatewayHostSecurity is therefore the enforcement point for cleartext gateway scope.
+    凭据安全基线：本分支只与 DSH 服务器通信，登录密码与 dsh_session Cookie 均要求 https。
+    全局禁止明文流量；normalizeServerUrl() 在保存地址时同样强制 https。
+    （旧注释引用的 GatewayHostSecurity 网关白名单属于其他分支的 gateway 架构，本分支无此组件。）
   -->
-  <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration" />
+  <base-config cleartextTrafficPermitted="false" />
 </network-security-config>

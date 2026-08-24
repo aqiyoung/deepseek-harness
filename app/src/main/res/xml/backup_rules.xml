@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 注意：AndroidManifest 里 allowBackup=false 已整体禁用备份/迁移，本文件是第二道防线。
+     若未来放开 allowBackup，请改用白名单（include）语义，黑名单未匹配路径会被备份。 -->
 <full-backup-content>
     <exclude domain="root" path="." />
 </full-backup-content>

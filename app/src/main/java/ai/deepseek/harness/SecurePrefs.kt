@@ -36,6 +36,10 @@ class SecurePrefs(context: Context) {
       .build()
   }
 
+  @Volatile
+  var isSecureStorageDegraded = false
+    private set
+
   private val securePrefs: SharedPreferences by lazy { createSecurePrefs() }
 
   private fun openSecurePrefs(): SharedPreferences =
@@ -51,20 +55,26 @@ class SecurePrefs(context: Context) {
     try {
       openSecurePrefs()
     } catch (_: Exception) {
-      // KeyStore/加密文件损坏不能变成启动崩溃循环：重置一次，仍失败则降级为明文 prefs。
+      // KeyStore/加密文件损坏不能变成启动崩溃循环：重置一次；仍失败则进入降级模式——
+      // 机密（Cookie、记住的密码）一律不持久化，并复位登录态要求重新登录。
       appContext.deleteSharedPreferences(securePrefsName)
       try {
         openSecurePrefs()
       } catch (_: Exception) {
+        isSecureStorageDegraded = true
+        plainPrefs.edit { remove("auth.loggedIn") }
         plainPrefs
       }
     }
 
+  /** 后台预热加密存储（masterKey + ESP 初始化较重），避免主线程首次访问卡顿。 */
+  fun warmUp() {
+    securePrefs.getString("auth.sessionCookie", null)
+  }
+
   // ── DSH Login ──
 
-  private val _serverUrl = MutableStateFlow(
-    plainPrefs.getString("auth.serverUrl", "https://dsh.threel.site") ?: "https://dsh.threel.site",
-  )
+  private val _serverUrl = MutableStateFlow(plainPrefs.getString("auth.serverUrl", null).orEmpty())
   val serverUrl: StateFlow<String> = _serverUrl
 
   private val _isLoggedIn = MutableStateFlow(plainPrefs.getBoolean("auth.loggedIn", false))
@@ -80,33 +90,35 @@ class SecurePrefs(context: Context) {
   }
 
   fun setLoggedIn(value: Boolean, username: String = "") {
-    plainPrefs.edit {
-      putBoolean("auth.loggedIn", value)
-      if (username.isNotEmpty()) putString("auth.username", username)
-    }
+    plainPrefs.edit { putBoolean("auth.loggedIn", value) }
     _isLoggedIn.value = value
-    if (username.isNotEmpty()) {
+    // 账号名只进加密存储；明文层只保留 loggedIn 标志。
+    if (!isSecureStorageDegraded && username.isNotEmpty()) {
       securePrefs.edit { putString("auth.username", username) }
       _sessionUser.value = username
     }
   }
 
   fun setSessionCookie(value: String) {
+    if (isSecureStorageDegraded) return
     securePrefs.edit { putString("auth.sessionCookie", value) }
   }
 
-  fun getSessionCookie(): String? = securePrefs.getString("auth.sessionCookie", null)
+  fun getSessionCookie(): String? =
+    if (isSecureStorageDegraded) null else securePrefs.getString("auth.sessionCookie", null)
 
   // ── Remembered credentials（可选：记住密码，加密存储） ──
 
   fun setRememberedPassword(value: String?) {
+    if (isSecureStorageDegraded) return
     securePrefs.edit {
       if (value.isNullOrEmpty()) remove("auth.rememberedPassword")
       else putString("auth.rememberedPassword", value)
     }
   }
 
-  fun getRememberedPassword(): String? = securePrefs.getString("auth.rememberedPassword", null)
+  fun getRememberedPassword(): String? =
+    if (isSecureStorageDegraded) null else securePrefs.getString("auth.rememberedPassword", null)
 
   // ── Theme ──
 
@@ -192,21 +204,6 @@ class SecurePrefs(context: Context) {
     val next = (listOf(trimmed) + _modelRecents.value.filterNot { it == trimmed }).take(5)
     persistStringList("chat.modelRecents", next)
     _modelRecents.value = next
-  }
-
-  // ── Active Session (for restart restore) ──
-
-  private val _activeSessionId = MutableStateFlow(
-    plainPrefs.getString("chat.activeSessionId", "") ?: "",
-  )
-  val activeSessionId: StateFlow<String> = _activeSessionId
-
-  fun setActiveSessionId(value: String?) {
-    plainPrefs.edit {
-      if (value.isNullOrBlank()) remove("chat.activeSessionId")
-      else putString("chat.activeSessionId", value.trim())
-    }
-    _activeSessionId.value = value ?: ""
   }
 
   // ── Helpers ──

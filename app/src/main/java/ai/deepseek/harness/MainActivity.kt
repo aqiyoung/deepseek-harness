@@ -57,6 +57,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -88,9 +89,15 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -127,6 +134,15 @@ class MainActivity : ComponentActivity() {
 
   private var filePathCallback: ValueCallback<Array<Uri>>? = null
   private var webViewRef: WebView? = null
+
+  /** 主文档当前 host（UI 线程在 onPageStarted 更新），供 JS 桥做来源门禁。 */
+  @Volatile
+  private var webHost: String? = null
+
+  private fun bridgeAllowed(): Boolean {
+    val serverHost = Uri.parse(prefs.serverUrl.value).host?.lowercase() ?: return false
+    return webHost == serverHost
+  }
 
   private val http by lazy { OkHttpClient() }
 
@@ -166,6 +182,8 @@ class MainActivity : ComponentActivity() {
           ShellRoot(
             onNeedLogin = { expired -> performLogout(expired) },
             onFileChoose = { callback, intent ->
+              // 上一次选择未完成时先取消旧回调，避免覆盖后旧 ValueCallback 永不回收。
+              filePathCallback?.onReceiveValue(null)
               filePathCallback = callback
               try {
                 fileChooserLauncher.launch(intent)
@@ -294,83 +312,111 @@ class MainActivity : ComponentActivity() {
 
   private fun submitLogin(serverInput: String, userInput: String, password: String, rememberPwd: Boolean) {
     loginError.value = null
+    val srv = normalizeServerUrl(serverInput)
+    if (srv == null) {
+      loginError.value = "服务器地址无效：必须以 https:// 开头"
+      return
+    }
     loggingIn.value = true
-    val srv = serverInput.trim().removeSuffix("/")
     val usr = userInput.trim()
-    lifecycleScope.launch(Dispatchers.IO) {
-      val cookie = sessionLogin(srv, usr, password)
-      lifecycleScope.launch(Dispatchers.Main) {
-        loggingIn.value = false
-        if (cookie != null) {
-          prefs.setServerUrl(srv)
-          prefs.setLoggedIn(true, usr)
-          prefs.setSessionCookie(cookie)
-          prefs.setRememberedPassword(if (rememberPwd) password else null)
-          CookieManager.getInstance().setCookie(srv, "dsh_session=" + cookie)
-          CookieManager.getInstance().flush()
-          loggedInState.value = true
-        } else {
-          loginError.value = "登录失败：请检查服务器地址、账号或密码"
+    lifecycleScope.launch(Dispatchers.Main) {
+      val outcome = withContext(Dispatchers.IO) { sessionLogin(srv, usr, password) }
+      loggingIn.value = false
+      val cookie = outcome.cookie
+      if (cookie != null) {
+        prefs.setServerUrl(srv)
+        prefs.setLoggedIn(true, usr)
+        prefs.setSessionCookie(cookie)
+        prefs.setRememberedPassword(if (rememberPwd) password else null)
+        CookieManager.getInstance().setCookie(srv, "dsh_session=" + cookie)
+        CookieManager.getInstance().flush()
+        loggedInState.value = true
+      } else {
+        loginError.value = when (outcome.failure) {
+          LoginFailure.NETWORK -> "网络错误：无法连接到服务器"
+          LoginFailure.AUTH -> "登录失败：账号或密码不正确"
+          else -> "登录失败：请检查服务器地址、账号或密码"
         }
       }
     }
   }
 
-  private suspend fun sessionLogin(server: String, user: String, password: String): String? {
-    return withContext(Dispatchers.IO) {
+  private enum class LoginFailure { NETWORK, AUTH, SERVER }
+
+  private data class LoginOutcome(val cookie: String?, val failure: LoginFailure? = null)
+
+  private suspend fun sessionLogin(server: String, user: String, password: String): LoginOutcome =
+    withContext(Dispatchers.IO) {
       try {
-        val safeUser = user.replace("\\", "\\\\").replace("\"", "\\\"")
-        val safePass = password.replace("\\", "\\\\").replace("\"", "\\\"")
-        val body = ("{\"user\":\"" + safeUser + "\",\"password\":\"" + safePass + "\"}")
-          .toRequestBody("application/json; charset=utf-8".toMediaType())
+        // 用 kotlinx.serialization 构造请求体，控制字符/引号不再破坏报文。
+        val body = buildJsonObject {
+          put("user", user)
+          put("password", password)
+        }.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
         val req = Request.Builder().url(server + "/api/session-login").post(body).build()
         http.newCall(req).execute().use { resp ->
-          if (!resp.isSuccessful) return@use null
-          resp.headers("set-cookie").firstOrNull { it.contains("dsh_session=") }
+          val cookie = resp.headers("set-cookie").firstOrNull { it.contains("dsh_session=") }
             ?.substringAfter("dsh_session=")
             ?.substringBefore(";")
+          if (!resp.isSuccessful) {
+            val kind = if (resp.code == 401 || resp.code == 403) LoginFailure.AUTH else LoginFailure.SERVER
+            return@use LoginOutcome(null, kind)
+          }
+          if (cookie.isNullOrEmpty()) return@use LoginOutcome(null, LoginFailure.SERVER)
+          LoginOutcome(cookie)
         }
       } catch (e: Exception) {
-        null
+        LoginOutcome(null, LoginFailure.NETWORK)
       }
     }
-  }
 
   fun performLogout(expired: Boolean) {
     CookieManager.getInstance().removeAllCookies(null)
     CookieManager.getInstance().flush()
     prefs.setLoggedIn(false)
     prefs.setSessionCookie("")
+    (application as NodeApp).dsh.invalidate()
     loginError.value = if (expired) "会话已过期，请重新登录" else null
     loggedInState.value = false
   }
 
-  /** 应用服务器切换：清 cookie → 记住密码时静默重登，否则刷新到登录页。 */
+  /** 应用服务器切换：先清空存量 Cookie 再换地址（防旧凭据被注入新域名），记住密码时静默重登。 */
   fun applyServerChange(rawInput: String) {
-    val raw = rawInput.trim().removeSuffix("/")
-    val current = prefs.serverUrl.value
-    if (raw.isEmpty() || raw == current) return
-    prefs.setServerUrl(raw)
+    val raw = normalizeServerUrl(rawInput)
+    if (raw == null) {
+      Toast.makeText(this, "服务器地址无效：必须以 https:// 开头", Toast.LENGTH_LONG).show()
+      return
+    }
+    if (raw == prefs.serverUrl.value) return
+    // P0：必须在 serverUrl 生效前清空旧服务器的会话 Cookie，
+    // 否则 LaunchedEffect(serverUrl) 会把旧 dsh_session 注入新域名并随请求跨域发送。
     CookieManager.getInstance().removeAllCookies(null)
+    CookieManager.getInstance().flush()
+    prefs.setSessionCookie("")
+    (application as NodeApp).dsh.invalidate()
+    prefs.setServerUrl(raw)
     val usr = prefs.sessionUser.value
     val pwd = prefs.getRememberedPassword() ?: ""
     if (usr.isNotEmpty() && pwd.isNotEmpty()) {
-      lifecycleScope.launch(Dispatchers.IO) {
-        val ck = sessionLogin(raw, usr, pwd)
-        lifecycleScope.launch(Dispatchers.Main) {
-          if (ck != null) {
-            prefs.setSessionCookie(ck)
-            CookieManager.getInstance().setCookie(raw, "dsh_session=" + ck)
-            refreshShell()
-            Toast.makeText(this@MainActivity, "已切换并登录：" + raw, Toast.LENGTH_SHORT).show()
-          } else {
-            performLogout(expired = false)
-            Toast.makeText(this@MainActivity, "已切换服务器，请重新登录", Toast.LENGTH_SHORT).show()
-          }
+      lifecycleScope.launch(Dispatchers.Main) {
+        val outcome = withContext(Dispatchers.IO) { sessionLogin(raw, usr, pwd) }
+        val ck = outcome.cookie
+        if (ck != null) {
+          prefs.setLoggedIn(true, usr)
+          prefs.setSessionCookie(ck)
+          CookieManager.getInstance().setCookie(raw, "dsh_session=" + ck)
+          CookieManager.getInstance().flush()
+          refreshShell()
+          Toast.makeText(this@MainActivity, "已切换并登录：" + raw, Toast.LENGTH_SHORT).show()
+        } else {
+          performLogout(expired = false)
+          Toast.makeText(this@MainActivity, "已切换服务器，自动登录失败，请重新登录", Toast.LENGTH_SHORT).show()
         }
       }
     } else {
-      refreshShell()
+      // 没有记住的密码：直接回原生登录页，避免把未认证的 WebView 指向新服务器。
+      performLogout(expired = false)
+      Toast.makeText(this, "已切换服务器，请重新登录", Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -520,7 +566,8 @@ class MainActivity : ComponentActivity() {
     var showExitConfirm by remember { mutableStateOf(false) }
 
     // DSH 服务摘要（当前模型 / 插件启用数 / 默认预设），失败静默显示 "-"
-    var dshSummary by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    data class DshSummary(val model: String, val plugins: String, val preset: String)
+    var dshSummary by remember { mutableStateOf<DshSummary?>(null) }
     LaunchedEffect(Unit) {
       val r = withContext(Dispatchers.IO) {
         runCatching {
@@ -528,14 +575,15 @@ class MainActivity : ComponentActivity() {
           val models = runCatching { dsh.models() }.getOrNull()
           val plugins = runCatching { dsh.plugins() }.getOrNull()
           val presets = runCatching { dsh.presets() }.getOrNull()
-          Triple(
+          DshSummary(
             models?.let { it.currentModel.ifBlank { "未选择" } } ?: "-",
             plugins?.let { list -> list.count { p -> p.enabled }.toString() + "/" + list.size.toString() + " 启用" } ?: "-",
             presets?.let { list -> list.firstOrNull { it.isDefault }?.name ?: if (list.isEmpty()) "无" else "-" } ?: "-",
           )
         }
       }
-      r.getOrNull()?.let { dshSummary = it }
+      val s = r.getOrNull() ?: return@LaunchedEffect
+      dshSummary = s
     }
 
     Column(
@@ -585,19 +633,19 @@ class MainActivity : ComponentActivity() {
         Column {
           DshSettingsRow(
             title = "模型",
-            value = dshSummary?.first ?: "-",
+            value = dshSummary?.model ?: "-",
             onClick = { onOpenRoute(SettingRoute.Models) },
           )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(
             title = "插件",
-            value = dshSummary?.second ?: "-",
+            value = dshSummary?.plugins ?: "-",
             onClick = { onOpenRoute(SettingRoute.Plugins) },
           )
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(
             title = "Agent 预设",
-            value = dshSummary?.third ?: "-",
+            value = dshSummary?.preset ?: "-",
             onClick = { onOpenRoute(SettingRoute.Presets) },
           )
         }
@@ -745,6 +793,7 @@ class MainActivity : ComponentActivity() {
   @Composable
   private fun LanguageDetailPage(onBack: () -> Unit) {
     val appLanguage by prefs.appLanguage.collectAsState()
+    val activityContext = LocalContext.current
 
     DshDetailFrame(title = "语言", onBack = onBack) {
       Spacer(modifier = Modifier.height(6.dp))
@@ -755,7 +804,11 @@ class MainActivity : ComponentActivity() {
             Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .clickable { prefs.saveAppLanguage(language) }
+                .clickable {
+                  prefs.saveAppLanguage(language)
+                  // ComponentActivity 不随 AppCompatDelegate.setApplicationLocales 自动重建，显式重建使切换立即生效。
+                  (activityContext as? android.app.Activity)?.recreate()
+                }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -789,11 +842,31 @@ class MainActivity : ComponentActivity() {
 
   @Composable
   private fun LicensesDetailPage(onBack: () -> Unit) {
-    val notices = remember { loadAndroidLicenseNotices(assets) }
+    var notices by remember { mutableStateOf<List<AndroidLicenseNotice>?>(null) }
+    LaunchedEffect(Unit) {
+      // 资产文件读取放后台线程，避免组合期主线程磁盘 IO 卡顿。
+      notices = withContext(Dispatchers.IO) {
+        runCatching { loadAndroidLicenseNotices(assets) }.getOrDefault(emptyList())
+      }
+    }
 
     DshDetailFrame(title = "开源许可证", onBack = onBack) {
-      Spacer(modifier = Modifier.height(6.dp))
-      notices.forEach { notice ->
+      val current = notices
+      when {
+        current == null -> Box(
+          modifier = Modifier.fillMaxSize(),
+          contentAlignment = Alignment.Center,
+        ) {
+          CircularProgressIndicator(color = DshTheme.colors.primary, strokeWidth = 2.dp)
+        }
+        current.isEmpty() -> Text(
+          text = "暂未打包第三方许可证文件。",
+          style = DshTheme.type.body,
+          color = DshTheme.colors.textMuted,
+          modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+          textAlign = TextAlign.Center,
+        )
+        else -> current.forEach { notice ->
         DshSectionLabel(notice.title)
         DshSoftPanel {
           Text(
@@ -802,10 +875,11 @@ class MainActivity : ComponentActivity() {
             color = DshTheme.colors.textMuted,
           )
         }
-        Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+          }
+        }
       }
     }
-  }
 
   private fun themeDisplayLabel(mode: AppearanceThemeMode): String = when (mode) {
     AppearanceThemeMode.System -> "跟随系统"
@@ -875,12 +949,17 @@ class MainActivity : ComponentActivity() {
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         settings.allowFileAccess = false
         settings.userAgentString = settings.userAgentString + " DshAndroid/" + BuildConfig.VERSION_NAME
-        CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+        // 会话凭据是第一方 Cookie；关闭第三方 Cookie 收窄 CSRF/跟踪暴露面。
+        CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
 
         webViewClient = object : WebViewClient() {
           override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): android.webkit.WebResourceResponse? {
-            // 冻结版：App 内的移动 UI 适配插件使用 APK 内置副本，不受服务器更新影响
-            if (request.url.toString().contains("dsh-web-ui-mobile/client.js")) {
+            // 冻结版：App 内的移动 UI 适配插件使用 APK 内置副本，不受服务器更新影响。
+            // 仅对当前配置服务器的 https 请求提供，避免向任意 frame/主机泄漏内置资源。
+            val serverHost = Uri.parse(prefs.serverUrl.value).host?.lowercase()
+            val reqHost = request.url.host?.lowercase()
+            if (serverHost != null && reqHost == serverHost &&
+                request.url.toString().contains("dsh-web-ui-mobile/client.js")) {
               try {
                 val input = assets.open("dsh-mobile-client.js")
                 return android.webkit.WebResourceResponse("application/javascript", "utf-8", input)
@@ -894,8 +973,15 @@ class MainActivity : ComponentActivity() {
             return handleExternalNavigation(context, prefs.serverUrl.value, request.url)
           }
           override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
-            // 被踢回 nginx 登录页 → 会话失效
-            if (url.endsWith("/login")) onNeedLogin(true)
+            // 被踢回本服务器 nginx 登录页 → 会话失效（精确匹配 path，避免误伤 /docs/login 等）
+            val serverHost = Uri.parse(prefs.serverUrl.value).host?.lowercase()
+            val u = Uri.parse(url)
+            val kickedToLogin = u.host != null && u.host.equals(serverHost, ignoreCase = true) &&
+              u.path?.removeSuffix("/") == "/login"
+            if (kickedToLogin) onNeedLogin(true)
+          }
+          override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
+            webHost = Uri.parse(url).host?.lowercase()
           }
           override fun onPageFinished(view: WebView, url: String) {
             CookieManager.getInstance().flush()
@@ -922,8 +1008,18 @@ class MainActivity : ComponentActivity() {
       }
     }
 
-    DisposableEffect(Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+      val observer = LifecycleEventObserver { _, event ->
+        when (event) {
+          Lifecycle.Event.ON_PAUSE -> { webView.onPause(); webView.pauseTimers() }
+          Lifecycle.Event.ON_RESUME -> { webView.onResume(); webView.resumeTimers() }
+          else -> Unit
+        }
+      }
+      lifecycleOwner.lifecycle.addObserver(observer)
       onDispose {
+        lifecycleOwner.lifecycle.removeObserver(observer)
         webViewRef = null
         webView.stopLoading()
         webView.loadUrl("about:blank")
@@ -931,8 +1027,9 @@ class MainActivity : ComponentActivity() {
       }
     }
 
-    // Cookie 注入 + 加载
+    // Cookie 注入 + 加载；服务器地址为空时绝不发起加载
     LaunchedEffect(serverUrl) {
+      if (serverUrl.isBlank()) return@LaunchedEffect
       val ck = prefs.getSessionCookie()
       if (!ck.isNullOrEmpty()) {
         CookieManager.getInstance().setCookie(serverUrl, "dsh_session=" + ck)
@@ -963,7 +1060,15 @@ class MainActivity : ComponentActivity() {
       }
       "intent" -> {
         runCatching {
-          Intent.parseUri(url.toString(), Intent.URI_INTENT_SCHEME)?.let { context.startActivity(it) }
+          val parsed = Intent.parseUri(url.toString(), Intent.URI_INTENT_SCHEME) ?: return@runCatching
+          // 消毒：剥离 component/selector/extras，防 intent 重定向拉起任意组件。
+          parsed.component = null
+          parsed.selector = null
+          parsed.action = Intent.ACTION_VIEW
+          parsed.replaceExtras(android.os.Bundle())
+          if (parsed.resolveActivity(context.packageManager) != null) {
+            context.startActivity(parsed)
+          }
         }
         return true
       }
@@ -972,26 +1077,38 @@ class MainActivity : ComponentActivity() {
   }
 
   private fun startDownload(url: String, userAgent: String, contentDisposition: String, mimeType: String) {
-    val name = URLUtil.guessFileName(url, contentDisposition, mimeType)
-    val cookie = CookieManager.getInstance().getCookie(url)
-    val request = DownloadManager.Request(Uri.parse(url)).apply {
-      setMimeType(mimeType)
-      setTitle(name)
-      setDescription("DeepSeek Harness")
-      setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-      addRequestHeader("User-Agent", userAgent)
-      if (!cookie.isNullOrEmpty()) addRequestHeader("Cookie", cookie)
-      setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
+    val parsed = Uri.parse(url)
+    val scheme = parsed.scheme?.lowercase()
+    if (scheme != "https" && scheme != "http") {
+      Toast.makeText(applicationContext, "不支持的下载地址", Toast.LENGTH_SHORT).show()
+      return
     }
-    runCatching {
+    try {
+      val name = URLUtil.guessFileName(url, contentDisposition, mimeType)
+      // 仅当下载端点与会话服务器同域时才附带 dsh_session Cookie。
+      val serverHost = Uri.parse(prefs.serverUrl.value).host?.lowercase()
+      val sameHost = parsed.host?.lowercase() != null && parsed.host.equals(serverHost, ignoreCase = true)
+      val request = DownloadManager.Request(parsed).apply {
+        setMimeType(mimeType)
+        setTitle(name)
+        setDescription("DeepSeek Harness")
+        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        addRequestHeader("User-Agent", userAgent)
+        if (sameHost) {
+          CookieManager.getInstance().getCookie(url)?.let { addRequestHeader("Cookie", it) }
+        }
+        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
+      }
       (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
       Toast.makeText(applicationContext, "开始下载：" + name, Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+      Toast.makeText(applicationContext, "下载失败：" + (e.message ?: "未知错误"), Toast.LENGTH_SHORT).show()
     }
   }
 
   // ── 原生对话框（供 Web Bridge 调用）──
 
-  fun showChangeServerDialog(silentRelogin: Boolean) {
+  fun showChangeServerDialog() {
     val input = EditText(this).apply {
       setText(prefs.serverUrl.value)
       inputType = InputType.TYPE_TEXT_VARIATION_URI
@@ -1022,37 +1139,46 @@ class MainActivity : ComponentActivity() {
 
   fun refreshShell() {
     CookieManager.getInstance().flush()
-    webViewRef?.loadUrl(prefs.serverUrl.value.ifBlank { "https://dsh.threel.site" })
+    val target = prefs.serverUrl.value
+    if (target.isBlank()) return
+    webViewRef?.loadUrl(target)
   }
 
   // ── AppBridge：供 Web 设置里的 App 区块调用 ──
 
   private inner class AppBridge(
-    val onChangeServer: () -> Unit = { runOnUiThread { showChangeServerDialog(silentRelogin = true) } },
+    val onChangeServer: () -> Unit = { runOnUiThread { showChangeServerDialog() } },
     val onClearLogin: () -> Unit = { runOnUiThread { performLogout(expired = false) } },
     val onLicenses: () -> Unit = { runOnUiThread { showLicensesDialog() } },
     val onRefresh: () -> Unit = { runOnUiThread { refreshShell() } },
   ) {
+    /** 来源门禁：仅当前配置服务器的主文档可调用桥方法，跨域 iframe 一律忽略。 */
+    private fun gated(): Boolean = bridgeAllowed()
+
     @JavascriptInterface
     fun getVersion(): String = BuildConfig.VERSION_NAME
 
     @JavascriptInterface
-    fun changeServer() = onChangeServer()
+    fun updateCheckUrl(): String =
+      if (gated()) "https://api.github.com/repos/aqiyoung/deepseek-harness/releases/latest" else ""
 
     @JavascriptInterface
-    fun clearLogin() = onClearLogin()
+    fun changeServer() { if (gated()) onChangeServer() }
 
     @JavascriptInterface
-    fun showLicenses() = onLicenses()
+    fun clearLogin() { if (gated()) onClearLogin() }
 
     @JavascriptInterface
-    fun refreshPage() = onRefresh()
+    fun showLicenses() { if (gated()) onLicenses() }
 
     @JavascriptInterface
-    fun setSidebarOpen(open: Boolean) = runOnUiThread { sidebarOpenState.value = open }
+    fun refreshPage() { if (gated()) onRefresh() }
 
     @JavascriptInterface
-    fun openAppSettings() = runOnUiThread { settingsOpenTick.value += 1 }
+    fun setSidebarOpen(open: Boolean) { if (gated()) runOnUiThread { sidebarOpenState.value = open } }
+
+    @JavascriptInterface
+    fun openAppSettings() { if (gated()) runOnUiThread { settingsOpenTick.value += 1 } }
 
   }
 }

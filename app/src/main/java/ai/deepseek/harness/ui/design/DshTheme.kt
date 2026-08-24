@@ -96,7 +96,8 @@ private val DshDarkColors =
     borderStrong = Color(0xFF3A3A3A),
     text = Color(0xFFF8F8F8),
     textMuted = Color(0xFFA8A8A8),
-    textSubtle = Color(0xFF707070),
+    // 深色画布上对比度 ≥ 4.5:1（WCAG AA），原 #707070 仅约 3.6:1。
+    textSubtle = Color(0xFF8A8F98),
     primary = Color(0xFFFFFFFF),
     primaryText = Color(0xFF050505),
     success = Color(0xFF3EDB82),
@@ -117,7 +118,8 @@ private val DshLightColors =
     borderStrong = Color(0xFFC7D0DC),
     text = Color(0xFF111318),
     textMuted = Color(0xFF505865),
-    textSubtle = Color(0xFF8993A2),
+    // 浅色画布上对比度 ≥ 4.5:1（WCAG AA），原 #8993A2 仅约 3.0:1。
+    textSubtle = Color(0xFF6B7280),
     primary = Color(0xFF111827),
     primaryText = Color(0xFFFFFFFF),
     success = Color(0xFF217747),

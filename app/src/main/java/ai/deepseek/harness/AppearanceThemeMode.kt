@@ -18,8 +18,9 @@ enum class AppearanceThemeMode(
     }
 
   companion object {
-    fun fromRawValue(value: String?): AppearanceThemeMode = entries.firstOrNull { it.rawValue == value?.trim()?.lowercase() } ?: Dark
+    // 未识别/缺省一律回退 System，与 SecurePrefs 的初始默认保持一致。
+    fun fromRawValue(value: String?): AppearanceThemeMode = entries.firstOrNull { it.rawValue == value?.trim()?.lowercase() } ?: System
 
-    fun fromDisplayLabel(label: String): AppearanceThemeMode = entries.firstOrNull { it.displayLabel.equals(label.trim(), ignoreCase = true) } ?: Dark
+    fun fromDisplayLabel(label: String): AppearanceThemeMode = entries.firstOrNull { it.displayLabel.equals(label.trim(), ignoreCase = true) } ?: System
   }
 }
