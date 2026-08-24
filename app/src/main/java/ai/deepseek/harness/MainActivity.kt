@@ -435,23 +435,7 @@ class MainActivity : ComponentActivity() {
     }
 
     Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
-      // 顶栏与内容融为一体：无分隔线；侧边栏展开时整条隐藏（避免双 logo）
-      if (!sidebarOpenState.value) {
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .padding(start = 4.dp, end = 12.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          DshPlainIconButton(
-            icon = Icons.Default.Menu,
-            contentDescription = "打开会话列表",
-            onClick = { toggleWebSidebar() },
-          )
-        }
-      }
-
+      // 完全无顶栏（v1.0.67）— 侧边栏通过 Web 边缘左滑打开（setupTouch 已支持），原生设置可从侧边栏 logoRow 齿轮进入
       Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
           backEnabled = !showSettings,

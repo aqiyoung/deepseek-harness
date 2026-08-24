@@ -32,10 +32,11 @@ window.__ModuleLoader__.load({
           "box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;",
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
-        /* 恢复官方侧边栏 logoRow（logo+标题）显示；newSession 大按钮隐藏，改用 logoRow 作为侧边栏头部 */
+        /* 侧边栏顶部 logoRow(v1.0.67 重新隐藏, 改为纯入口列表; logoRow 改为 dsh-side-gear 齿轮调原生设置) */
         ".dsh-mobile-active .hHd-Xa_root .hHd-Xa_logoRow{",
-          "display:flex !important;",
+          "display:none !important;",
         "}",
+        /* newSession 大按钮仍隐藏 (侧边栏头部整段无内容) */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
           "display:none !important;",
         "}",
@@ -615,51 +616,82 @@ window.__ModuleLoader__.load({
                                                                       document.head.appendChild(st);
     }
 
-    /* 把 URL 面包屑放到 Session log 按钮所在行的最左侧（产品要求） */
-    function alignUrlAndSessionLog() {
+    /* 把 URL 面包屑放到「会话标题」(对话/轨迹) tab 行最左侧, 同时隐藏整个原面包屑行
+   (产品要求 v1.0.67) — 删除顶栏/侧边栏顶栏后, 原面包屑整行变成噪声 */
+    function alignUrlToSessionTitle() {
       try {
-        var btns = document.querySelectorAll('button, a, [role="button"]');
-        var sl = null;
-        for (var i = 0; i < btns.length; i++) {
-          var t = (btns[i].textContent || '').trim().toLowerCase();
-          if (t.indexOf('session log') >= 0) { sl = btns[i]; break; }
-        }
-        if (!sl || !sl.parentElement) return false;
-        var all = document.querySelectorAll('*');
+        // 1) 找 URL 叶子 (textContent starts with https://)
         var urlEl = null;
-        for (var j = 0; j < all.length; j++) {
-          var el = all[j];
-          var tx = (el.textContent || '').trim();
-          if (tx.indexOf('https://') === 0 && el.children.length === 0) { urlEl = el; break; }
+        var all = document.querySelectorAll("*");
+        for (var i = 0; i < all.length; i++) {
+          var el = all[i];
+          var tx = (el.textContent || "").trim();
+          if (tx.indexOf("https://") === 0 && el.children.length === 0) { urlEl = el; break; }
         }
-        if (!urlEl || urlEl === sl) return false;
-        var parent = sl.parentElement;
-        if (urlEl.parentElement !== parent) {
-          try { parent.insertBefore(urlEl, sl); } catch (e) { return false; }
+        if (!urlEl) return false;
+
+        // 2) 找 Session log 按钮 (用于定位原面包屑行)
+        var btns = document.querySelectorAll("button, a, [role=\"button\"]");
+        var sl = null;
+        for (var k = 0; k < btns.length; k++) {
+          var t2 = (btns[k].textContent || "").trim().toLowerCase();
+          if (t2.indexOf("session log") >= 0) { sl = btns[k]; break; }
         }
-        parent.style.display = 'flex';
-        parent.style.alignItems = 'center';
-        parent.style.gap = '8px';
-        if (!parent.style.minHeight) parent.style.minHeight = '44px';
-        urlEl.style.order = '-1';
-        urlEl.style.flex = '1 1 auto';
-        urlEl.style.minWidth = '0';
-        urlEl.style.overflow = 'hidden';
-        urlEl.style.textOverflow = 'ellipsis';
-        urlEl.style.whiteSpace = 'nowrap';
-        sl.style.order = '0';
-        sl.style.flex = '0 0 auto';
+
+        // 3) 找 tab (对话 / 轨迹) — 取第一个精确匹配的容器
+        var tabEl = null;
+        var cand = document.querySelectorAll("button, a, [role=\"tab\"], div, span, li");
+        for (var j = 0; j < cand.length; j++) {
+          var t = (cand[j].textContent || "").trim();
+          if (t === "对话" || t === "轨迹") { tabEl = cand[j]; break; }
+        }
+        if (!tabEl || !tabEl.parentElement) return false;
+        var tabBar = tabEl.parentElement;
+
+        // 4) 移动 URL 到 tabBar 最左 (idempotent)
+        try {
+          if (urlEl.parentElement !== tabBar || tabBar.firstChild !== urlEl) {
+            tabBar.insertBefore(urlEl, tabBar.firstChild);
+          }
+        } catch (e) { return false; }
+
+        // 5) 隐藏原面包屑行 (找 Session log 父链里, 含 session log 但 URL 已不在的最具体祖先)
+        if (sl) {
+          var origRow = null;
+          var p = sl.parentElement;
+          var hop = 0;
+          while (p && p !== document.body && hop++ < 8) {
+            var txt = (p.textContent || "").trim();
+            if (txt.indexOf("https://") < 0 && /session\s*log/i.test(txt)) {
+              if (p.children.length > 0 && p.children.length <= 8) { origRow = p; break; }
+            }
+            p = p.parentElement;
+          }
+          if (origRow) origRow.style.setProperty("display", "none", "important");
+        }
+
+        // 6) tabBar flex 布局, URL order:-1 占左侧 (截图显示成单行: URL + 对话 + 轨迹)
+        var cs = window.getComputedStyle(tabBar);
+        if (cs.display !== "flex" && cs.display !== "inline-flex") tabBar.style.display = "flex";
+        tabBar.style.alignItems = "center";
+        tabBar.style.gap = "8px";
+        urlEl.style.order = "-1";
+        urlEl.style.flex = "1 1 auto";
+        urlEl.style.minWidth = "0";
+        urlEl.style.overflow = "hidden";
+        urlEl.style.textOverflow = "ellipsis";
+        urlEl.style.whiteSpace = "nowrap";
         return true;
       } catch (e) { return false; }
     }
-    /* 持续观察 DOM 变化，应对官方重渲染/切对话时回弹（debounce 500ms） */
+    /* 持续观察 DOM, 应对官方 React 重渲染/切对话回弹 (debounce 500ms) */
     var _tbTimer = null;
     var _tbObserver = null;
     function startToolbarObserver() {
       if (_tbObserver || typeof MutationObserver === "undefined") return;
       _tbObserver = new MutationObserver(function() {
         if (_tbTimer) return;
-        _tbTimer = setTimeout(function() { _tbTimer = null; alignUrlAndSessionLog(); }, 500);
+        _tbTimer = setTimeout(function() { _tbTimer = null; alignUrlToSessionTitle(); }, 500);
       });
       _tbObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
     }
@@ -690,7 +722,7 @@ window.__ModuleLoader__.load({
         console.error("[dsh-mobile] init error:", e);
       }
       MOBILE_READY = true;
-      try { alignUrlAndSessionLog(); startToolbarObserver(); } catch (e) {}
+      try { alignUrlToSessionTitle(); startToolbarObserver(); } catch (e) {}
       window.__DSH_MOBILE__ = { initialized: true, toggle: function() { doToggle(findSidebar()); } };
     }
 
