@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Settings page UI: adds a ✕ close button to the settings home page (was missing), tightens the vertical spacing (8→4dp top, 10→6dp title gap, 18→12dp between sections, 24→14dp bottom) so the page no longer feels vertically sparse, and adds a 1.5dp shadow to DshSoftPanel containers for a raised/3D feel.
+
 Replaces the ugly Chrome default offline page (ERR_ADDRESS_UNREACHABLE) with a self-contained native overlay: centered card, animated ring icon, server address, dark/light theme, and a retry button that calls DshAppBridge.refreshPage(). Triggered from onReceivedError (network failures) and onReceivedHttpError (5xx). Also fixes the sidebar drawer open/close race (external-collapse safety net mis-firing during the adapter's own open flow) and makes doToggle survive a missing .hHd-Xa_toggle element.
 
 Fixes a race where the external-collapse safety net mis-fired during the

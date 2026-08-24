@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,7 +69,14 @@ internal fun DshSoftPanel(
   content: @Composable ColumnScope.() -> Unit,
 ) {
   Surface(
-    modifier = modifier.fillMaxWidth(),
+    modifier = modifier
+      .fillMaxWidth()
+      .shadow(
+        elevation = 1.5.dp,
+        shape = RoundedCornerShape(DshTheme.radii.panel),
+        ambientColor = DshTheme.colors.surfaceRaised.copy(alpha = 0.25f),
+        spotColor = DshTheme.colors.surfaceRaised.copy(alpha = 0.25f),
+      ),
     shape = RoundedCornerShape(DshTheme.radii.panel),
     color = DshTheme.colors.surfaceRaised,
     contentColor = DshTheme.colors.text,

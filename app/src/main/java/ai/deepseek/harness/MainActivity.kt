@@ -53,6 +53,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Menu
@@ -498,6 +499,7 @@ class MainActivity : ComponentActivity() {
             onOpenRoute = onRouteChange,
             onRefresh = onRefresh,
             onLogoutRequest = { showLogoutConfirm = true },
+            onClose = onClose,
           )
           SettingRoute.Server -> ServerDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Models -> ai.deepseek.harness.ui.ModelsDetailPage(onBack = { onRouteChange(null) })
@@ -535,6 +537,7 @@ class MainActivity : ComponentActivity() {
     onOpenRoute: (SettingRoute) -> Unit,
     onRefresh: () -> Unit,
     onLogoutRequest: () -> Unit,
+    onClose: () -> Unit,
   ) {
     val serverUrl by prefs.serverUrl.collectAsState()
     val sessionUser by prefs.sessionUser.collectAsState()
@@ -576,15 +579,21 @@ class MainActivity : ComponentActivity() {
         .verticalScroll(rememberScrollState())
         .padding(horizontal = 20.dp),
     ) {
-      Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(4.dp))
       Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = DshTheme.spacing.touchTarget),
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        DshPlainIconButton(
+          icon = Icons.Filled.Close,
+          contentDescription = "关闭",
+          onClick = onClose,
+        )
+        Spacer(modifier = Modifier.width(10.dp))
         Text(text = "设置", style = DshTheme.type.title, color = DshTheme.colors.text)
       }
 
-      Spacer(modifier = Modifier.height(10.dp))
+      Spacer(modifier = Modifier.height(6.dp))
 
       DshSectionLabel("连接")
       DshSoftPanel {
@@ -610,7 +619,7 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(18.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
       DshSectionLabel("DSH 服务")
       DshSoftPanel {
@@ -635,7 +644,7 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(18.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
       DshSectionLabel("通用设置")
       DshSoftPanel {
@@ -654,7 +663,7 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(18.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
       DshSectionLabel("账户")
       DshSoftPanel {
@@ -665,7 +674,7 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(18.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
       DshSectionLabel("关于")
       DshSoftPanel {
@@ -676,7 +685,7 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(24.dp))
+      Spacer(modifier = Modifier.height(14.dp))
     }
 
   }
