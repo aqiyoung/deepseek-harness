@@ -14,9 +14,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.URLUtil
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -54,23 +52,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -87,14 +76,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -460,7 +447,6 @@ class MainActivity : ComponentActivity() {
           onNeedLogin = onNeedLogin,
           onFileChoose = onFileChoose,
           onDownload = onDownload,
-          onChangeServer = { showChangeServerDialog() },
         )
         if (showSettings) {
           SettingsOverlay(
@@ -901,14 +887,9 @@ class MainActivity : ComponentActivity() {
     onNeedLogin: (Boolean) -> Unit,
     onFileChoose: (ValueCallback<Array<Uri>>, Intent) -> Unit,
     onDownload: (String, String, String, String) -> Unit,
-    onChangeServer: () -> Unit,
   ) {
     val context = LocalContext.current
     val serverUrl by prefs.serverUrl.collectAsState()
-
-    // ── 网络错误捕获：覆盖 Chrome 默认错误页，给出 native 友好界面 + 重试/切服入口 (v1.0.73) ──
-    var netError by remember { mutableStateOf<NetErrorInfo?>(null) }
-    var retryNonce by remember { mutableStateOf(0) }
 
     val webView = remember {
       WebView(context).apply {
@@ -958,42 +939,9 @@ class MainActivity : ComponentActivity() {
           }
           override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
             webHost = Uri.parse(url).host?.lowercase()
-            // 任何主 frame 导航都清错误 UI（含 retry / 链接点击 / 历史返回），避免残留旧错误文案
-            view.post { netError = null }
           }
           override fun onPageFinished(view: WebView, url: String) {
             CookieManager.getInstance().flush()
-          }
-          /* 网络层错误覆盖 (v1.0.73) — 见 NetErrorOverlay。
-             仅拦截主 frame，iframe/广告子资源失败不打扰。 */
-          override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-            if (!request.isForMainFrame) return
-            val desc = runCatching { error.description?.toString() }.getOrNull().orEmpty()
-            val urlStr = runCatching { request.url?.toString() }.getOrNull().orEmpty()
-            view.post {
-              netError = NetErrorInfo(
-                kind = NetErrorKind.NETWORK,
-                code = error.errorCode,
-                desc = desc,
-                url = urlStr,
-              )
-            }
-          }
-          /* HTTP 4xx/5xx 覆盖。4xx 大多是业务逻辑（未登录/权限）让 web 自己渲染；
-             5xx 是服务器故障，全屏替换为 native 错误页才能让用户明白 + 提供重试入口。 */
-          override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
-            if (!request.isForMainFrame) return
-            if (errorResponse.statusCode < 500) return
-            val urlStr = runCatching { request.url?.toString() }.getOrNull().orEmpty()
-            val reason = runCatching { errorResponse.reasonPhrase }.getOrNull().orEmpty()
-            view.post {
-              netError = NetErrorInfo(
-                kind = NetErrorKind.HTTP,
-                code = errorResponse.statusCode,
-                desc = reason,
-                url = urlStr,
-              )
-            }
           }
         }
         webChromeClient = object : WebChromeClient() {
@@ -1036,9 +984,8 @@ class MainActivity : ComponentActivity() {
       }
     }
 
-    // Cookie 注入 + 加载；服务器地址为空时绝不发起加载。
-    // retryNonce 让"重新连接"按钮通过自增触发本 effect 重跑 (v1.0.73)。
-    LaunchedEffect(serverUrl, retryNonce) {
+    // Cookie 注入 + 加载；服务器地址为空时绝不发起加载
+    LaunchedEffect(serverUrl) {
       if (serverUrl.isBlank()) return@LaunchedEffect
       val ck = prefs.getSessionCookie()
       if (!ck.isNullOrEmpty()) {
@@ -1048,24 +995,10 @@ class MainActivity : ComponentActivity() {
       webView.loadUrl(serverUrl)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-      AndroidView(
-        factory = { webViewRef = webView; webView },
-        modifier = Modifier.fillMaxSize(),
-      )
-      netError?.let { info ->
-        NetErrorOverlay(
-          info = info,
-          onRetry = {
-            netError = null
-            retryNonce += 1
-          },
-          onOpenInBrowser = { openUrlInExternalBrowser(context, info.url) },
-          onChangeServer = onChangeServer,
-          modifier = Modifier.fillMaxSize(),
-        )
-      }
-    }
+    AndroidView(
+      factory = { webViewRef = webView; webView },
+      modifier = Modifier.fillMaxSize(),
+    )
 
     BackHandler(enabled = backEnabled) {
       if (webView.canGoBack()) webView.goBack() else finish()
@@ -1144,160 +1077,6 @@ class MainActivity : ComponentActivity() {
       .setPositiveButton("保存") { _, _ -> applyServerChange(input.text.toString()) }
       .setNegativeButton("取消", null)
       .show()
-  }
-
-  // ── 网络错误覆盖层 (v1.0.73) — 替代 Chrome 默认错误页 ──
-
-  private enum class NetErrorKind { NETWORK, HTTP }
-
-  private data class NetErrorInfo(
-    val kind: NetErrorKind,
-    val code: Int,
-    val desc: String,
-    val url: String,
-  )
-
-  @Composable
-  private fun NetErrorOverlay(
-    info: NetErrorInfo,
-    onRetry: () -> Unit,
-    onOpenInBrowser: () -> Unit,
-    onChangeServer: () -> Unit,
-    modifier: Modifier = Modifier,
-  ) {
-    val colors = DshTheme.colors
-    // 错误码本地化（参照 Chromium chromium/net/base/net_error_list.h & 5xx 常用语义）
-    val (icon, title, hint) = when (info.kind) {
-      NetErrorKind.NETWORK -> when (info.code) {
-        -2 -> Triple(Icons.Filled.Public, "找不到服务器", "无法解析域名，请检查服务器地址是否正确，或检查 DNS 设置")
-        -15, -103 -> Triple(Icons.Filled.CloudOff, "连接超时", "网络不通畅或服务器响应过慢，请稍后重试")
-        -101, -100 -> Triple(Icons.Filled.CloudOff, "连接被中止", "网络不稳定或服务器临时不可达，请稍后重试")
-        -102, -10, -106 -> Triple(Icons.Filled.CloudOff, "无法连接到服务器", "请检查 WiFi / 移动数据是否正常，重试或切换网络后再次尝试")
-        -7, -12, -3 -> Triple(Icons.Filled.Lock, "连接被拒绝", "服务器拒绝连接，可能服务未启动或被防火墙拦截")
-        -8, -11 -> Triple(Icons.Filled.Lock, "SSL/TLS 握手失败", "服务器证书无效或协议不兼容，请联系运维核查证书")
-        else -> Triple(Icons.Filled.CloudOff, "无法连接到服务器", "未知网络错误（${info.code}），请检查网络后重试")
-      }
-      NetErrorKind.HTTP -> Triple(
-        Icons.Filled.CloudOff,
-        "服务器返回错误",
-        "${info.code} ${info.desc.ifBlank { "" }}服务端异常，请稍后重试或联系运维".trim(),
-      )
-    }
-
-    // 拦截触摸事件：避免错误层空白区误触到底层 WebView（Surface 不带 onClick 时不消费指针）
-    Box(
-      modifier = modifier
-        .fillMaxSize()
-        .clickable(enabled = true) { /* swallow touches so they don't pass through to WebView */ },
-      contentAlignment = Alignment.Center,
-    ) {
-      Surface(modifier = Modifier.fillMaxSize(), color = colors.canvas) {
-      Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 36.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Box(
-          modifier = Modifier
-            .size(96.dp)
-            .clip(CircleShape)
-            .background(colors.dangerSoft),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = colors.danger,
-            modifier = Modifier.size(42.dp),
-          )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-          text = title,
-          color = colors.text,
-          style = DshTheme.type.title,
-          textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-          text = hint,
-          color = colors.textMuted,
-          style = DshTheme.type.body,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.padding(horizontal = 8.dp),
-        )
-        if (info.url.isNotBlank()) {
-          Spacer(modifier = Modifier.height(10.dp))
-          Text(
-            text = info.url,
-            color = colors.textSubtle,
-            style = DshTheme.type.caption,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 12.dp),
-          )
-        }
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-          onClick = onRetry,
-          modifier = Modifier.fillMaxWidth().height(48.dp),
-          shape = RoundedCornerShape(12.dp),
-          colors = ButtonDefaults.buttonColors(
-            containerColor = colors.primary,
-            contentColor = colors.primaryText,
-          ),
-          elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
-          contentPadding = PaddingValues(horizontal = 16.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Filled.Refresh,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(text = "重新连接", maxLines = 1, style = DshTheme.type.label)
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        OutlinedButton(
-          onClick = onOpenInBrowser,
-          modifier = Modifier.fillMaxWidth().height(44.dp),
-          shape = RoundedCornerShape(12.dp),
-          enabled = info.url.isNotBlank(),
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(text = "在浏览器中打开", maxLines = 1, style = DshTheme.type.label)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        TextButton(
-          onClick = onChangeServer,
-          modifier = Modifier.fillMaxWidth().height(40.dp),
-        ) {
-          Icon(
-            imageVector = Icons.Filled.SwapHoriz,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-          )
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(text = "切换服务器", maxLines = 1, style = DshTheme.type.label, color = colors.textMuted)
-        }
-      }
-    }
-  }
-
-  private fun openUrlInExternalBrowser(context: Context, url: String) {
-    val u = runCatching { Uri.parse(url) }.getOrNull()
-    if (u == null || u.scheme !in setOf("http", "https")) {
-      Toast.makeText(context, "无法打开此地址", Toast.LENGTH_SHORT).show()
-      return
-    }
-    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, u)) }
-      .onFailure { Toast.makeText(context, "浏览器启动失败", Toast.LENGTH_SHORT).show() }
   }
 
   fun showLicensesDialog() {

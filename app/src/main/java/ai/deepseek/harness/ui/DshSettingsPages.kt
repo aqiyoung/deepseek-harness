@@ -219,6 +219,7 @@ fun PluginsDetailPage(onBack: () -> Unit) {
                 !entry.enabled -> "已停用" to DshStatus.Neutral
                 entry.phase == "active" -> "运行中" to DshStatus.Success
                 entry.phase == "failed" -> "加载失败" to DshStatus.Danger
+                entry.phase == "installed" -> "已安装" to DshStatus.Neutral
                 else -> "加载中" to DshStatus.Warning
               }
               DshStatusPill(text = label, status = status)
@@ -228,7 +229,11 @@ fun PluginsDetailPage(onBack: () -> Unit) {
       }
       Spacer(modifier = Modifier.height(12.dp))
       Text(
-        text = "插件参数（Bash、AgentLoop、WebSearch 等）请到网页端 设置 → 插件 调整。",
+        text = if (entries.any { it.phase == "installed" }) {
+          "当前服务端未提供插件状态接口，以上为服务器首页清单中的插件；参数请到网页端 设置 → 插件 调整。"
+        } else {
+          "插件参数（Bash、AgentLoop、WebSearch 等）请到网页端 设置 → 插件 调整。"
+        },
         style = DshTheme.type.caption,
         color = DshTheme.colors.textSubtle,
         modifier = Modifier.padding(horizontal = 4.dp),

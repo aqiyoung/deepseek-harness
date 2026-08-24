@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v1.0.75 - 2026-08-24
+
+Repackages the v1.0.74 baseline as a clean release build. Includes the redesigned sidebar drawer settings entry (SVG gear + chevron, theme-variable colors, gesture-bar safe-area padding), merged DOM observers, plugin manifest parsing hardening, and the associated unit test.
+
+Fixes the model-picker menu losing its background/border/shadow (orphaned CSS fragment) and the sidebar drawer sticking open after opening native settings from its bottom entry (collapse now goes through the adapter so inline styles are restored). Redesigns that entry: SVG gear + chevron, theme-variable colors, gesture-bar safe-area padding, merged DOM observers for less main-thread churn.
+
+
 Recovers gracefully from the 12-hour server session expiry: expired sessions no longer surface as "response parse failed" in native settings (the nginx login redirect is detected, not followed), errors carry actionable messages with RPC codes, and the app automatically returns to the login screen instead of appearing logged-in while every request fails.
 
 Hardens credential handling end-to-end: switching servers clears the previous session cookie before it can leak cross-origin, server URLs must be https, intent:// navigation is sanitized, and degraded encrypted storage never persists secrets in plaintext.

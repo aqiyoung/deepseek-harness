@@ -178,6 +178,15 @@ class DshRepo(context: Context) {
   }
 
   suspend fun plugins(): List<DshPluginEntry> =
+    try {
+      pluginsViaRpc()
+    } catch (e: DshApiException) {
+      // 当前服务端版本未提供 pluginInventory.list（HTTP 404）：
+      // 降级为解析首页内嵌的插件清单，保证插件页可用。
+      if (e.code == "transport") pluginsFromManifest() else throw e
+    }
+
+  private suspend fun pluginsViaRpc(): List<DshPluginEntry> =
     call("pluginInventory.list").expectObj().arr("entries").orEmpty()
       .mapNotNull { it as? JsonObject }
       .map { o ->
@@ -187,6 +196,22 @@ class DshRepo(context: Context) {
           phase = o.str("fiberPhase"),
         )
       }
+
+  /** 拉取应用首页并解析其中内嵌的插件清单（{"id":..,"url":..,"rev":..} 条目）。 */
+  private suspend fun pluginsFromManifest(): List<DshPluginEntry> =
+    withContext(Dispatchers.IO) {
+      val base = prefs.serverUrl.value.trimEnd('/')
+      if (base.isEmpty()) throw DshApiException("config", "尚未配置服务器地址")
+      val url = "$base/"
+      val req = Request.Builder().url(url)
+        .header("Cookie", CookieManager.getInstance().getCookie(url) ?: "")
+        .build()
+      http.newCall(req).execute().use { resp ->
+        if (!resp.isSuccessful) throw DshApiException("transport", "HTTP ${resp.code}")
+        val html = resp.body?.string().orEmpty()
+        parsePluginManifest(html)
+      }
+    }
 
   suspend fun presets(): List<DshPresetEntry> =
     call("agentPreset.list").expectObj().arr("presets").orEmpty()
@@ -235,6 +260,28 @@ class DshRepo(context: Context) {
       false
     }
   }
+}
+
+/**
+ * 从应用首页 HTML 解析内嵌的插件清单条目。
+ * 形状：{"id":"@scope/name 或 plain-id","url":"/plugins/.../client.js?rev=..","rev":".."}
+ * 基础设施类插件（client runtime/hmr、api 网关等）不在原生设置中展示。
+ */
+internal fun parsePluginManifest(html: String): List<DshPluginEntry> {
+  val entryRegex = Regex("""\{"id":"([^"]+)","url":"([^"]*)"[^}]*\}""")
+  val infraRegex = Regex("(dsh-client-|typert-registry|api-gateway|api-remotes|client-hmr)")
+  return entryRegex.findAll(html)
+    .mapNotNull { m ->
+      val id = m.groupValues[1]
+      val url = m.groupValues[2]
+      if (!url.contains("/plugins/") && !url.contains("client.js")) return@mapNotNull null
+      if (infraRegex.containsMatchIn(id)) return@mapNotNull null
+      val shortName = id.substringAfterLast('/').ifBlank { id }
+      DshPluginEntry(name = shortName, enabled = true, phase = "installed")
+    }
+    .toList()
+    .distinctBy { it.name }
+    .sortedBy { it.name.lowercase() }
 }
 
 /** 纯解析逻辑，供 JVM 单测直接覆盖（不触网、不依赖 Android）。 */
