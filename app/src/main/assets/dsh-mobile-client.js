@@ -6,6 +6,7 @@ window.__ModuleLoader__.load({
   id: "dsh-web-ui-mobile",
   factory: function(require) {
     var MOBILE_READY = false;
+    var ADAPTER_THINKS_OPEN = false;
     var DRILL_BOUND = false;
     var AUTO_CLOSE_BOUND = false;
     var SHELL_OBSERVERS_BOUND = false;
@@ -270,9 +271,16 @@ window.__ModuleLoader__.load({
       if (!sb) return;
       var opening = sb.classList.contains("hHd-Xa_collapsed");
       var tgl = sb.querySelector('.hHd-Xa_toggle');
-      if (!tgl) return;
-      try { tgl.click(); } catch(e) {}
+      if (tgl) {
+        try { tgl.click(); } catch(e) {}
+      } else {
+        /* 官方 toggle 不存在（后端换版本导致 .hHd-Xa_toggle hash 变化）时，
+           手动切换折叠类，保证侧边栏仍能展开/收起。 */
+        if (opening) sb.classList.remove("hHd-Xa_collapsed");
+        else sb.classList.add("hHd-Xa_collapsed");
+      }
       if (opening) {
+        ADAPTER_THINKS_OPEN = true;
         /* 轮询等待 App 真正展开（替代固定 60ms 与动画竞速），上限 ~1.2s */
         var waits = 0;
         var iv = setInterval(function() {
@@ -289,6 +297,7 @@ window.__ModuleLoader__.load({
           }
         }, 50);
       } else {
+        ADAPTER_THINKS_OPEN = false;
         clearDrawerStyles(sb);
       }
       syncOverlay(opening);
@@ -519,12 +528,14 @@ window.__ModuleLoader__.load({
         requestAnimationFrame(function() {
           pending = false;
           try {
-            /* 外部收起防线：若侧边栏被 App/键盘 Esc 直接加上 hHd-Xa_collapsed，
-               但我们还保留着展开态快照（DRAWER_SNAPSHOTS 非空），说明这次折叠
-               绕过了我们的 doToggle → 内联样式会泄漏。此处立即清理，避免抽屉
-               以展开态卡在页面上（CSS .hHd-Xa_collapsed 因内联 !important 压不住）。 */
+            /* 外部收起防线：只有当适配器自认为抽屉处于打开态（ADAPTER_THINKS_OPEN）
+               且快照非空、而侧边栏又被 App/键盘直接折叠（hHd-Xa_collapsed）时，
+               才判定为"绕过 doToggle 的外部折叠"并清理泄漏的内联样式。用显式
+               标志区分"打开中间态（tgl.click 已移除类、快照尚未非空）"和
+               "真的外部折叠"，避免在打开流程中误判清理。 */
             var sb = findSidebar();
-            if (sb && DRAWER_SNAPSHOTS && sb.classList.contains('hHd-Xa_collapsed')) {
+            if (sb && ADAPTER_THINKS_OPEN && DRAWER_SNAPSHOTS && sb.classList.contains('hHd-Xa_collapsed')) {
+              ADAPTER_THINKS_OPEN = false;
               syncOverlay(false);
               clearDrawerStyles(sb);
             }

@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.URLUtil
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -44,6 +45,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import java.util.Locale
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -943,6 +945,25 @@ class MainActivity : ComponentActivity() {
           override fun onPageFinished(view: WebView, url: String) {
             CookieManager.getInstance().flush()
           }
+
+          override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+            if (!isFatalNetworkError(error)) return
+            if (request.isForMainFrame == false) return
+            val isZh = Locale.getDefault().language.startsWith("zh")
+            val html = buildOfflinePage(isZh, isServiceUnavailable = false, BuildConfig.VERSION_NAME)
+            view.loadDataWithBaseURL("about:blank", html, "text/html", "utf-8", null)
+          }
+
+          override fun onReceivedHttpError(
+            view: WebView, request: WebResourceRequest,
+            errorResponse: android.webkit.WebResourceResponse,
+          ) {
+            if (errorResponse.statusCode !in 502..504) return
+            if (request.isForMainFrame == false) return
+            val isZh = Locale.getDefault().language.startsWith("zh")
+            val html = buildOfflinePage(isZh, isServiceUnavailable = true, BuildConfig.VERSION_NAME)
+            view.loadDataWithBaseURL("about:blank", html, "text/html", "utf-8", null)
+          }
         }
         webChromeClient = object : WebChromeClient() {
           override fun onShowFileChooser(
@@ -1138,4 +1159,103 @@ class MainActivity : ComponentActivity() {
     fun openAppSettings() { if (gated()) runOnUiThread { settingsOpenTick.value += 1 } }
 
   }
+
+private fun isFatalNetworkError(error: WebResourceError): Boolean {
+  // android.webkit.WebResourceError 常量在 SDK 里不可见，改用字面量
+  return error.errorCode == -2 ||   // ERROR_HOST_LOOKUP
+    error.errorCode == -3 ||        // ERROR_IO
+    error.errorCode == -4 ||        // ERROR_TIMEOUT
+    error.errorCode == -28 ||       // ERROR_FAILED
+    error.errorCode == -12 ||       // ERROR_SSL
+    error.errorCode == -13          // ERROR_BAD_URL
+}
+
+private fun buildOfflinePage(isZh: Boolean, isServiceUnavailable: Boolean, version: String): String {
+  val (title, subtitle, hint) = if (isZh) {
+    if (isServiceUnavailable) {
+      Triple("\u670D\u52A1\u5668\u65F6\u671F\u4E0D\u53EF\u7528",
+        "\u76EE\u6807\u670D\u52A1\u5668\u8FD4\u56DE\u4E86\u670D\u52A1\u7AEF\u9519\u8BE5\uFF085xx\uFF09\uFF0C\u8BF7\u7A0D\u540E\u518D\u8BD5\u3002",
+        "\u70B9\u51FB\u91CD\u8BD5")
+    } else {
+      Triple("\u65E0\u6CD5\u8FDE\u63A5\u670D\u52A1\u5668",
+        "\u8BF7\u68C0\u67E5\u7F51\u7EDC\uFF0C\u6216\u786E\u8BA4\u670D\u52A1\u5668\u5730\u5740 ${prefs.serverUrl.value} \u53EF\u8FBE\u3002",
+        "\u70B9\u51FB\u91CD\u8BD5")
+    }
+  } else {
+    if (isServiceUnavailable) {
+      Triple("Server temporarily unavailable",
+        "The target server returned a 5xx error. Please try again later.",
+        "Retry")
+    } else {
+      Triple("Cannot connect to server",
+        "Please check your network or confirm the server address is reachable.",
+        "Retry")
+    }
+  }
+  return """
+<!doctype html>
+<html lang="zh" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);color:var(--fg);transition:background .2s,color .2s}
+@keyframes ping{0%{transform:scale(.8);opacity:.7}80%,100%{transform:scale(1.5);opacity:0}}
+.container{max-width:420px;width:calc(100% - 32px);padding:32px 24px;border-radius:20px;
+  background:var(--card);border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow);
+  text-align:center;animation:rise .35s cubic-bezier(.22,1,.36,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.ring-wrap{position:relative;width:84px;height:84px;margin:0 auto 18px;display:flex;
+  align-items:center;justify-content:center;border-radius:50%;background:var(--ring-bg)}
+.ring-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--fg);opacity:0;
+  animation:ping 2.2s cubic-bezier(0,0,.2,1) infinite}
+.icon{position:relative;width:36px;height:36px;color:var(--fg);opacity:.85}
+.icon svg{width:100%;height:100%;display:block}
+h1{font-size:20px;font-weight:600;line-height:1.4;margin-bottom:10px;letter-spacing:-.01em}
+p{font-size:14px;line-height:1.6;color:var(--muted);margin-bottom:18px}
+.address{font-size:12px;color:var(--muted);opacity:.75;word-break:break-all;margin-bottom:22px}
+.retry{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;
+  border:1px solid var(--border);background:var(--btn-bg);color:var(--btn-fg);font-size:14px;
+  font-weight:500;cursor:pointer;transition:transform .1s,background .15s;-webkit-tap-highlight-color:transparent}
+.retry:active{transform:scale(.97);background:var(--btn-press)}
+.retry .arrow{width:16px;height:16px}
+.footer{margin-top:22px;padding-top:16px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);opacity:.7;letter-spacing:.02em}
+:root{--bg:#f5f5f7;--fg:#1d1d1f;--muted:#6e6e73;--card:#fff;--border:#e5e5ea;
+  --shadow:rgba(0,0,0,.06);--ring-bg:#f0f0f5;--btn-bg:#f0f0f5;--btn-fg:#1d1d1f;--btn-press:#e5e5ea}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--fg:#f5f5f7;--muted:#a1a1a6;
+  --card:#1c1c1e;--border:#38383a;--shadow:rgba(0,0,0,.4);--ring-bg:#2c2c2e;
+  --btn-bg:#2c2c2e;--btn-fg:#f5f5f7;--btn-press:#3a3a3c}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="ring-wrap">
+    <span class="ring-pulse"></span>
+    <span class="icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+        <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12" y2="20"/>
+      </svg>
+    </span>
+  </div>
+  <h1>$title</h1>
+  <p>$subtitle</p>
+  <div class="address">${prefs.serverUrl.value}</div>
+  <button class="retry" onclick="window.DshAppBridge.refreshPage()">
+    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20 4H7a5 5 0 0 0-4.6 7L1 14h3l.5 4L4 14"/></svg></span>
+    $hint
+  </button>
+  <div class="footer">DeepSeek Harness Android v$version</div>
+</div>
+</body>
+</html>
+""".trimIndent()
+}
 }

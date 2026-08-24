@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+Replaces the ugly Chrome default offline page (ERR_ADDRESS_UNREACHABLE) with a self-contained native overlay: centered card, animated ring icon, server address, dark/light theme, and a retry button that calls DshAppBridge.refreshPage(). Triggered from onReceivedError (network failures) and onReceivedHttpError (5xx). Also fixes the sidebar drawer open/close race (external-collapse safety net mis-firing during the adapter's own open flow) and makes doToggle survive a missing .hHd-Xa_toggle element.
+
+Fixes a race where the external-collapse safety net mis-fired during the
+sidebar's own open flow (styles applied then immediately cleared, leaving
+the drawer stuck closed). Gates the check on an explicit ADAPTER_THINKS_OPEN
+flag so only true external collapses (App/Esc folding the rail while the
+adapter thinks it is open) trigger cleanup. Also makes doToggle survive a
+missing .hHd-Xa_toggle element (backend hash churn) by falling back to
+directly toggling the hHd-Xa_collapsed class.
+
 Adds an external-collapse safety net for the sidebar: if the app or keyboard Esc toggles the rail closed outside the adapter's own toggle path, open-state inline styles would leak and the drawer would stick open on top of the content (CSS can't override inline !important). The merged shell observer now detects this mismatch on each DOM change and clears the styles. Removes a stale comment about the gear icon being in the logo row.
 
 ## v1.0.75 - 2026-08-24
