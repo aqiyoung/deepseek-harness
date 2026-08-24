@@ -33,7 +33,7 @@ window.__ModuleLoader__.load({
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
         /* 侧边栏顶部 logoRow：恢复官方 logo + "DeepSeek Harness" 标题显示 (v1.0.70)
-           齿轮入口继续注入到 logoRow 行尾 (见 setupSidebar) */
+           原生设置入口位于侧边栏底部 .dsh-native-settings-entry (见下方) */
         /* newSession 大按钮仍隐藏 (头部 logoRow 已是入口区，不再叠加新会话块) */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
           "display:none !important;",
@@ -519,6 +519,15 @@ window.__ModuleLoader__.load({
         requestAnimationFrame(function() {
           pending = false;
           try {
+            /* 外部收起防线：若侧边栏被 App/键盘 Esc 直接加上 hHd-Xa_collapsed，
+               但我们还保留着展开态快照（DRAWER_SNAPSHOTS 非空），说明这次折叠
+               绕过了我们的 doToggle → 内联样式会泄漏。此处立即清理，避免抽屉
+               以展开态卡在页面上（CSS .hHd-Xa_collapsed 因内联 !important 压不住）。 */
+            var sb = findSidebar();
+            if (sb && DRAWER_SNAPSHOTS && sb.classList.contains('hHd-Xa_collapsed')) {
+              syncOverlay(false);
+              clearDrawerStyles(sb);
+            }
             injectSidebarSettingsEntry();
             injectAppSection();
             /* 设置弹窗打开期间隐藏整个抽屉，避免列表压在弹窗上拦截触摸 */

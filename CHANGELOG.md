@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Adds an external-collapse safety net for the sidebar: if the app or keyboard Esc toggles the rail closed outside the adapter's own toggle path, open-state inline styles would leak and the drawer would stick open on top of the content (CSS can't override inline !important). The merged shell observer now detects this mismatch on each DOM change and clears the styles. Removes a stale comment about the gear icon being in the logo row.
+
 ## v1.0.75 - 2026-08-24
 
 Repackages the v1.0.74 baseline as a clean release build. Includes the redesigned sidebar drawer settings entry (SVG gear + chevron, theme-variable colors, gesture-bar safe-area padding), merged DOM observers, plugin manifest parsing hardening, and the associated unit test.
