@@ -541,7 +541,6 @@ class MainActivity : ComponentActivity() {
         runCatching { (application as NodeApp).dsh.ping() }.getOrDefault(false)
       }
     }
-    var showExitConfirm by remember { mutableStateOf(false) }
 
     // DSH 服务摘要（当前模型 / 插件启用数 / 默认预设），失败静默显示 "-"
     data class DshSummary(val model: String, val plugins: String, val preset: String)
@@ -670,34 +669,9 @@ class MainActivity : ComponentActivity() {
         }
       }
 
-      Spacer(modifier = Modifier.height(18.dp))
-
-      DshSectionLabel("应用")
-      DshSoftPanel {
-        Column {
-          DshSettingsRow(title = "退出app", danger = true, onClick = { showExitConfirm = true })
-        }
-      }
-
       Spacer(modifier = Modifier.height(24.dp))
     }
 
-    if (showExitConfirm) {
-      AlertDialog(
-        onDismissRequest = { showExitConfirm = false },
-        title = { Text("退出应用") },
-        text = { Text("将关闭 DeepSeek Harness。") },
-        confirmButton = {
-          TextButton(onClick = {
-            showExitConfirm = false
-            finishAffinity()
-          }) { Text("退出", color = DshTheme.colors.danger) }
-        },
-        dismissButton = {
-          TextButton(onClick = { showExitConfirm = false }) { Text("取消") }
-        },
-      )
-    }
   }
 
   @Composable
