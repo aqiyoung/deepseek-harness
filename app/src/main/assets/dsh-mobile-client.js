@@ -33,11 +33,9 @@ window.__ModuleLoader__.load({
           "box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;",
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
-        /* 侧边栏顶部 logoRow(v1.0.67 重新隐藏, 改为纯入口列表; logoRow 改为 dsh-side-gear 齿轮调原生设置) */
-        ".dsh-mobile-active .hHd-Xa_root .hHd-Xa_logoRow{",
-          "display:none !important;",
-        "}",
-        /* newSession 大按钮仍隐藏 (侧边栏头部整段无内容) */
+        /* 侧边栏顶部 logoRow：恢复官方 logo + "DeepSeek Harness" 标题显示 (v1.0.70)
+           齿轮入口继续注入到 logoRow 行尾 (见 setupSidebar) */
+        /* newSession 大按钮仍隐藏 (头部 logoRow 已是入口区，不再叠加新会话块) */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
           "display:none !important;",
         "}",
@@ -688,29 +686,51 @@ window.__ModuleLoader__.load({
                                                                       document.head.appendChild(st);
     }
 
-    /* 把 URL 面包屑放到「会话标题」(对话/轨迹) tab 行最左侧, 同时隐藏整个原面包屑行
-   (产品要求 v1.0.67) — 删除顶栏/侧边栏顶栏后, 原面包屑整行变成噪声 */
+/* 把 URL 面包屑放到「会话标题」(对话/轨迹) tab 行最左侧, 同时**整体隐藏原面包屑行**
+       再在 tabBar 左侧**合成一个新的、唯一的** URL 节点 (.dsh-url-leaf).
+       旧算法搬运 DOM 节点会被 React 重渲染/多兄弟节点污染 — tabBar 内出现 N 个截断
+       的 http... 副本就是它的副作用 (v1.0.67 引入).  v1.0.70 改为"隐藏+合成", 幂等. */
+    function _dshFindUrlAnchor() {
+      /* 从原面包屑或整页 DOM 抓一个可见的 https:// 文本作为参考 (用于合成新节点的 fallback) */
+      var all = document.querySelectorAll("*");
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        if (el.children.length !== 0) continue;
+        var tx = (el.textContent || "").trim();
+        if (/^https?:\/\/[^\s]+/.test(tx) && el.offsetParent !== null) {
+          return tx.length > 48 ? tx.substring(0, 45) + "…" : tx;
+        }
+      }
+      return null;
+    }
+    function _dshHideOriginalBreadcrumb() {
+      /* 整体隐藏原面包屑行: 含 session log 但已不含 https:// 的最具体祖先
+         (因为我们已经把所有 https:// 节点*隐藏*在父级 display:none 里) */
+      var btns = document.querySelectorAll("button, a, [role=\"button\"]");
+      var sl = null;
+      for (var k = 0; k < btns.length; k++) {
+        var t2 = (btns[k].textContent || "").trim().toLowerCase();
+        if (t2.indexOf("session log") >= 0) { sl = btns[k]; break; }
+      }
+      if (!sl) return;
+      var p = sl.parentElement;
+      var hop = 0;
+      while (p && p !== document.body && hop++ < 8) {
+        var txt = (p.textContent || "").trim();
+        /* 只有当 session log 文本所在的祖先**已经被我们隐藏过整行**才停止, 否则继续向上找.
+           利用 dataset 标记避免重复隐藏后再次撞到原节点. */
+        if (p.dataset && p.dataset.dshBreadcrumbHidden === "1") return;
+        if (/session\s*log/i.test(txt) && p.children.length > 0 && p.children.length <= 12) {
+          p.style.setProperty("display", "none", "important");
+          try { p.dataset.dshBreadcrumbHidden = "1"; } catch (e) {}
+          return;
+        }
+        p = p.parentElement;
+      }
+    }
     function alignUrlToSessionTitle() {
       try {
-        // 1) 找 URL 叶子 (textContent starts with https://)
-        var urlEl = null;
-        var all = document.querySelectorAll("*");
-        for (var i = 0; i < all.length; i++) {
-          var el = all[i];
-          var tx = (el.textContent || "").trim();
-          if (tx.indexOf("https://") === 0 && el.children.length === 0) { urlEl = el; break; }
-        }
-        if (!urlEl) return false;
-
-        // 2) 找 Session log 按钮 (用于定位原面包屑行)
-        var btns = document.querySelectorAll("button, a, [role=\"button\"]");
-        var sl = null;
-        for (var k = 0; k < btns.length; k++) {
-          var t2 = (btns[k].textContent || "").trim().toLowerCase();
-          if (t2.indexOf("session log") >= 0) { sl = btns[k]; break; }
-        }
-
-        // 3) 找 tab (对话 / 轨迹) — 取第一个精确匹配的容器
+        /* 1) 找 tab (对话 / 轨迹) — 必须是**精确**文本的容器, 取其父链作为 tabBar */
         var tabEl = null;
         var cand = document.querySelectorAll("button, a, [role=\"tab\"], div, span, li");
         for (var j = 0; j < cand.length; j++) {
@@ -720,39 +740,50 @@ window.__ModuleLoader__.load({
         if (!tabEl || !tabEl.parentElement) return false;
         var tabBar = tabEl.parentElement;
 
-        // 4) 移动 URL 到 tabBar 最左 (idempotent)
+        /* 2) 清理上一次合成的 URL 节点 + 隐藏原面包屑行 (幂等) */
+        var stale = tabBar.querySelectorAll(".dsh-url-leaf");
+        for (var s = 0; s < stale.length; s++) {
+          try { stale[s].parentNode.removeChild(stale[s]); } catch (e) {}
+        }
+        _dshHideOriginalBreadcrumb();
+
+        /* 3) 合成一个新的、唯一的 URL 节点插到 tabBar 最左侧.
+           内容来源优先级:
+           a) window.location.origin (WebView 加载的就是官方服务器)
+           b) DOM 中搜到的 https:// 文本 */
+        var origin = "";
+        try { origin = (window.location && window.location.origin) ? window.location.origin : ""; } catch (e) {}
+        var text = origin && /^https?:\/\//.test(origin)
+          ? origin
+          : (_dshFindUrlAnchor() || "");
+        if (!text) return false;
+
+        var leaf = document.createElement("div");
+        leaf.className = "dsh-url-leaf";
+        leaf.textContent = text;
+        leaf.style.cssText = [
+          "order:-1",
+          "flex:1 1 auto",
+          "min-width:0",
+          "max-width:60%",
+          "overflow:hidden",
+          "text-overflow:ellipsis",
+          "white-space:nowrap",
+          "font-size:13px",
+          "color:var(--dsw-alias-text-muted,#8a8f98)",
+          "padding:0 6px",
+          "user-select:none",
+          "-webkit-user-select:none",
+        ].join(";");
         try {
-          if (urlEl.parentElement !== tabBar || tabBar.firstChild !== urlEl) {
-            tabBar.insertBefore(urlEl, tabBar.firstChild);
-          }
+          tabBar.insertBefore(leaf, tabBar.firstChild);
         } catch (e) { return false; }
 
-        // 5) 隐藏原面包屑行 (找 Session log 父链里, 含 session log 但 URL 已不在的最具体祖先)
-        if (sl) {
-          var origRow = null;
-          var p = sl.parentElement;
-          var hop = 0;
-          while (p && p !== document.body && hop++ < 8) {
-            var txt = (p.textContent || "").trim();
-            if (txt.indexOf("https://") < 0 && /session\s*log/i.test(txt)) {
-              if (p.children.length > 0 && p.children.length <= 8) { origRow = p; break; }
-            }
-            p = p.parentElement;
-          }
-          if (origRow) origRow.style.setProperty("display", "none", "important");
-        }
-
-        // 6) tabBar flex 布局, URL order:-1 占左侧 (截图显示成单行: URL + 对话 + 轨迹)
+        /* 4) tabBar flex 布局对齐 */
         var cs = window.getComputedStyle(tabBar);
         if (cs.display !== "flex" && cs.display !== "inline-flex") tabBar.style.display = "flex";
         tabBar.style.alignItems = "center";
         tabBar.style.gap = "8px";
-        urlEl.style.order = "-1";
-        urlEl.style.flex = "1 1 auto";
-        urlEl.style.minWidth = "0";
-        urlEl.style.overflow = "hidden";
-        urlEl.style.textOverflow = "ellipsis";
-        urlEl.style.whiteSpace = "nowrap";
         return true;
       } catch (e) { return false; }
     }
