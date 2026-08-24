@@ -449,12 +449,6 @@ class MainActivity : ComponentActivity() {
             contentDescription = "打开会话列表",
             onClick = { toggleWebSidebar() },
           )
-          Spacer(modifier = Modifier.weight(1f))
-          DshPlainIconButton(
-            icon = Icons.Default.Settings,
-            contentDescription = "设置",
-            onClick = { settingsOpenTick.value += 1 },
-          )
         }
       }
 

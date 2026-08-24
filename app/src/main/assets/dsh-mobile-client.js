@@ -32,15 +32,12 @@ window.__ModuleLoader__.load({
           "box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;",
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
-        /* logoRow（logo+标题）按产品要求整体隐藏；设置入口在原生顶栏齿轮 */
+        /* 恢复官方侧边栏 logoRow（logo+标题）显示；newSession 大按钮隐藏，改用 logoRow 作为侧边栏头部 */
         ".dsh-mobile-active .hHd-Xa_root .hHd-Xa_logoRow{",
-          "display:none !important;",
+          "display:flex !important;",
         "}",
-        /* newSession 按钮展开 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
-          "width:100% !important;display:flex !important;align-items:center !important;",
-          "justify-content:center !important;padding:12px 16px !important;",
-          "margin:4px 8px !important;box-sizing:border-box !important;",
+          "display:none !important;",
         "}",
         /* 入口按钮展开 + 显示文字标签 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=entry]{",
@@ -325,12 +322,24 @@ window.__ModuleLoader__.load({
       }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
       sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
-      /* 官方 logoRow（logo + 标题）按需求隐藏，设置入口在原生顶栏齿轮 */
-      /* newSession 按钮展开 */
-      var ns = sb.querySelector('.hHd-Xa_newSession');
-      if (ns) {
-        ns.style.cssText = "width:100% !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:12px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;";
+      /* 官方 logoRow（logo+标题）恢复显示 + 注入原生设置齿轮（顶栏齿轮已移除，设置入口下移到侧边栏头部） */
+      var lr = sb.querySelector('.hHd-Xa_logoRow');
+      if (lr) {
+        if (!lr.querySelector('.dsh-side-gear')) {
+          var g = document.createElement('button');
+          g.type = 'button';
+          g.className = 'dsh-side-gear';
+          g.setAttribute('aria-label', '打开原生设置');
+          g.textContent = '\u2699';
+          g.style.cssText = 'width:34px;height:34px;border-radius:17px;border:none;background:transparent;color:inherit;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;';
+          g.addEventListener('click', function(e) {
+            e.stopPropagation();
+            try { if (window.DshAppBridge && window.DshAppBridge.openAppSettings) window.DshAppBridge.openAppSettings(); } catch (err) {}
+          });
+          lr.appendChild(g);
+        }
       }
+      /* newSession 大按钮已用 CSS 隐藏，不再注入内联展开样式 */
       /* 入口按钮：图标+文字横排 */
       var entries = sb.querySelectorAll('[class$=_entry]');
       for (var i = 0; i < entries.length; i++) {
@@ -601,7 +610,6 @@ window.__ModuleLoader__.load({
       var st = document.createElement("style");
       st.id = "dsh-shell-css";
       st.textContent =
-        ".dsh-mobile-active .hHd-Xa_logoRow{display:none !important}" +
         ".dsh-mobile-active .hHd-Xa_settingsArea{display:none !important}" +
         ".dsh-mobile-active .hHd-Xa_footArea,.dsh-mobile-active .hHd-Xa_footerActions{display:none !important}";
                                                                       document.head.appendChild(st);
