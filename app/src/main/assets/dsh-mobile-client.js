@@ -615,6 +615,55 @@ window.__ModuleLoader__.load({
                                                                       document.head.appendChild(st);
     }
 
+    /* 把 URL 面包屑放到 Session log 按钮所在行的最左侧（产品要求） */
+    function alignUrlAndSessionLog() {
+      try {
+        var btns = document.querySelectorAll('button, a, [role="button"]');
+        var sl = null;
+        for (var i = 0; i < btns.length; i++) {
+          var t = (btns[i].textContent || '').trim().toLowerCase();
+          if (t.indexOf('session log') >= 0) { sl = btns[i]; break; }
+        }
+        if (!sl || !sl.parentElement) return false;
+        var all = document.querySelectorAll('*');
+        var urlEl = null;
+        for (var j = 0; j < all.length; j++) {
+          var el = all[j];
+          var tx = (el.textContent || '').trim();
+          if (tx.indexOf('https://') === 0 && el.children.length === 0) { urlEl = el; break; }
+        }
+        if (!urlEl || urlEl === sl) return false;
+        var parent = sl.parentElement;
+        if (urlEl.parentElement !== parent) {
+          try { parent.insertBefore(urlEl, sl); } catch (e) { return false; }
+        }
+        parent.style.display = 'flex';
+        parent.style.alignItems = 'center';
+        parent.style.gap = '8px';
+        if (!parent.style.minHeight) parent.style.minHeight = '44px';
+        urlEl.style.order = '-1';
+        urlEl.style.flex = '1 1 auto';
+        urlEl.style.minWidth = '0';
+        urlEl.style.overflow = 'hidden';
+        urlEl.style.textOverflow = 'ellipsis';
+        urlEl.style.whiteSpace = 'nowrap';
+        sl.style.order = '0';
+        sl.style.flex = '0 0 auto';
+        return true;
+      } catch (e) { return false; }
+    }
+    /* 持续观察 DOM 变化，应对官方重渲染/切对话时回弹（debounce 500ms） */
+    var _tbTimer = null;
+    var _tbObserver = null;
+    function startToolbarObserver() {
+      if (_tbObserver || typeof MutationObserver === "undefined") return;
+      _tbObserver = new MutationObserver(function() {
+        if (_tbTimer) return;
+        _tbTimer = setTimeout(function() { _tbTimer = null; alignUrlAndSessionLog(); }, 500);
+      });
+      _tbObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    }
+
     var INIT_TRIES = 0;
     var INIT_MAX_TRIES = 24; /* 约 12 秒后放弃，避免登录页等无侧边栏场景常驻定时器耗电；后续靠 MutationObserver 恢复 */
     function init() {
@@ -641,6 +690,7 @@ window.__ModuleLoader__.load({
         console.error("[dsh-mobile] init error:", e);
       }
       MOBILE_READY = true;
+      try { alignUrlAndSessionLog(); startToolbarObserver(); } catch (e) {}
       window.__DSH_MOBILE__ = { initialized: true, toggle: function() { doToggle(findSidebar()); } };
     }
 
