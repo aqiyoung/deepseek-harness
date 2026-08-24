@@ -106,4 +106,8 @@ dependencies {
 
   implementation(libs.androidx.security.crypto)
   implementation(libs.okhttp)
+
+  testImplementation(libs.junit)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.mockwebserver)
 }
