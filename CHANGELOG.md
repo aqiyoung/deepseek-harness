@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+Hardens credential handling end-to-end: switching servers clears the previous session cookie before it can leak cross-origin, server URLs must be https, intent:// navigation is sanitized, and degraded encrypted storage never persists secrets in plaintext.
+
+Fixes stale session reuse after logout or server switch, concurrent duplicate session creation, control-character handling in login requests, false session-expiry detection, lost file-picker callbacks, WebView background playback drain, empty licenses page, language switching not applying, fake connection status, and JS adapter polling/observer overhead.
+
+
 ## 2026.7.4 - 2026-07-30
 
 Adds inline audio/video playback and uploads, session dashboards, run telemetry, chat rewind/fork, a Settings repair assistant, and Wear instant Talk.
