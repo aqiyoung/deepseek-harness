@@ -9,6 +9,7 @@ window.__ModuleLoader__.load({
     var DRILL_BOUND = false;
     var AUTO_CLOSE_BOUND = false;
     var APP_SECTION_BOUND = false;
+    var SIDEBAR_ENTRY_BOUND = false;
 
     function injectCss() {
       if (document.getElementById("dsh-mobile-css")) return;
@@ -552,6 +553,77 @@ window.__ModuleLoader__.load({
       observer.observe(document.body, { childList: true, subtree: true });
     }
 
+    /* v1.0.68: 侧边栏底部固定一行「原生设置」入口, 调 DshAppBridge.openAppSettings()
+       打开原生设置覆盖层（联机状态 / 退出app / 退出登录）。 */
+    function injectSidebarSettingsEntry() {
+      var sb = findSidebar();
+      if (!sb || !window.DshAppBridge) return;
+      if (sb.querySelector('.dsh-native-settings-entry')) return;
+      var entry = document.createElement('div');
+      entry.className = 'dsh-native-settings-entry';
+      entry.style.cssText =
+        'border-top:1px solid rgba(127,127,127,0.25);padding:14px;' +
+        'display:flex;align-items:center;gap:10px;cursor:pointer;' +
+        'flex:0 0 auto;min-height:48px;box-sizing:border-box;' +
+        '-webkit-tap-highlight-color:transparent;';
+      entry.innerHTML =
+        '<span style="font-size:18px;line-height:1;">⚙\uFE0F</span>' +
+        '<span style="font-size:14px;color:var(--dsw-alias-label-primary,#111);">原生设置</span>';
+      entry.addEventListener('mouseenter', function() { entry.style.background = 'rgba(127,127,127,0.12)'; });
+      entry.addEventListener('mouseleave', function() { entry.style.background = 'transparent'; });
+      var lock = false;
+      function fire() {
+        if (lock) return;
+        lock = true;
+        try {
+          /* 先收起抽屉再开原生设置, 避免抽屉叠在覆盖层上拦截触摸 */
+          var cur = findSidebar();
+          if (cur && !cur.classList.contains('hHd-Xa_collapsed')) {
+            var t = cur.querySelector('.hHd-Xa_toggle');
+            if (t) try { t.click(); } catch (e) {}
+          }
+          if (window.DshAppBridge && window.DshAppBridge.openAppSettings) {
+            window.DshAppBridge.openAppSettings();
+          }
+        } catch (err) {}
+        setTimeout(function() { lock = false; }, 350);
+      }
+      entry.addEventListener('click', function(e) { e.preventDefault(); fire(); });
+      entry.addEventListener('touchend', function(e) { e.preventDefault(); fire(); }, { passive: false });
+      /* 插到 regionArea 之后 (最靠近底部的可见区域), 不动 footArea/settingsArea DOM 顺序 */
+      var region = sb.querySelector('.hHd-Xa_regionArea');
+      if (region && region.parentElement === sb) {
+        var insertBefore = null;
+        var n = region.nextSibling;
+        while (n) {
+          if (n.nodeType === 1 && n.classList && (n.classList.contains('hHd-Xa_footArea') || n.classList.contains('hHd-Xa_settingsArea'))) {
+            insertBefore = n;
+            break;
+          }
+          n = n.nextSibling;
+        }
+        if (insertBefore) sb.insertBefore(entry, insertBefore);
+        else sb.appendChild(entry);
+      } else {
+        sb.appendChild(entry);
+      }
+    }
+    function bindSidebarSettingsEntry() {
+      if (SIDEBAR_ENTRY_BOUND) return;
+      SIDEBAR_ENTRY_BOUND = true;
+      try { injectSidebarSettingsEntry(); } catch (e) {}
+      var pending = false;
+      var observer = new MutationObserver(function() {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(function() {
+          pending = false;
+          try { injectSidebarSettingsEntry(); } catch (e) {}
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
     /* 抽屉打开时，点击会话行/新建会话后自动收起抽屉（跳转由 App 原生处理） */
     function bindDrawerAutoClose() {
       if (AUTO_CLOSE_BOUND) return;
@@ -718,6 +790,7 @@ window.__ModuleLoader__.load({
         bindModelMenuDrill();
         bindDrawerAutoClose();
         bindAppSettingsSection();
+        bindSidebarSettingsEntry();
       } catch (e) {
         console.error("[dsh-mobile] init error:", e);
       }
