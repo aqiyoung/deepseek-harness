@@ -158,6 +158,11 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    // 会话过期（RPC 遇到 302/401/403）时自动回到登录页，避免设置页停留在"已登录但报错"的状态。
+    (application as NodeApp).dsh.onUnauthorized = {
+      runOnUiThread { if (loggedInState.value == true) performLogout(expired = true) }
+    }
+
     if (loggedInState.value == null) {
       val hasCookie = !prefs.getSessionCookie().isNullOrEmpty()
       loggedInState.value = prefs.isLoggedIn.value && hasCookie

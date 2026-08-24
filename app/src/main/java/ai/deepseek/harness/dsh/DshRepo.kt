@@ -76,8 +76,12 @@ data class DshPresetEntry(
 class DshRepo(context: Context) {
   private val appContext = context.applicationContext
   private val prefs get() = (appContext as NodeApp).prefs
-  private val http = OkHttpClient()
+  private val http = OkHttpClient.Builder().followRedirects(false).build()
   private val json = Json { ignoreUnknownKeys = true }
+
+  /** 会话失效（nginx 302 跳登录 / 401/403）时触发，由宿主登记用于自动回到登录页。 */
+  @Volatile
+  var onUnauthorized: (() -> Unit)? = null
 
   /** 串行化 session.list/create 解析，防止并发首次调用各自创建重复会话。 */
   private val sessionMutex = Mutex()
@@ -90,10 +94,15 @@ class DshRepo(context: Context) {
     cachedSessionId = null
   }
 
+  private fun notifyUnauthorized() {
+    invalidate()
+    try { onUnauthorized?.invoke() } catch (_: Exception) {}
+  }
+
   private suspend fun call(method: String, payload: JsonObject = JsonObject(emptyMap())): JsonElement =
     withContext(Dispatchers.IO) {
       val base = prefs.serverUrl.value.trimEnd('/')
-      require(base.isNotEmpty()) { "server url is empty" }
+      if (base.isEmpty()) throw DshApiException("config", "尚未配置服务器地址")
       val url = "$base/api/$method"
       val body = buildJsonObject {
         put("type", "client-request")
@@ -107,7 +116,18 @@ class DshRepo(context: Context) {
         .build()
       http.newCall(req).execute().use { resp ->
         val text = resp.body?.string().orEmpty()
+        // 会话过期时 nginx 会 302 到 /login（或返回 401/403）。禁止跟随重定向后，
+        // 这里把它们归一化为 unauthorized 并触发宿主登出，而不是把登录页 HTML 当 JSON 解析。
+        if (resp.code in setOf(301, 302, 303, 307, 308, 401, 403)) {
+          notifyUnauthorized()
+          throw DshApiException("unauthorized", "登录已过期，请重新登录")
+        }
         if (!resp.isSuccessful) throw DshApiException("transport", "HTTP ${resp.code}")
+        if (text.trimStart().startsWith("<")) {
+          // 兜底：网关返回了 HTML（登录页/错误页）而非 RPC JSON
+          notifyUnauthorized()
+          throw DshApiException("unauthorized", "登录已过期，请重新登录")
+        }
         val root = runCatching { json.parseToJsonElement(text).expectObj() }
           .getOrElse { throw DshApiException("bad-response", "响应解析失败") }
         val result = root.obj("result") ?: throw DshApiException("bad-response", "响应缺少 result")

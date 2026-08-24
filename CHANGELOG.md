@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Recovers gracefully from the 12-hour server session expiry: expired sessions no longer surface as "response parse failed" in native settings (the nginx login redirect is detected, not followed), errors carry actionable messages with RPC codes, and the app automatically returns to the login screen instead of appearing logged-in while every request fails.
+
 Hardens credential handling end-to-end: switching servers clears the previous session cookie before it can leak cross-origin, server URLs must be https, intent:// navigation is sanitized, and degraded encrypted storage never persists secrets in plaintext.
 
 Fixes stale session reuse after logout or server switch, concurrent duplicate session creation, control-character handling in login requests, false session-expiry detection, lost file-picker callbacks, WebView background playback drain, empty licenses page, language switching not applying, fake connection status, and JS adapter polling/observer overhead.

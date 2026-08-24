@@ -82,7 +82,11 @@ private fun <T> DshAsyncPage(
       verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
     ) {
       Text(
-        text = "加载失败：" + (current.exceptionOrNull()?.message ?: "未知错误"),
+        text = run {
+          val ex = current.exceptionOrNull()
+          val code = (ex as? ai.deepseek.harness.dsh.DshApiException)?.code
+          "加载失败：" + (if (code != null) "[$code] " else "") + (ex?.message ?: "未知错误")
+        },
         style = DshTheme.type.body,
         color = DshTheme.colors.textMuted,
         textAlign = TextAlign.Center,
