@@ -174,6 +174,9 @@ class MainActivity : ComponentActivity() {
       val themeMode by prefs.appearanceThemeMode.collectAsState()
       val dark = themeMode.isDark(systemDark = isSystemInDarkTheme())
       SideEffect {
+        // 沉浸式状态栏：开启 edge-to-edge，状态栏透明，内容可延伸到状态栏下方
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = 0x00000000
         WindowCompat.getInsetsController(window, window.decorView)
           .isAppearanceLightStatusBars = !dark
       }

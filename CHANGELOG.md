@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Adds immersive status bar: enables edge-to-edge layout (setDecorFitsSystemWindows(false)) and sets the status bar color to transparent (0x00000000), so in dark mode the app content flows behind the status bar instead of being pushed down by a solid bar. Status bar icon color still follows the theme (light icons on dark, dark on light).
+
 Settings page UI: adds a ← back button to the settings home page (was missing — only the system back handler worked), tightens the vertical spacing (8→4dp top, 10→6dp title gap, 18→12dp between sections, 24→14dp bottom) so the page no longer feels vertically sparse, and adds a 1.5dp shadow to DshSoftPanel containers for a raised/3D feel. The home page now uses the same ← back arrow as all sub-pages (was a ✕ close icon). Adds WebView forced-dark support (FORCE_DARK_AUTO) so web content follows the system dark theme instead of always rendering light.
 
 Replaces the ugly Chrome default offline page (ERR_ADDRESS_UNREACHABLE) with a self-contained native overlay: centered card, animated ring icon, server address, dark/light theme, and a retry button that calls DshAppBridge.refreshPage(). Triggered from onReceivedError (network failures) and onReceivedHttpError (5xx). Also fixes the sidebar drawer open/close race (external-collapse safety net mis-firing during the adapter's own open flow) and makes doToggle survive a missing .hHd-Xa_toggle element.
