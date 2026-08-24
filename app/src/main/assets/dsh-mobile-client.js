@@ -8,8 +8,7 @@ window.__ModuleLoader__.load({
     var MOBILE_READY = false;
     var DRILL_BOUND = false;
     var AUTO_CLOSE_BOUND = false;
-    var APP_SECTION_BOUND = false;
-    var SIDEBAR_ENTRY_BOUND = false;
+    var SHELL_OBSERVERS_BOUND = false;
 
     function injectCss() {
       if (document.getElementById("dsh-mobile-css")) return;
@@ -122,15 +121,14 @@ window.__ModuleLoader__.load({
           "position:fixed !important;left:8px !important;right:8px !important;",
           "top:auto !important;bottom:76px !important;height:352px !important;max-height:60dvh !important;width:auto !important;max-width:none !important;",
           "overflow-y:auto !important;",
-        "}",
-        /* 滚动统一由菜单容器承担，内层不再各自为政 */
-        ".dsh-mobile-active ._7KE1Ra_groups{",
-          "max-height:none !important;overflow:visible !important;",
-        "}",
           "background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
           "border-radius:14px !important;border:1px solid var(--dsw-alias-border-l2,rgba(127,127,127,0.25)) !important;",
           "box-shadow:0 12px 32px rgba(0,0,0,0.18) !important;",
           "-webkit-overflow-scrolling:touch !important;",
+        "}",
+        /* 滚动统一由菜单容器承担，内层不再各自为政 */
+        ".dsh-mobile-active ._7KE1Ra_groups{",
+          "max-height:none !important;overflow:visible !important;",
         "}",
         /* 分组标题：吸附顶部的小字标签 */
         ".dsh-mobile-active ._7KE1Ra_groupTitle{",
@@ -296,29 +294,21 @@ window.__ModuleLoader__.load({
       syncOverlay(opening);
     }
 
-    /* 尝试通过 cordis 服务关闭应用自带侧边栏 rail */
-    function tryCollapseAppSidebar() {
-      try {
-        // 方法 1：通过 CSS 变量强制宽度为 0
-        document.documentElement.style.setProperty("--dsh-sidebar-width", "0px");
-        // 方法 2：如果能访问 cordis 上下文（通过全局 app）
-        if (window.__app__ && window.__app__.service && window.__app__.service.layout) {
-          window.__app__.service.layout.setSidebar(0);
-        }
-      } catch(e) {}
-    }
-
     /* 打开抽屉时：用内联样式强制修正布局（比 CSS !important 更可靠）。
        首次写入前对抽屉内所有节点做内联样式快照，关闭时精确还原，
        不再清空后代全部 cssText（避免抹掉 Web 应用自身设置的动态样式）。 */
     var DRAWER_SNAPSHOTS = null;
+    var DRAWER_SNAPSHOTS_SB = null;
     function applyDrawerStyles(sb) {
+      /* 抽屉根节点被 App 重渲染替换后，旧快照全部失效，需对新节点重新快照 */
+      if (DRAWER_SNAPSHOTS && DRAWER_SNAPSHOTS_SB !== sb) DRAWER_SNAPSHOTS = null;
       if (!DRAWER_SNAPSHOTS) {
         DRAWER_SNAPSHOTS = [[sb, sb.getAttribute("style")]];
         var descendants = sb.querySelectorAll("*");
         for (var q = 0; q < descendants.length; q++) {
           DRAWER_SNAPSHOTS.push([descendants[q], descendants[q].getAttribute("style")]);
         }
+        DRAWER_SNAPSHOTS_SB = sb;
       }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
       sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
@@ -515,10 +505,13 @@ window.__ModuleLoader__.load({
       content.appendChild(sec);
     }
 
-    function bindAppSettingsSection() {
+    /* 单一全树观察器统一承担三件事（合并前是两个各自常驻的观察器）：
+       注入侧边栏底部设置入口 / 注入 Web 设置弹窗 App 区块 / 弹窗打开期间收起抽屉。 */
+    function bindShellObservers() {
       if (!(/DshAndroid\/[\d.]+/.test(navigator.userAgent))) return;
-      if (APP_SECTION_BOUND) return;
-      APP_SECTION_BOUND = true;
+      if (SHELL_OBSERVERS_BOUND) return;
+      SHELL_OBSERVERS_BOUND = true;
+      try { injectSidebarSettingsEntry(); } catch (e) {}
       var pending = false;
       var observer = new MutationObserver(function() {
         if (pending) return;
@@ -526,6 +519,7 @@ window.__ModuleLoader__.load({
         requestAnimationFrame(function() {
           pending = false;
           try {
+            injectSidebarSettingsEntry();
             injectAppSection();
             /* 设置弹窗打开期间隐藏整个抽屉，避免列表压在弹窗上拦截触摸 */
             var panelOpen = !!document.querySelector('.VOzbGW_panel');
@@ -547,16 +541,19 @@ window.__ModuleLoader__.load({
       entry.className = 'dsh-native-settings-entry';
       entry.style.cssText =
         'border-top:1px solid var(--dsw-alias-border-l2,rgba(127,127,127,0.18));' +
-        'margin-top:auto;padding:12px 16px;' +
+        'margin-top:auto;padding:10px 16px calc(12px + env(safe-area-inset-bottom));' +
         'display:flex;align-items:center;gap:12px;cursor:pointer;' +
         'flex:0 0 auto;min-height:52px;box-sizing:border-box;' +
-        'border-radius:10px;transition:background-color .15s ease;' +
-        '-webkit-tap-highlight-color:transparent;';
+        'transition:background-color .15s ease;-webkit-tap-highlight-color:transparent;';
+      entry.setAttribute('role', 'button');
+      entry.setAttribute('aria-label', '打开设置');
       entry.innerHTML =
-        '<span style="width:34px;height:34px;border-radius:50%;' +
+        '<span style="width:32px;height:32px;border-radius:9px;' +
         'background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,0.15));' +
-        'display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;flex-shrink:0;">⚙\uFE0F</span>' +
-        '<span style="font-size:14px;font-weight:500;color:var(--dsw-alias-label-primary,#111);">原生设置</span>';
+        'display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--dsw-alias-label-secondary,#333);">' +
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0 .33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>' +
+        '<span style="font-size:14px;font-weight:500;color:var(--dsw-alias-label-primary,#111);">设置</span>' +
+        '<svg style="margin-left:auto;flex-shrink:0;color:var(--dsw-alias-label-tertiary,#8a8f98);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>';
       /* hover / active 反馈 (移动端用 :active 模拟) */
       entry.addEventListener('mouseenter', function() { entry.style.backgroundColor = 'var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,0.15))'; });
       entry.addEventListener('mouseleave', function() { entry.style.backgroundColor = 'transparent'; });
@@ -567,12 +564,10 @@ window.__ModuleLoader__.load({
         if (lock) return;
         lock = true;
         try {
-          /* 先收起抽屉再开原生设置, 避免抽屉叠在覆盖层上拦截触摸 */
+          /* 收起抽屉必须走 doToggle：只有它会还原展开态内联样式并同步遮罩，
+             直接点官方 toggle 会把抽屉卡在展开态、叠在原生设置层后面 */
           var cur = findSidebar();
-          if (cur && !cur.classList.contains('hHd-Xa_collapsed')) {
-            var t = cur.querySelector('.hHd-Xa_toggle');
-            if (t) try { t.click(); } catch (e) {}
-          }
+          if (cur && drawerOpen(cur)) doToggle(cur);
           if (window.DshAppBridge && window.DshAppBridge.openAppSettings) {
             window.DshAppBridge.openAppSettings();
           }
@@ -598,21 +593,6 @@ window.__ModuleLoader__.load({
       } else {
         sb.appendChild(entry);
       }
-    }
-    function bindSidebarSettingsEntry() {
-      if (SIDEBAR_ENTRY_BOUND) return;
-      SIDEBAR_ENTRY_BOUND = true;
-      try { injectSidebarSettingsEntry(); } catch (e) {}
-      var pending = false;
-      var observer = new MutationObserver(function() {
-        if (pending) return;
-        pending = true;
-        requestAnimationFrame(function() {
-          pending = false;
-          try { injectSidebarSettingsEntry(); } catch (e) {}
-        });
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
     }
 
     /* 抽屉打开时，点击会话行/新建会话后自动收起抽屉（跳转由 App 原生处理） */
@@ -703,8 +683,7 @@ window.__ModuleLoader__.load({
         setupTouch();
         bindModelMenuDrill();
         bindDrawerAutoClose();
-        bindAppSettingsSection();
-        bindSidebarSettingsEntry();
+        bindShellObservers();
       } catch (e) {
         console.error("[dsh-mobile] init error:", e);
       }
