@@ -358,7 +358,7 @@ window.__ModuleLoader__.load({
       if (region) region.style.cssText = "width:100% !important;flex:1 1 auto !important;min-height:0 !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 !important;box-sizing:border-box !important;";
       /* 区域内部的 rail/list 容器 */
       var regionInner = sb.querySelector('[class*=sectionHeader]');
-      if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:space-between !important;align-items:center !important;padding:8px 14px !important;";
+      if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:flex-start !important;align-items:center !important;padding:8px 14px !important;";
       var searchArea = sb.querySelector('[class*=search]');
       if (searchArea) searchArea.style.cssText = "width:auto !important;display:flex !important;align-items:center !important;padding:4px 14px !important;flex-shrink:0 !important;";
       var listArea = sb.querySelector('[class*=listArea]');
