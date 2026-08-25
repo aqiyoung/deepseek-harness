@@ -363,6 +363,11 @@ window.__ModuleLoader__.load({
       if (searchArea) searchArea.style.cssText = "width:auto !important;display:flex !important;align-items:center !important;padding:4px 14px !important;flex-shrink:0 !important;";
       var listArea = sb.querySelector('[class*=listArea]');
       if (listArea) listArea.style.cssText = "width:100% !important;padding:0 !important;box-sizing:border-box !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;";
+      /* 会话行：撑满列表宽度，消除右侧空白 */
+      var sessionRows = sb.querySelectorAll('[class*=sessionRow]');
+      for (var sr = 0; sr < sessionRows.length; sr++) {
+        sessionRows[sr].style.cssText = "width:100% !important;max-width:none !important;box-sizing:border-box !important;";
+      }
       /* footer */
       var foot = sb.querySelector('.hHd-Xa_footArea');
       if (foot) foot.style.cssText = "width:100% !important;flex-direction:column !important;padding:8px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;";
