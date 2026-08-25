@@ -230,6 +230,19 @@ window.__ModuleLoader__.load({
         "@media screen and (max-width:768px){",
           ".dsh-mobile-active [class*=message]{max-width:100% !important;}",
         "}",
+        /* 移除侧边栏内所有元素 max-width 限制 */
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) *{max-width:none !important;}",
+        /* 搜索/sectionHeader 强制可见 */
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sectionHeader]{",
+          "display:flex !important;width:100% !important;visibility:visible !important;opacity:1 !important;",
+        "}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search]{",
+          "display:flex !important;width:auto !important;min-width:36px !important;",
+          "visibility:visible !important;opacity:1 !important;flex-shrink:0 !important;",
+        "}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] *{",
+          "display:flex !important;visibility:visible !important;opacity:1 !important;",
+        "}",
         /* ===== OpenClaw \u98ce\u683c\u8c03\u8272\u677f ===== */
         /* \u4f1a\u8bdd\u884c\u6837\u5f0f\uff1a\u72b6\u6001\u70b9 + \u4e24\u884c\u6587\u672c + \u5706\u89d2\u9009\u4e2d\u9ad8\u4eae */
         ".dsh-mobile-active [class*=sessionRow]{",
