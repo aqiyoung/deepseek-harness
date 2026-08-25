@@ -85,14 +85,6 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active .qDHVXG_sectionHeader{",
           "display:flex !important;align-items:center !important;width:100% !important;",
         "}",
-        ".dsh-mobile-active .qDHVXG_search{",
-          "display:flex !important;align-items:center !important;width:auto !important;flex-shrink:0 !important;",
-        "}",
-        ".dsh-mobile-active .qDHVXG_searchButton{",
-          "display:flex !important;width:36px !important;height:36px !important;",
-          "align-items:center !important;justify-content:center !important;",
-          "visibility:visible !important;opacity:1 !important;",
-        "}",
         /* regionArea 展开：撑满中部，footer(设置)贴底 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea{",
           "width:100% !important;flex:1 1 auto !important;min-height:0 !important;",
@@ -361,9 +353,9 @@ window.__ModuleLoader__.load({
       var regionInner = sb.querySelector('[class*=sectionHeader]');
       if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:space-between !important;align-items:center !important;padding:8px 14px !important;";
       var searchArea = sb.querySelector('[class*=search]');
-      if (searchArea) searchArea.style.cssText = "width:100% !important;display:flex !important;align-items:center !important;padding:4px 14px !important;";
+      if (searchArea) searchArea.style.cssText = "width:auto !important;display:flex !important;align-items:center !important;padding:4px 14px !important;flex-shrink:0 !important;";
       var listArea = sb.querySelector('[class*=listArea]');
-      if (listArea) listArea.style.cssText = "width:100% !important;overflow-y:auto !important;";
+      if (listArea) listArea.style.cssText = "width:100% !important;padding:0 !important;box-sizing:border-box !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;";
       /* footer */
       var foot = sb.querySelector('.hHd-Xa_footArea');
       if (foot) foot.style.cssText = "width:100% !important;flex-direction:column !important;padding:8px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;";

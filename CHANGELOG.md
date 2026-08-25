@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Sidebar (v1.0.88): root-cause fix for search overlap + right gap. The applyDrawerStyles inline style was forcing searchArea to width:100%, which made the search box span the full sidebar width and overlap the session list — now set to width:auto so the magnifying-glass icon sizes to its content. Removed speculative .qDHVXG_search/.qDHVXG_searchButton CSS rules whose hash-based class names may not match the live Web DOM. Added padding:0 + box-sizing:border-box to listArea so the session list flushes to the right edge.
+
 Sidebar (v1.0.87): restore the search button — injects a flex-shrink:0 magnifying-glass container so the search icon always shows in the sidebar header instead of disappearing; the search input is no longer force-expanded on open, matching the web default (tap the icon to reveal the input). Session rows now span full sidebar width (width:100% + border-box) so the list flushes to the right edge with no empty margin. Section-header padding aligned to entries.
 
 Sidebar search (v1.0.86): removed the forced auto-expand (doToggle no longer clicks the search button on open) and the CSS that forced display:block on the search input, so the sidebar now matches the web default — a magnifying-glass icon that expands to a search box only when tapped. Section-header padding aligned to entries (8px 14px) so the header row sits flush with the session list instead of being offset.
