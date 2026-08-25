@@ -80,13 +80,9 @@ window.__ModuleLoader__.load({
           "display:flex !important;align-items:center !important;gap:10px !important;",
           "min-height:40px !important;border-radius:8px !important;",
         "}",
-        /* 搜索框：展开为可见输入框（官方窄屏折叠成 4px 图标） */
-        /* 搜索：官方窄屏会把输入框折叠成图标(!important)，实测 input 仍以
-           140px 可见可点（溢出展示），不再与其宽度规则缠斗。 */
+        /* 搜索：对齐 Web 端行为——默认是放大镜图标，点击后才出现搜索框。
+           不再强制 display:block，避免搜索框与会话列表错位重叠。 */
         ".dsh-mobile-active .qDHVXG_sectionHeader{flex-wrap:wrap !important;}",
-        ".dsh-mobile-active .qDHVXG_search input{",
-          "width:100% !important;min-width:140px !important;height:36px !important;display:block !important;",
-        "}",
         /* regionArea 展开：撑满中部，footer(设置)贴底 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea{",
           "width:100% !important;flex:1 1 auto !important;min-height:0 !important;",
@@ -296,9 +292,8 @@ window.__ModuleLoader__.load({
             clearInterval(iv);
             if (cur && drawerOpen(cur)) {
               applyDrawerStyles(cur);
-              /* 自动展开官方搜索（窄屏默认折叠成图标） */
-              var sbtn = cur.querySelector('.qDHVXG_searchButton');
-              if (sbtn && sbtn.getAttribute('aria-expanded') === 'false') { try { sbtn.click(); } catch(e) {} }
+              /* 不再自动展开搜索框：Web 端默认是放大镜图标，点击后才出现搜索框，
+                 自动点击会导致搜索框与会话列表错位重叠 */
             }
           }
         }, 50);
@@ -354,7 +349,7 @@ window.__ModuleLoader__.load({
       if (region) region.style.cssText = "width:100% !important;flex:1 1 auto !important;min-height:0 !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 !important;box-sizing:border-box !important;";
       /* 区域内部的 rail/list 容器 */
       var regionInner = sb.querySelector('[class*=sectionHeader]');
-      if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:space-between !important;align-items:center !important;padding:8px 12px !important;";
+      if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:space-between !important;align-items:center !important;padding:8px 14px !important;";
       var searchArea = sb.querySelector('[class*=search]');
       if (searchArea) searchArea.style.cssText = "width:100% !important;display:flex !important;align-items:center !important;padding:4px 14px !important;";
       var listArea = sb.querySelector('[class*=listArea]');

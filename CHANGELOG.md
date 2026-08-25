@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Unreleased
+
+Sidebar search: removed the forced auto-expand (doToggle no longer clicks the search button on open) and the CSS that forced display:block on the search input, so the sidebar now matches the web default — a magnifying-glass icon that expands to a search box only when tapped. Section-header padding aligned to entries (8px 14px) so the header row sits flush with the session list instead of being offset.
+
 Immersive status bar (final): the window background is now themed — android:background #030303 in values-night, #FAFBFC in values — so with the already-transparent status bar the top area renders in the app canvas color instead of the system default white. Edge-to-edge stays enabled and content sits below the bar via systemBarsPadding(); selected session rows use --dsw-alias-interactive-bg-selected for dark-mode legibility.
 
 Sidebar alignment fixes: entry gap reduced 12px→8px and right padding 16px→14px so session rows no longer feel too wide on the right; regionArea inner padding removed (0 8px→0) so entries control their own horizontal inset; search area padding aligned to entries (4px 14px) and search input height raised to 36px to match other controls; entry label text now explicitly uses --dsw-alias-label-primary so it stays legible in dark mode instead of inheriting a too-faint color.
