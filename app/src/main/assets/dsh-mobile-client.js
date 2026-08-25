@@ -80,9 +80,19 @@ window.__ModuleLoader__.load({
           "display:flex !important;align-items:center !important;gap:10px !important;",
           "min-height:40px !important;border-radius:8px !important;",
         "}",
-        /* 搜索：对齐 Web 端行为——默认是放大镜图标，点击后才出现搜索框。
-           不再强制 display:block，避免搜索框与会话列表错位重叠。 */
-        ".dsh-mobile-active .qDHVXG_sectionHeader{flex-wrap:wrap !important;}",
+        /* 搜索：对齐 Web 端行为——默认放大镜图标，点击后才展开搜索框。
+           显式显示搜索容器和按钮，不强制输入框，避免重叠。 */
+        ".dsh-mobile-active .qDHVXG_sectionHeader{",
+          "display:flex !important;align-items:center !important;width:100% !important;",
+        "}",
+        ".dsh-mobile-active .qDHVXG_search{",
+          "display:flex !important;align-items:center !important;width:auto !important;flex-shrink:0 !important;",
+        "}",
+        ".dsh-mobile-active .qDHVXG_searchButton{",
+          "display:flex !important;width:36px !important;height:36px !important;",
+          "align-items:center !important;justify-content:center !important;",
+          "visibility:visible !important;opacity:1 !important;",
+        "}",
         /* regionArea 展开：撑满中部，footer(设置)贴底 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea{",
           "width:100% !important;flex:1 1 auto !important;min-height:0 !important;",
@@ -224,8 +234,8 @@ window.__ModuleLoader__.load({
         /* ===== OpenClaw \u98ce\u683c\u8c03\u8272\u677f ===== */
         /* \u4f1a\u8bdd\u884c\u6837\u5f0f\uff1a\u72b6\u6001\u70b9 + \u4e24\u884c\u6587\u672c + \u5706\u89d2\u9009\u4e2d\u9ad8\u4eae */
         ".dsh-mobile-active [class*=sessionRow]{",
-          "min-height:48px !important;border-radius:10px !important;",
-          "padding:8px 12px !important;margin:1px 0 !important;",
+          "width:100% !important;min-height:48px !important;border-radius:10px !important;",
+          "padding:8px 12px !important;margin:1px 0 !important;box-sizing:border-box !important;",
         "}",
         ".dsh-mobile-active [class*=sessionRow][class*=selected],",
         ".dsh-mobile-active [class*=sessionRow][aria-current]{",

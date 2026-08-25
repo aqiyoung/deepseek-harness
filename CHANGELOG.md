@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-## Unreleased
+Sidebar (v1.0.87): restore the search button — injects a flex-shrink:0 magnifying-glass container so the search icon always shows in the sidebar header instead of disappearing; the search input is no longer force-expanded on open, matching the web default (tap the icon to reveal the input). Session rows now span full sidebar width (width:100% + border-box) so the list flushes to the right edge with no empty margin. Section-header padding aligned to entries.
 
-Sidebar search: removed the forced auto-expand (doToggle no longer clicks the search button on open) and the CSS that forced display:block on the search input, so the sidebar now matches the web default — a magnifying-glass icon that expands to a search box only when tapped. Section-header padding aligned to entries (8px 14px) so the header row sits flush with the session list instead of being offset.
+Sidebar search (v1.0.86): removed the forced auto-expand (doToggle no longer clicks the search button on open) and the CSS that forced display:block on the search input, so the sidebar now matches the web default — a magnifying-glass icon that expands to a search box only when tapped. Section-header padding aligned to entries (8px 14px) so the header row sits flush with the session list instead of being offset.
 
 Immersive status bar (final): the window background is now themed — android:background #030303 in values-night, #FAFBFC in values — so with the already-transparent status bar the top area renders in the app canvas color instead of the system default white. Edge-to-edge stays enabled and content sits below the bar via systemBarsPadding(); selected session rows use --dsw-alias-interactive-bg-selected for dark-mode legibility.
 
