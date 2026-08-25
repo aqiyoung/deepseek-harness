@@ -42,7 +42,7 @@ window.__ModuleLoader__.load({
         /* 入口按钮展开 + 显示文字标签 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=entry]{",
           "width:100% !important;padding:12px 16px !important;",
-          "flex-direction:row !important;gap:12px !important;",
+          "flex-direction:row !important;gap:8px !important;",
           "justify-content:flex-start !important;align-items:center !important;",
           "border-radius:8px !important;margin:2px 0 !important;box-sizing:border-box !important;",
           "text-align:left !important;",
@@ -50,7 +50,7 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=entryLabel]{",
           "display:inline !important;width:auto !important;height:auto !important;",
           "overflow:visible !important;white-space:nowrap !important;font-size:14px !important;",
-          "text-align:left !important;line-height:1.4 !important;",
+          "text-align:left !important;line-height:1.4 !important;color:var(--dsw-alias-label-primary,#0f1115) !important;",
         "}",
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=entryIcon]{",
           "width:20px !important;height:20px !important;flex-shrink:0 !important;",
@@ -85,13 +85,13 @@ window.__ModuleLoader__.load({
            140px 可见可点（溢出展示），不再与其宽度规则缠斗。 */
         ".dsh-mobile-active .qDHVXG_sectionHeader{flex-wrap:wrap !important;}",
         ".dsh-mobile-active .qDHVXG_search input{",
-          "width:100% !important;min-width:140px !important;height:32px !important;display:block !important;",
+          "width:100% !important;min-width:140px !important;height:36px !important;display:block !important;",
         "}",
         /* regionArea 展开：撑满中部，footer(设置)贴底 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea{",
           "width:100% !important;flex:1 1 auto !important;min-height:0 !important;",
-          "overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;",
-          "padding:0 8px !important;box-sizing:border-box !important;",
+          "overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 !important;",
+          "box-sizing:border-box !important;",
         "}",
         /* logo 行安全区留白由 dsh-shell-css 统一提供 */
 
@@ -329,7 +329,7 @@ window.__ModuleLoader__.load({
       for (var i = 0; i < entries.length; i++) {
         var e = entries[i];
         if (e.classList.contains('hHd-Xa_newSession')) continue;
-        e.style.cssText = "width:100% !important;display:flex !important;flex-direction:row !important;gap:12px !important;align-items:center !important;padding:10px 16px !important;box-sizing:border-box !important;border-radius:8px !important;margin:2px 0 !important;flex-shrink:0 !important;";
+        e.style.cssText = "width:100% !important;display:flex !important;flex-direction:row !important;gap:8px !important;align-items:center !important;padding:10px 14px !important;box-sizing:border-box !important;border-radius:8px !important;margin:2px 0 !important;flex-shrink:0 !important;";
       }
       /* 图标容器 */
       var icons = sb.querySelectorAll('[class$=entryIcon]');
@@ -345,12 +345,12 @@ window.__ModuleLoader__.load({
       }
       /* regionArea: 撑满中部，footer 贴底 */
       var region = sb.querySelector('.hHd-Xa_regionArea');
-      if (region) region.style.cssText = "width:100% !important;flex:1 1 auto !important;min-height:0 !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 8px !important;box-sizing:border-box !important;";
+      if (region) region.style.cssText = "width:100% !important;flex:1 1 auto !important;min-height:0 !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 !important;box-sizing:border-box !important;";
       /* 区域内部的 rail/list 容器 */
       var regionInner = sb.querySelector('[class*=sectionHeader]');
       if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:space-between !important;align-items:center !important;padding:8px 12px !important;";
       var searchArea = sb.querySelector('[class*=search]');
-      if (searchArea) searchArea.style.cssText = "width:100% !important;display:flex !important;align-items:center !important;padding:4px 12px !important;";
+      if (searchArea) searchArea.style.cssText = "width:100% !important;display:flex !important;align-items:center !important;padding:4px 14px !important;";
       var listArea = sb.querySelector('[class*=listArea]');
       if (listArea) listArea.style.cssText = "width:100% !important;overflow-y:auto !important;";
       /* footer */

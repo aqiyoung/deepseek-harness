@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Sidebar alignment fixes: entry gap reduced 12px→8px and right padding 16px→14px so session rows no longer feel too wide on the right; regionArea inner padding removed (0 8px→0) so entries control their own horizontal inset; search area padding aligned to entries (4px 14px) and search input height raised to 36px to match other controls; entry label text now explicitly uses --dsw-alias-label-primary so it stays legible in dark mode instead of inheriting a too-faint color.
+
 Reverts the immersive status bar experiment: the transparent/edge-to-edge status bar pushed chat content behind the bar, so the status bar is restored to its default opaque behavior with systemBarsPadding() keeping content below it. Status bar icon color still follows the theme (light icons on dark, dark on light).
 
 Settings page UI: adds a ← back button to the settings home page (was missing — only the system back handler worked), tightens the vertical spacing (8→4dp top, 10→6dp title gap, 18→12dp between sections, 24→14dp bottom) so the page no longer feels vertically sparse, and adds a 1.5dp shadow to DshSoftPanel containers for a raised/3D feel. The home page now uses the same ← back arrow as all sub-pages (was a ✕ close icon). Adds WebView forced-dark support (FORCE_DARK_AUTO) so web content follows the system dark theme instead of always rendering light.
