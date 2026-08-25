@@ -97,3 +97,5 @@ Refreshes native Android localization coverage, including Swedish app naming and
 DeepSeek Harness is now available on Android.
 
 Connect to your DeepSeek Harness Gateway to chat with your assistant, use realtime Talk mode, review approvals, and bring Android device capabilities like camera, location, screen, and notifications into your private automation workflows.
+
+Sidebar (v1.0.94): aggressive full-width fix — set width:100% + margin:0 + box-sizing:border-box on ALL elements inside the opened sidebar's regionArea via CSS !important, instead of relying on class-name substring selectors like [class*=listArea]/[class*=sessionRow] that may not match hash-based class names. Also applies width:100% inline to every direct child of regionArea and every <li> element inside it, as a fallback for elements the CSS selectors miss. SVG/input elements excluded from width:100% to preserve icon sizes.

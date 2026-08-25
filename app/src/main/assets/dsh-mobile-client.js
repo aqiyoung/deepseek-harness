@@ -235,8 +235,20 @@ window.__ModuleLoader__.load({
         "@media screen and (max-width:768px){",
           ".dsh-mobile-active [class*=message]{max-width:100% !important;}",
         "}",
-        /* 移除侧边栏内所有元素 max-width 限制 */
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) *{max-width:none !important;}",
+        /* 强制侧边栏内所有元素全宽 + 零外边距，消除右侧空白 */
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) *{",
+          "max-width:none !important;width:100% !important;margin:0 !important;box-sizing:border-box !important;",
+        "}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) svg{",
+          "width:auto !important;height:auto !important;",
+        "}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) input{width:auto !important;}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea > *{",
+          "width:100% !important;max-width:none !important;margin:0 !important;padding:0 !important;box-sizing:border-box !important;",
+        "}",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea > * > *{",
+          "max-width:none !important;margin:0 !important;box-sizing:border-box !important;",
+        "}",
         /* 搜索/sectionHeader 强制可见 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sectionHeader]{",
           "display:flex !important;width:100% !important;visibility:visible !important;opacity:1 !important;",
@@ -370,12 +382,20 @@ window.__ModuleLoader__.load({
       if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:flex-start !important;align-items:center !important;padding:8px 14px !important;";
       var searchArea = sb.querySelector('[class*=search]');
       if (searchArea) searchArea.style.cssText = "width:auto !important;display:flex !important;align-items:center !important;padding:4px 14px !important;flex-shrink:0 !important;";
-      var listArea = sb.querySelector('[class*=listArea]');
-      if (listArea) listArea.style.cssText = "width:100% !important;padding:0 !important;box-sizing:border-box !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;";
-      /* 会话行：撑满列表宽度，消除右侧空白 */
+      /* regionArea 内所有直接子元素强制全宽 + 零外边距（不依赖类名字符串匹配） */
+      var regionChildren = region ? region.children : [];
+      for (var rc = 0; rc < regionChildren.length; rc++) {
+        regionChildren[rc].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;padding:0 !important;box-sizing:border-box !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;";
+      }
+      /* regionArea 内所有 <li> 元素也强制全宽（会话行通常是 li） */
+      var allLIs = region ? region.querySelectorAll("li") : [];
+      for (var li = 0; li < allLIs.length; li++) {
+        allLIs[li].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;box-sizing:border-box !important;";
+      }
+      /* 会话行：撑满列表宽度，消除右侧空白（兼容两种选择器） */
       var sessionRows = sb.querySelectorAll('[class*=sessionRow]');
       for (var sr = 0; sr < sessionRows.length; sr++) {
-        sessionRows[sr].style.cssText = "width:100% !important;max-width:none !important;box-sizing:border-box !important;";
+        sessionRows[sr].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;box-sizing:border-box !important;";
       }
       /* footer */
       var foot = sb.querySelector('.hHd-Xa_footArea');
