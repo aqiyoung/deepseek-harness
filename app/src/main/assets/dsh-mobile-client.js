@@ -265,11 +265,18 @@ window.__ModuleLoader__.load({
         /* \u6df1\u8272\u6a21\u5f0f\u9002\u914d */
         "@media (prefers-color-scheme: dark){",
           ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed){",
-            "background:#000 !important;color:#EDEDED !important;",
+            "background:#0a0a0a !important;color:#E4E4E7 !important;",
           "}",
-          ".dsh-mobile-active [class*=sessionRow][class*=selected],",
-          ".dsh-mobile-active [class*=sessionRow][aria-current]{",
-            "background:#232327 !important;",
+          ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) *{",
+            "color:#E4E4E7 !important;",
+          "}",
+          ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sessionRow][class*=selected],",
+          ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sessionRow][aria-current]{",
+            "background:#1B1B1F !important;",
+          "}",
+          ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] svg,",
+          ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] [role=button]{",
+            "color:#E4E4E7 !important;fill:#E4E4E7 !important;stroke:#E4E4E7 !important;",
           "}",
         "}",
       ].join("");
@@ -351,7 +358,7 @@ window.__ModuleLoader__.load({
         DRAWER_SNAPSHOTS_SB = sb;
       }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
-      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;";
+      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding:0 !important;padding-top:env(safe-area-inset-top) !important;padding-bottom:calc(10px + env(safe-area-inset-bottom)) !important;";
       /* 官方 logoRow（logo+标题）恢复显示 — 不再注入任何控件, 头部保持干净
          (原生设置入口已下移到侧边栏底部 .dsh-native-settings-entry, 见下方) */
       /* newSession 大按钮已用 CSS 隐藏，不再注入内联展开样式 */
