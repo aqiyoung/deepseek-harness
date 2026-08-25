@@ -3,6 +3,7 @@
     <style name="Theme.DeepSeekHarnessNode" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:background">#030303</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

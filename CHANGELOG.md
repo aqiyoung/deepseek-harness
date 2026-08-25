@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Immersive status bar (take 3): enables edge-to-edge and sets the status bar color to match the app canvas (#030303 dark / #FAFBFC light) instead of the default white, so in dark mode the top bar blends with the app instead of being a white strip. Content still sits below the bar via systemBarsPadding(). Selected session rows now use --dsw-alias-interactive-bg-selected instead of the web app's white highlight so they stay legible in dark mode.
+Immersive status bar (final): the window background is now themed — android:background #030303 in values-night, #FAFBFC in values — so with the already-transparent status bar the top area renders in the app canvas color instead of the system default white. Edge-to-edge stays enabled and content sits below the bar via systemBarsPadding(); selected session rows use --dsw-alias-interactive-bg-selected for dark-mode legibility.
 
 Sidebar alignment fixes: entry gap reduced 12px→8px and right padding 16px→14px so session rows no longer feel too wide on the right; regionArea inner padding removed (0 8px→0) so entries control their own horizontal inset; search area padding aligned to entries (4px 14px) and search input height raised to 36px to match other controls; entry label text now explicitly uses --dsw-alias-label-primary so it stays legible in dark mode instead of inheriting a too-faint color.
 

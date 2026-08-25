@@ -174,10 +174,8 @@ class MainActivity : ComponentActivity() {
       val themeMode by prefs.appearanceThemeMode.collectAsState()
       val dark = themeMode.isDark(systemDark = isSystemInDarkTheme())
       SideEffect {
-        // 沉浸式状态栏：edge-to-edge + 状态栏底色跟随 App 主题底色，
-        // 深色模式下状态栏与 App 画布同色（#030303），视觉上融为一体
+        // 沉浸式状态栏：edge-to-edge + 状态栏透明，窗口底色由主题控制
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = if (dark) android.graphics.Color.rgb(3, 3, 3) else android.graphics.Color.rgb(250, 251, 252)
         WindowCompat.getInsetsController(window, window.decorView)
           .isAppearanceLightStatusBars = !dark
       }
