@@ -85,14 +85,19 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active .qDHVXG_sectionHeader{",
           "display:flex !important;align-items:center !important;width:100% !important;",
         "}",
-        /* 搜索场域强制可见：Web 端窄屏可能折叢/隐藏搜索，这里强制显示放大镜图户 */
+        /* 搜索区域强制可见 + 放大镜图标颜色 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search]{",
-          "display:flex !important;visibility:visible !important;opacity:1 !important;flex-shrink:0 !important;",
+          "display:flex !important;width:auto !important;min-width:36px !important;",
+          "visibility:visible !important;opacity:1 !important;flex-shrink:0 !important;",
         "}",
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] *{",
           "visibility:visible !important;opacity:1 !important;",
         "}",
-        /* regionArea 展开：撑满中部，footer(设置)贴底 */
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] svg,",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] [role=button]{",
+          "color:var(--dsw-alias-label-primary,#0f1115) !important;fill:var(--dsw-alias-label-primary,#0f1115) !important;",
+          "stroke:var(--dsw-alias-label-primary,#0f1115) !important;",
+        "}",
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea{",
           "width:100% !important;flex:1 1 auto !important;min-height:0 !important;",
           "overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;padding:0 !important;",
@@ -236,15 +241,6 @@ window.__ModuleLoader__.load({
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sectionHeader]{",
           "display:flex !important;width:100% !important;visibility:visible !important;opacity:1 !important;",
         "}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search]{",
-          "display:flex !important;width:auto !important;min-width:36px !important;",
-          "visibility:visible !important;opacity:1 !important;flex-shrink:0 !important;",
-        "}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=search] *{",
-          "display:flex !important;visibility:visible !important;opacity:1 !important;",
-        "}",
-        /* ===== OpenClaw \u98ce\u683c\u8c03\u8272\u677f ===== */
-        /* \u4f1a\u8bdd\u884c\u6837\u5f0f\uff1a\u72b6\u6001\u70b9 + \u4e24\u884c\u6587\u672c + \u5706\u89d2\u9009\u4e2d\u9ad8\u4eae */
         ".dsh-mobile-active [class*=sessionRow]{",
           "width:100% !important;max-width:none !important;min-height:48px !important;border-radius:10px !important;",
           "padding:8px 12px !important;margin:1px 0 !important;box-sizing:border-box !important;",
