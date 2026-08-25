@@ -35,10 +35,6 @@ window.__ModuleLoader__.load({
         "}",
         /* 侧边栏顶部 logoRow：恢复官方 logo + "DeepSeek Harness" 标题显示 (v1.0.70)
            原生设置入口位于侧边栏底部 .dsh-native-settings-entry (见下方) */
-        /* newSession 大按钮仍隐藏 (头部 logoRow 已是入口区，不再叠加新会话块) */
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_newSession{",
-          "display:none !important;",
-        "}",
         /* 入口按钮展开 + 显示文字标签 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=entry]{",
           "width:100% !important;padding:12px 16px !important;",
@@ -235,21 +231,6 @@ window.__ModuleLoader__.load({
         "@media screen and (max-width:768px){",
           ".dsh-mobile-active [class*=message]{max-width:100% !important;}",
         "}",
-        /* 强制侧边栏内所有元素全宽 + 零外边距，消除右侧空白 */
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) *{",
-          "max-width:none !important;width:100% !important;margin:0 !important;box-sizing:border-box !important;",
-        "}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) svg{",
-          "width:auto !important;height:auto !important;",
-        "}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) input{width:auto !important;}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea > *{",
-          "width:100% !important;max-width:none !important;margin:0 !important;padding:0 !important;box-sizing:border-box !important;",
-        "}",
-        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) .hHd-Xa_regionArea > * > *{",
-          "max-width:none !important;margin:0 !important;box-sizing:border-box !important;",
-        "}",
-        /* 搜索/sectionHeader 强制可见 */
         ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=sectionHeader]{",
           "display:flex !important;width:100% !important;visibility:visible !important;opacity:1 !important;",
         "}",
@@ -358,7 +339,7 @@ window.__ModuleLoader__.load({
         DRAWER_SNAPSHOTS_SB = sb;
       }
       /* 侧边栏整体；配色跟随应用主题（--dsw-alias-* 由 body 提供，浅色/深色自动切换） */
-      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding:0 !important;padding-top:env(safe-area-inset-top) !important;padding-bottom:calc(10px + env(safe-area-inset-bottom)) !important;";
+      sb.style.cssText = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;z-index:9999 !important;transform:translateX(0) !important;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1) !important;box-shadow:2px 0 12px rgba(0,0,0,0.2) !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:var(--dsw-alias-bg-base,#fff) !important;color:var(--dsw-alias-label-primary,#0f1115) !important;padding-top:env(safe-area-inset-top) !important;padding-bottom:env(safe-area-inset-bottom) !important;";
       /* 官方 logoRow（logo+标题）恢复显示 — 不再注入任何控件, 头部保持干净
          (原生设置入口已下移到侧边栏底部 .dsh-native-settings-entry, 见下方) */
       /* newSession 大按钮已用 CSS 隐藏，不再注入内联展开样式 */
@@ -389,21 +370,6 @@ window.__ModuleLoader__.load({
       if (regionInner) regionInner.style.cssText = "width:100% !important;display:flex !important;justify-content:flex-start !important;align-items:center !important;padding:8px 14px !important;";
       var searchArea = sb.querySelector('[class*=search]');
       if (searchArea) searchArea.style.cssText = "width:auto !important;display:flex !important;align-items:center !important;padding:4px 14px !important;flex-shrink:0 !important;";
-      /* regionArea 内所有直接子元素强制全宽 + 零外边距（不依赖类名字符串匹配） */
-      var regionChildren = region ? region.children : [];
-      for (var rc = 0; rc < regionChildren.length; rc++) {
-        regionChildren[rc].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;padding:0 !important;box-sizing:border-box !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;";
-      }
-      /* regionArea 内所有 <li> 元素也强制全宽（会话行通常是 li） */
-      var allLIs = region ? region.querySelectorAll("li") : [];
-      for (var li = 0; li < allLIs.length; li++) {
-        allLIs[li].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;box-sizing:border-box !important;";
-      }
-      /* 会话行：撑满列表宽度，消除右侧空白（兼容两种选择器） */
-      var sessionRows = sb.querySelectorAll('[class*=sessionRow]');
-      for (var sr = 0; sr < sessionRows.length; sr++) {
-        sessionRows[sr].style.cssText = "width:100% !important;max-width:none !important;margin:0 !important;box-sizing:border-box !important;";
-      }
       /* footer */
       var foot = sb.querySelector('.hHd-Xa_footArea');
       if (foot) foot.style.cssText = "width:100% !important;flex-direction:column !important;padding:8px 16px !important;box-sizing:border-box !important;flex-shrink:0 !important;";
