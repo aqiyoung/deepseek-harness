@@ -44,10 +44,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.size
 import java.util.Locale
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -175,9 +174,7 @@ class MainActivity : ComponentActivity() {
       val themeMode by prefs.appearanceThemeMode.collectAsState()
       val dark = themeMode.isDark(systemDark = isSystemInDarkTheme())
       SideEffect {
-        // 沉浸式状态栏：开启 edge-to-edge，状态栏透明，内容可延伸到状态栏下方
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = 0x00000000
+        // 状态栏图标颜色跟随主题（深色模式下浅色图标，浅色模式下深色图标）
         WindowCompat.getInsetsController(window, window.decorView)
           .isAppearanceLightStatusBars = !dark
       }
@@ -445,7 +442,7 @@ class MainActivity : ComponentActivity() {
       if (settingsOpenTick.value > 0) showSettings = true
     }
 
-    Column(modifier = Modifier.fillMaxSize().navigationBarsPadding().background(DshTheme.colors.canvas)) {
+    Column(modifier = Modifier.fillMaxSize().systemBarsPadding().background(DshTheme.colors.canvas)) {
       // 完全无顶栏（v1.0.67）— 侧边栏通过 Web 边缘左滑打开（setupTouch 已支持），原生设置可从侧边栏 logoRow 齿轮进入
       Box(modifier = Modifier.weight(1f).fillMaxSize()) {
         ShellScreen(
@@ -496,7 +493,7 @@ class MainActivity : ComponentActivity() {
     var showLogoutConfirm by remember { mutableStateOf(false) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = DshTheme.colors.canvas) {
-      Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+      Column(modifier = Modifier.fillMaxSize()) {
         when (route) {
           null -> SettingsHome(
             onOpenRoute = onRouteChange,

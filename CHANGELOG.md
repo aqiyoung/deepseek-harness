@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Immersive status bar: enables edge-to-edge layout (setDecorFitsSystemWindows(false)) with a transparent status bar, and replaces the root systemBarsPadding() with navigationBarsPadding() so the app canvas actually extends behind the status bar (the previous transparent-bar + full padding combo still left a dead strip on top). The settings overlay keeps statusBarsPadding() so its title row stays clear of the bar. Status bar icon color follows the theme.
+Reverts the immersive status bar experiment: the transparent/edge-to-edge status bar pushed chat content behind the bar, so the status bar is restored to its default opaque behavior with systemBarsPadding() keeping content below it. Status bar icon color still follows the theme (light icons on dark, dark on light).
 
 Settings page UI: adds a ← back button to the settings home page (was missing — only the system back handler worked), tightens the vertical spacing (8→4dp top, 10→6dp title gap, 18→12dp between sections, 24→14dp bottom) so the page no longer feels vertically sparse, and adds a 1.5dp shadow to DshSoftPanel containers for a raised/3D feel. The home page now uses the same ← back arrow as all sub-pages (was a ✕ close icon). Adds WebView forced-dark support (FORCE_DARK_AUTO) so web content follows the system dark theme instead of always rendering light.
 
