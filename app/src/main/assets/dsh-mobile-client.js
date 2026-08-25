@@ -95,6 +95,12 @@ window.__ModuleLoader__.load({
         "}",
         /* logo 行安全区留白由 dsh-shell-css 统一提供 */
 
+        /* 选中的会话：深色模式下不再使用白色背景，改用主题色，避免看不清 */
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=selected],",
+        ".dsh-mobile-active .hHd-Xa_root:not(.hHd-Xa_collapsed) [class*=active]{",
+          "background:var(--dsw-alias-interactive-bg-selected,rgba(127,127,127,0.18)) !important;",
+        "}",
+
         /* 设置区保持可见、可点：作为抽屉底部的正常入口 */
         /* 折叠态：完全隐藏 rail（0宽度） */
         ".dsh-mobile-active .hHd-Xa_root.hHd-Xa_collapsed{",

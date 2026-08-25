@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Immersive status bar (take 3): enables edge-to-edge and sets the status bar color to match the app canvas (#030303 dark / #FAFBFC light) instead of the default white, so in dark mode the top bar blends with the app instead of being a white strip. Content still sits below the bar via systemBarsPadding(). Selected session rows now use --dsw-alias-interactive-bg-selected instead of the web app's white highlight so they stay legible in dark mode.
+
 Sidebar alignment fixes: entry gap reduced 12px→8px and right padding 16px→14px so session rows no longer feel too wide on the right; regionArea inner padding removed (0 8px→0) so entries control their own horizontal inset; search area padding aligned to entries (4px 14px) and search input height raised to 36px to match other controls; entry label text now explicitly uses --dsw-alias-label-primary so it stays legible in dark mode instead of inheriting a too-faint color.
 
 Reverts the immersive status bar experiment: the transparent/edge-to-edge status bar pushed chat content behind the bar, so the status bar is restored to its default opaque behavior with systemBarsPadding() keeping content below it. Status bar icon color still follows the theme (light icons on dark, dark on light).
