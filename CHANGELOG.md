@@ -105,3 +105,5 @@ Sidebar (v1.0.95): dark mode full-text color override — set color:#E4E4E7 on a
 Sidebar (v1.0.96): restored New Session button (removed display:none override that hid .hHd-Xa_newSession). Removed aggressive width:100%+margin:0 CSS on all sidebar descendants and the JS-level regionChildren/allLIs forced-width loops — let Web layout render naturally inside the mobile full-width drawer. Session row CSS kept but scoped to actual sessionRow class only.
 
 Sidebar (v1.0.97): hide search input box by default — CSS rule [class*=search] input { display:none } so the magnifying-glass icon shows instead of an expanded search field, matching Web behavior. Search area *:not(input) stays visible.
+
+Sidebar (v1.0.98): narrowed search CSS from [class*=search] to [class*=searchButton]/[class*=searchIcon] with fixed 36px container + 24px icon + 20px SVG. sectionHeader now justify-content:space-between so search/options on right, title on left. Added dropdown menu CSS: [class*=dropdown]/[class*=popup]/[class*=popover]/[class*=contextMenu] set position:fixed z-index:10000 to escape sidebar overflow:hidden. Added menu option/item styling. Removed searchArea JS padding:4px 14px.
