@@ -109,3 +109,5 @@ Sidebar (v1.0.97): hide search input box by default — CSS rule [class*=search]
 Sidebar (v1.0.98): narrowed search CSS from [class*=search] to [class*=searchButton]/[class*=searchIcon] with fixed 36px container + 24px icon + 20px SVG. sectionHeader now justify-content:space-between so search/options on right, title on left. Added dropdown menu CSS: [class*=dropdown]/[class*=popup]/[class*=popover]/[class*=contextMenu] set position:fixed z-index:10000 to escape sidebar overflow:hidden. Added menu option/item styling. Removed searchArea JS padding:4px 14px.
 
 Settings (v1.0.99): compact design — nav padding 6px8px→4px6px, nav cell padding 8px14px→6px10px, nav gap 6px→4px. Content max-width 500px centered. Settings items padding reduced to 8px16px, section titles 6px16px4px, item gaps 2px, font-size 13px.
+
+Settings (v1.0.100): aggressive vertical spacing reduction — nav padding 4px6px→2px6px, nav cell height 38px→32px, content padding 4px0→2px0, settings items padding 8px16px→6px16px min-height 40px→36px, sections 4px0→2px0, section titles 6px16px4px→4px16px2px, dividers 6px0→4px0, section margin 8px→6px, item gap 2px→1px.
