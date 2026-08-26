@@ -103,3 +103,5 @@ Sidebar (v1.0.94): aggressive full-width fix — set width:100% + margin:0 + box
 Sidebar (v1.0.95): dark mode full-text color override — set color:#E4E4E7 on all sidebar descendants in dark mode (not just root), so running-tasks and session text are legible. Added sidebar root padding:0 + safe-area bottom padding to eliminate inherited left/right padding that could cause asymmetric gaps. Added dark-mode search icon color (#E4E4E7).
 
 Sidebar (v1.0.96): restored New Session button (removed display:none override that hid .hHd-Xa_newSession). Removed aggressive width:100%+margin:0 CSS on all sidebar descendants and the JS-level regionChildren/allLIs forced-width loops — let Web layout render naturally inside the mobile full-width drawer. Session row CSS kept but scoped to actual sessionRow class only.
+
+Sidebar (v1.0.97): hide search input box by default — CSS rule [class*=search] input { display:none } so the magnifying-glass icon shows instead of an expanded search field, matching Web behavior. Search area *:not(input) stays visible.
