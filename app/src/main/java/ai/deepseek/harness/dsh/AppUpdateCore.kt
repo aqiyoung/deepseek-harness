@@ -23,6 +23,10 @@ data class AppUpdateConfig(
   val proxyPrefixes: List<String> = listOf("https://gh-proxy.com/", ""),
   val useMetaFallback: Boolean = false,
   val metaBranch: String = "meta",
+  /** 服务器代理地址（首选数据源：手机已连上 DSH 服务器，服务器代查 GitHub 比手机直连靠谱）。 */
+  val serverUrl: String? = null,
+  val serverUpdatePath: String = "/api/update/check",
+  val serverDownloadPath: String = "/api/update/download",
 ) {
   val apiLatestUrl: String get() = "https://api.github.com/repos/" + owner + "/" + repo + "/releases/latest"
   val apiListUrl: String get() = "https://api.github.com/repos/" + owner + "/" + repo + "/releases"
@@ -111,6 +115,51 @@ class AppUpdateCore(val config: AppUpdateConfig) {
     val failures = mutableListOf<String>()
     val isBeta = channel == "beta"
 
+    // ── 0) 服务器代理（首选：手机已连上 DSH 服务器，服务器代查 GitHub，比手机直连靠谱）──
+    val server = config.serverUrl?.trimEnd('/')
+    if (server != null && server.isNotEmpty()) {
+      try {
+        val url = "$server${config.serverUpdatePath}?channel=$channel"
+        val resp = doGet(http, url, apiHeaders)
+        if (resp.code == 200) {
+          val body = resp.body?.string() ?: ""
+          resp.close()
+          val data = decodeJson(body) as? JsonObject
+          if (data != null) {
+            val tagName = data.optString("latest_version")
+            if (tagName != null && tagName.isNotEmpty()) {
+              val releaseNotes = data.optString("release_notes") ?: ""
+              val releaseName = tagName
+              val notes = releaseNotes
+              val isCritical = isCritical(notes)
+              val newer = compareVersions(tagName, currentVersion) > 0
+              val releaseUrl = config.releaseTagUrl(tagName)
+              val fullDownloadUrl = "$server${config.serverDownloadPath}"
+              return AppUpdateResult(
+                tagName = tagName,
+                latestVersion = stripV(tagName),
+                releaseName = releaseName,
+                releaseUrl = releaseUrl,
+                releaseNotes = notes,
+                isCritical = isCritical,
+                hasUpdate = newer,
+                source = "server",
+                versionCode = versionCodeFromTag(tagName),
+                apkAssetName = null,
+                apkDownloadUrl = fullDownloadUrl,
+              )
+            }
+          }
+        } else {
+          failures.add("server " + url + " -> HTTP " + resp.code)
+        }
+        resp.close()
+      } catch (e: Exception) {
+        failures.add("server -> " + e.message)
+      }
+    }
+
+    // ── 1) GitHub API：代理链 ──
     val base = if (isBeta) config.apiListUrl else config.apiLatestUrl
     for (prefix in config.proxyPrefixes) {
       val url = if (prefix.isEmpty()) base else prefix + base

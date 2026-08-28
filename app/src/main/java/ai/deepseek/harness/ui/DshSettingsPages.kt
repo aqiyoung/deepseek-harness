@@ -344,7 +344,8 @@ fun CheckUpdatesDetailPage(onBack: () -> Unit) {
         checking = true
         result = null
         val current = BuildConfig.VERSION_NAME
-        val config = AppUpdateConfig(owner = "aqiyoung", repo = "deepseek-harness")
+        val server = (context.applicationContext as NodeApp).prefs.serverUrl.value
+        val config = AppUpdateConfig(owner = "aqiyoung", repo = "deepseek-harness", serverUrl = server)
         val http = okhttp3.OkHttpClient.Builder()
           .followRedirects(false)
           .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
