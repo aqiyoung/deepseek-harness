@@ -482,7 +482,7 @@ class MainActivity : ComponentActivity() {
 
   // ── 设置页（OpenClaw 分组样式：首页 + 二级详情页）──
 
-  private enum class SettingRoute { Server, Models, Plugins, Presets, Theme, Language, Licenses }
+  private enum class SettingRoute { Server, Models, Plugins, Presets, Theme, Language, Licenses, CheckUpdates }
 
   @Composable
   private fun SettingsOverlay(
@@ -509,6 +509,7 @@ class MainActivity : ComponentActivity() {
           SettingRoute.Theme -> ThemeDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Language -> LanguageDetailPage(onBack = { onRouteChange(null) })
           SettingRoute.Licenses -> LicensesDetailPage(onBack = { onRouteChange(null) })
+          SettingRoute.CheckUpdates -> ai.deepseek.harness.ui.CheckUpdatesDetailPage(onBack = { onRouteChange(null) })
         }
       }
     }
@@ -683,6 +684,8 @@ class MainActivity : ComponentActivity() {
           DshSettingsRow(title = "版本", value = BuildConfig.VERSION_NAME)
           HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
           DshSettingsRow(title = "开源许可证", onClick = { onOpenRoute(SettingRoute.Licenses) })
+          HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+          DshSettingsRow(title = "检查更新", onClick = { onOpenRoute(SettingRoute.CheckUpdates) })
         }
       }
 

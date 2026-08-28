@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,9 +27,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import ai.deepseek.harness.BuildConfig
 import ai.deepseek.harness.NodeApp
+import ai.deepseek.harness.dsh.AppUpdateConfig
+import ai.deepseek.harness.dsh.AppUpdateCore
+import ai.deepseek.harness.dsh.AppUpdateResult
 import ai.deepseek.harness.ui.design.DshDetailFrame
 import ai.deepseek.harness.ui.design.DshPrimaryButton
 import ai.deepseek.harness.ui.design.DshSecondaryButton
@@ -317,5 +324,213 @@ fun PresetsDetailPage(onBack: () -> Unit) {
         modifier = Modifier.padding(horizontal = 4.dp),
       )
     }
+  }
+}
+
+
+/** 检查更新详情页：当前版本 → 检查 → 结果（已有新版 / 已是最新 / 网络失败）。 */
+@Composable
+fun CheckUpdatesDetailPage(onBack: () -> Unit) {
+  val context = LocalContext.current
+  val scope = rememberCoroutineScope()
+
+  var checking by remember { mutableStateOf(false) }
+  var result by remember { mutableStateOf<CheckUpdateResult?>(null) }
+  var retryTick by remember { mutableStateOf(0) }
+
+  LaunchedEffect(retryTick) {
+    scope.launch {
+      try {
+        checking = true
+        result = null
+        val current = BuildConfig.VERSION_NAME
+        val config = AppUpdateConfig(owner = "aqiyoung", repo = "deepseek-harness")
+        val http = okhttp3.OkHttpClient.Builder()
+          .followRedirects(false)
+          .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+          .build()
+        val core = AppUpdateCore(config)
+        val r = core.check(http, current, channel = "stable")
+        checking = false
+        result = if (r != null) {
+          if (r.hasUpdate) CheckUpdateResult.UpdateAvailable(r)
+          else CheckUpdateResult.UpToDate(r)
+        } else {
+          CheckUpdateResult.Failure
+        }
+      } catch (e: Exception) {
+        checking = false
+        result = CheckUpdateResult.Failure
+      }
+    }
+  }
+
+  DshDetailFrame(title = "检查更新", onBack = onBack) {
+    Spacer(modifier = Modifier.height(6.dp))
+
+    DshSoftPanel {
+      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = "当前版本",
+            style = DshTheme.type.body,
+            color = DshTheme.colors.text,
+            modifier = Modifier.weight(1f),
+          )
+          Text(
+            text = BuildConfig.VERSION_NAME,
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.textSubtle,
+            maxLines = 1,
+          )
+        }
+        HorizontalDivider(thickness = 0.5.dp, color = DshTheme.colors.border)
+        Text(
+          text = "检查 DeepSeek Harness 服务端是否有新版本可下载。",
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(14.dp))
+
+    when (val current = result) {
+      null -> {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp), contentAlignment = Alignment.Center) {
+          if (checking) {
+            CircularProgressIndicator(color = DshTheme.colors.primary, strokeWidth = 2.dp)
+          }
+        }
+        DshPrimaryButton(
+          text = if (checking) "检查中…" else "检查更新",
+          onClick = { retryTick++ },
+          enabled = !checking,
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+      is CheckUpdateResult.Failure -> {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+          Text(
+            text = "无法检查更新，请检查网络后重试",
+            style = DshTheme.type.body,
+            color = DshTheme.colors.warning,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+        DshSecondaryButton(
+          text = "重新检查",
+          onClick = { retryTick++ },
+          modifier = Modifier.fillMaxWidth(),
+        )
+      }
+      is CheckUpdateResult.UpToDate -> {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+          DshStatusPill(text = "已是最新版本", status = DshStatus.Success)
+        }
+        Text(
+          text = "当前版本已是最新，无需更新。",
+          style = DshTheme.type.caption,
+          color = DshTheme.colors.textSubtle,
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+          textAlign = TextAlign.Center,
+        )
+      }
+      is CheckUpdateResult.UpdateAvailable -> {
+        val r = current.result
+        DshSoftPanel {
+          Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              DshStatusPill(text = "有新版本", status = DshStatus.Success)
+              Spacer(modifier = Modifier.width(10.dp))
+              Text(
+                text = r.tagName,
+                style = DshTheme.type.body,
+                color = DshTheme.colors.success,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+            if (r.releaseName != r.tagName) {
+              Text(text = r.releaseName, style = DshTheme.type.caption, color = DshTheme.colors.textMuted)
+            }
+            if (!r.releaseNotes.isNullOrBlank()) {
+              Text(
+                text = "更新内容：",
+                style = DshTheme.type.captionSmall,
+                color = DshTheme.colors.textSubtle,
+              )
+              Text(
+                text = r.releaseNotes.substring(0, minOf(r.releaseNotes.length, 300)),
+                style = DshTheme.type.caption.copy(fontSize = 12.sp, lineHeight = 16.sp),
+                color = DshTheme.colors.textMuted,
+              )
+            }
+          }
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        DshPrimaryButton(
+          text = "前往下载页",
+          onClick = { openInBrowser(context, r.releaseUrl) },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        if (r.apkDownloadUrl != null) {
+          Spacer(modifier = Modifier.height(8.dp))
+          DshSecondaryButton(
+            text = "直接下载 APK",
+            onClick = { startApkDownload(context, r.apkDownloadUrl, r.tagName) },
+            modifier = Modifier.fillMaxWidth(),
+          )
+        }
+        if (r.isCritical) {
+          Spacer(modifier = Modifier.height(8.dp))
+          Text(
+            text = "此版本为重要更新，建议立即升级。",
+            style = DshTheme.type.caption,
+            color = DshTheme.colors.danger,
+            textAlign = TextAlign.Center,
+          )
+        }
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(
+      text = "App 更新需通过 GitHub Release 页手动下载安装。",
+      style = DshTheme.type.captionSmall,
+      color = DshTheme.colors.textSubtle,
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+      textAlign = TextAlign.Center,
+    )
+  }
+}
+
+private sealed class CheckUpdateResult {
+  object Failure : CheckUpdateResult()
+  data class UpToDate(val result: AppUpdateResult) : CheckUpdateResult()
+  data class UpdateAvailable(val result: AppUpdateResult) : CheckUpdateResult()
+}
+
+private fun openInBrowser(context: android.content.Context, url: String) {
+  val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+  runCatching { context.startActivity(intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    .onFailure { Toast.makeText(context, "无法打开浏览器", android.widget.Toast.LENGTH_SHORT).show() }
+}
+
+private fun startApkDownload(context: android.content.Context, url: String, tag: String) {
+  val name = "dsh-android-" + tag + ".apk"
+  val request = android.app.DownloadManager.Request(android.net.Uri.parse(url)).apply {
+    setTitle("DeepSeek Harness " + tag)
+    setDescription("正在下载新版本")
+    setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+    setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, name)
+  }
+  runCatching {
+    (context.getSystemService(android.content.Context.DOWNLOAD_SERVICE) as android.app.DownloadManager).enqueue(request)
+    Toast.makeText(context, "开始下载：" + name, android.widget.Toast.LENGTH_SHORT).show()
+  }.onFailure {
+    Toast.makeText(context, "下载失败：" + it.message, android.widget.Toast.LENGTH_SHORT).show()
   }
 }
